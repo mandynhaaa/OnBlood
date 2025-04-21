@@ -1,7 +1,7 @@
 package Standard;
 
 public interface CRUD {
-	public void create();
+	public int create();
 	public void read();
 	public void update();
 	public void delete();

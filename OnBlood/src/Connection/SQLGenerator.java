@@ -46,7 +46,7 @@ public class SQLGenerator {
             return false;
         }
 
-        String idTabela = "id" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
+        String idTabela = "id_" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
 
         try (Connection conn = new ConnectionSQL().getConnection();
              Statement statement = conn.createStatement()) {
@@ -69,7 +69,7 @@ public class SQLGenerator {
     }
 
     public static boolean deleteSQL(String table, int id) {
-        String idTabela = "id" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
+        String idTabela = "id_" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
 
         try (Connection conn = new ConnectionSQL().getConnection();
              Statement statement = conn.createStatement()) {
@@ -150,7 +150,7 @@ public class SQLGenerator {
 
     public static int getLastId(String table) {
         int lastId = 0;
-        String idTabela = "id" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
+        String idTabela = "id_" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
 
         try (Connection conn = new ConnectionSQL().getConnection();
              Statement statement = conn.createStatement();
