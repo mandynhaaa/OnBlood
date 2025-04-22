@@ -3,14 +3,11 @@ package Main;
 import java.util.HashMap;
 import java.util.Map;
 
-import Connection.SQLGenerator;
-import Standard.CRUD;
+import Standard.BaseModel;
 
-public class Address implements CRUD {
-    private static final String TABLE = "endereco";
-    private int id;
+public class Address extends BaseModel {
     private String description;
-    private String cep;
+    private int cep;
     private String country;
     private String state;
     private String city;
@@ -19,8 +16,9 @@ public class Address implements CRUD {
     private int number;
     private String complement;
 
-    public Address(String description, String cep, String country, String state, String city, String neighborhood, String street, int number, String complement) {
-        this.description = description;
+    public Address(String description, int cep, String country, String state, String city, String neighborhood, String street, int number, String complement) {
+    	super("endereco");
+    	this.description = description;
         this.cep = cep;
         this.country = country;
         this.state = state;
@@ -32,15 +30,8 @@ public class Address implements CRUD {
     }
 
     public Address(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    	super("endereco", id);
+        this.read();
     }
 
     public String getDescription() {
@@ -51,11 +42,11 @@ public class Address implements CRUD {
         this.description = description;
     }
 
-    public String getCep() {
+    public int getCep() {
         return cep;
     }
 
-    public void setCep(String cep) {
+    public void setCep(int cep) {
         this.cep = cep;
     }
 
@@ -115,66 +106,11 @@ public class Address implements CRUD {
         this.complement = complement;
     }
 
-    public int create() {
-        int idAddress = SQLGenerator.insertSQL(TABLE, toMap());
-        this.id = idAddress;
-        return idAddress;
-    }
-   
-    public void read() {
-        if (this.id <= 0) {
-            return;
-        }
-
-        Map<String, String> filters = new HashMap<>();
-        filters.put("id_Endereco", String.valueOf(this.id));
-
-        String[][] result = SQLGenerator.selectSQL(TABLE, null, filters);
-
-        if (result.length < 2) {
-            return;
-        }
-
-        String[] columns = result[0];
-        String[] values = result[1];
-
-        Map<String, String> data = new HashMap<>();
-        for (int i = 0; i < columns.length; i++) {
-            data.put(columns[i], values[i]);
-        }
-
-        this.description = data.getOrDefault("descricao", null);
-        this.cep = data.getOrDefault("cep", null);
-        this.country = data.getOrDefault("pais", null);
-        this.state = data.getOrDefault("estado", null);
-        this.city = data.getOrDefault("cidade", null);
-        this.neighborhood = data.getOrDefault("bairro", null);
-        this.street = data.getOrDefault("rua", null);
-
-        String numeroStr = data.get("numero");
-        if (numeroStr != null && !numeroStr.isEmpty()) {
-            try {
-                this.number = Integer.parseInt(numeroStr);
-            } catch (NumberFormatException e) {
-                this.number = 0;
-            }
-        }
-
-        this.complement = data.getOrDefault("complemento", null);
-    }
-
-    public void update() {
-        SQLGenerator.updateSQL(TABLE, this.id, toMap());
-    }
-
-    public void delete() {
-        SQLGenerator.deleteSQL(TABLE, this.id);
-    }
-    
-    private Map<String, String> toMap() {
+    @Override
+    public Map<String, String> toMap() {
         Map<String, String> data = new HashMap<>();
         data.put("descricao", this.description);
-        data.put("cep", this.cep);
+        data.put("cep", String.valueOf(this.cep));
         data.put("pais", this.country);
         data.put("estado", this.state);
         data.put("cidade", this.city);
@@ -183,5 +119,18 @@ public class Address implements CRUD {
         data.put("numero", String.valueOf(this.number));
         data.put("complemento", this.complement);
         return data;
+    }	
+    
+    @Override
+    public void populate(Map<String, String> data) {
+        this.description = data.getOrDefault("descricao", null);
+        this.cep = Integer.parseInt(data.getOrDefault("cep", null));
+        this.country = data.getOrDefault("pais", null);
+        this.state = data.getOrDefault("estado", null);
+        this.city = data.getOrDefault("cidade", null);
+        this.neighborhood = data.getOrDefault("bairro", null);
+        this.street = data.getOrDefault("rua", null);
+        this.number = Integer.parseInt(data.getOrDefault("numero", null));
+        this.complement = data.getOrDefault("complemento", null);
     }
 }
