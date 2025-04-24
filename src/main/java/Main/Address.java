@@ -124,13 +124,13 @@ public class Address extends BaseModel {
     @Override
     public void populate(Map<String, String> data) {
         this.description = data.getOrDefault("descricao", null);
-        this.cep = Integer.parseInt(data.getOrDefault("cep", null));
+        this.cep = data.get("cep") != null ? Integer.parseInt(data.get("cep")) : 0;
         this.country = data.getOrDefault("pais", null);
         this.state = data.getOrDefault("estado", null);
         this.city = data.getOrDefault("cidade", null);
         this.neighborhood = data.getOrDefault("bairro", null);
         this.street = data.getOrDefault("rua", null);
-        this.number = Integer.parseInt(data.getOrDefault("numero", null));
+        this.number = data.get("numero") != null ? Integer.parseInt(data.get("numero")) : 0;
         this.complement = data.getOrDefault("complemento", null);
     }
 }

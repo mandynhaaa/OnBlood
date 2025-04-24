@@ -1,17 +1,16 @@
 package Main;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 import Standard.BaseModel;
 
 public class BloodCenter extends BaseModel {
-	private int cnpj;
+	private long cnpj;
 	private String companyName;
 	private User user;
 	
-	public BloodCenter(int cnpj, String companyName, User user)
+	public BloodCenter(long cnpj, String companyName, User user)
 	{
 		super("hemocentro");
 		this.cnpj = cnpj;
@@ -24,11 +23,11 @@ public class BloodCenter extends BaseModel {
         this.read();
     }
 
-	public int getCnpj() {
+	public long getCnpj() {
 		return cnpj;
 	}
 
-	public void setCnpj(int cnpj) {
+	public void setCnpj(long cnpj) {
 		this.cnpj = cnpj;
 	}
 
@@ -50,9 +49,9 @@ public class BloodCenter extends BaseModel {
    
 	@Override
 	public void populate(Map<String, String> data) {
-        this.cnpj = Integer.parseInt(data.getOrDefault("cnpj", null));
+        this.cnpj = data.get("cnpj") != null ? Long.parseLong(data.get("cnpj")) : 0;
         this.companyName = data.getOrDefault("razao_Social", null);
-        this.user = new User(Integer.parseInt(data.getOrDefault("id_Usuario", null)));
+        this.user = new User(data.get("id_Usuario") != null ? Integer.parseInt(data.get("id_Usuario")) : 0);
     }
     
 	@Override

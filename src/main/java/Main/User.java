@@ -107,8 +107,8 @@ public class User extends BaseModel {
 		this.email = data.getOrDefault("email", null);
 		this.password = data.getOrDefault("senha", null);
 		this.creationDate = LocalDate.parse(data.getOrDefault("data_Criacao", null));
-		this.userType = new UserType(Integer.parseInt(data.getOrDefault("id_Tipo_Usuario", null)));
-		this.telephone = new Telephone(Integer.parseInt(data.getOrDefault("id_Telefone", null)));
-		this.address = new Address(Integer.parseInt(data.getOrDefault("id_Endereco", null)));
+		this.userType = new UserType(data.get("id_Tipo_Usuario") != null ? Integer.parseInt(data.get("id_Tipo_Usuario")) : 0);
+		this.telephone = new Telephone(data.get("id_Telefone") != null ? Integer.parseInt(data.get("id_Telefone")) : 0);
+		this.address = new Address(data.get("id_Endereco") != null ? Integer.parseInt(data.get("id_Endereco")) : 0);
 	}
 }

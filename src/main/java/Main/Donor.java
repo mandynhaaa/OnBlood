@@ -7,12 +7,12 @@ import java.util.Map;
 import Standard.BaseModel;
 
 public class Donor extends BaseModel {
-	private int cpf;
+	private long cpf;
 	private LocalDate birthDate;
 	private User user;
 	private BloodType bloodType;
 	
-	public Donor(int cpf, LocalDate birthDate, User user, BloodType bloodType)
+	public Donor(long cpf, LocalDate birthDate, User user, BloodType bloodType)
 	{
 		super("doador");
 		this.cpf = cpf;
@@ -27,11 +27,11 @@ public class Donor extends BaseModel {
 		this.read();
 	}
 	
-	public int getCpf() {
+	public long getCpf() {
 		return cpf;
 	}
 
-	public void setCpf(int cpf) {
+	public void setCpf(long cpf) {
 		this.cpf = cpf;
 	}
 
@@ -61,10 +61,10 @@ public class Donor extends BaseModel {
 
 	@Override
 	public void populate(Map<String, String> data) {
-        this.cpf = Integer.parseInt(data.getOrDefault("cpf", null));
+        this.cpf = data.get("cpf") != null ? Long.parseLong(data.get("cpf")) : 0;
         this.birthDate = LocalDate.parse(data.getOrDefault("data_Nascimento", null));
-        this.user = new User(Integer.parseInt(data.getOrDefault("id_Usuario", null)));
-        this.bloodType = new BloodType(Integer.parseInt(data.getOrDefault("id_Tipo_Sanguineo", null)));
+        this.user = new User(data.get("id_Usuario") != null ? Integer.parseInt(data.get("id_Usuario")) : 0);
+        this.bloodType = new BloodType(data.get("id_Tipo_Sanguineo") != null ? Integer.parseInt(data.get("id_Tipo_Sanguineo")) : 0);
     }
     
 	@Override

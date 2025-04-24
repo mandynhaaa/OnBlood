@@ -60,7 +60,7 @@ public class Telephone extends BaseModel {
 	@Override
 	public void populate(Map<String, String> data) {
 		this.description = data.getOrDefault("descricao", null);
-		this.ddd = Integer.parseInt(data.getOrDefault("ddd", null));
-		this.number = Integer.parseInt(data.getOrDefault("numero", null));
+		this.ddd = data.get("ddd") != null ? Integer.parseInt(data.get("ddd")) : 0;
+		this.number = data.get("numero") != null ? Integer.parseInt(data.get("numero")) : 0;
 	}
 }

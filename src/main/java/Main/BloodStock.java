@@ -62,7 +62,7 @@ public class BloodStock extends BaseModel {
 	@Override
 	public void populate(Map<String, String> data) {
         this.lastUpdateData = LocalDate.parse(data.getOrDefault("data_Atualizacao", null));
-        this.volume = Float.parseFloat(data.getOrDefault("volume", null));
+        this.volume = data.get("volume") != null ? Float.parseFloat(data.get("volume")) : 0f;
         this.bloodCenter = new BloodCenter(Integer.parseInt(data.getOrDefault("id_Hemocentro", null)));
         this.bloodType = new BloodType(Integer.parseInt(data.getOrDefault("id_TipoSanguineo", null)));
     }
