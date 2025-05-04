@@ -37,7 +37,7 @@ public class ReportDonation {
 
 	            JOptionPane.showMessageDialog(null, resultado.length() > 0 ? resultado : "Nenhuma doação encontrada.");
 	        } catch (SQLException e) {
-	            e.printStackTrace();
+	             e.printStackTrace();
 	        }
 	    }
 }
