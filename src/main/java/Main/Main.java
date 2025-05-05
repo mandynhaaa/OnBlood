@@ -6,7 +6,7 @@ public class Main {
 		
 		Address address = new Address(
 	            "Minha Casa", 
-	            12345678, 
+	            "12345678", 
 	            "Brasil", 
 	            "SC", 
 	            "Florianópolis", 

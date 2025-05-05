@@ -12,7 +12,7 @@ class AddressTest {
     public void testCreateAddressWithData() {
         Address address = new Address(
             "Minha Casa", 
-            12345678, 
+            "12345678", 
             "Brasil", 
             "SC", 
             "Florianópolis", 
@@ -23,7 +23,7 @@ class AddressTest {
         );
 
         assertEquals("Minha Casa", address.getDescription());
-        assertEquals(12345678, address.getCep());
+        assertEquals("12345678", address.getCep());
         assertEquals("Brasil", address.getCountry());
         assertEquals("SC", address.getState());
         assertEquals("Florianópolis", address.getCity());
@@ -37,7 +37,7 @@ class AddressTest {
     public void testToMap() {
         Address address = new Address(
             "Minha Casa", 
-            12345678, 
+            "12345678", 
             "Brasil", 
             "SC", 
             "Florianópolis", 
@@ -75,13 +75,13 @@ class AddressTest {
         );
 
         Address address = new Address(
-            "", 0, "", "", "", "", "", 0, ""
+            "", "", "", "", "", "", "", 0, ""
         );
 
         address.populate(data);
 
         assertEquals("Minha Casa", address.getDescription());
-        assertEquals(12345678, address.getCep());
+        assertEquals("12345678", address.getCep());
         assertEquals("Brasil", address.getCountry());
         assertEquals("SC", address.getState());
         assertEquals("Florianópolis", address.getCity());
@@ -98,11 +98,11 @@ class AddressTest {
             "cep", "99999999"
         );
 
-        Address address = new Address("", 0, "", "", "", "", "", 0, "");
+        Address address = new Address("", "", "", "", "", "", "", 0, "");
         address.populate(partialData);
 
         assertEquals("Endereço Incompleto", address.getDescription());
-        assertEquals(99999999, address.getCep());
+        assertEquals("99999999", address.getCep());
         assertNull(address.getCountry());
         assertNull(address.getState());
         assertNull(address.getCity());
@@ -115,12 +115,12 @@ class AddressTest {
     @Test
     public void testRoundTripMapConversion() {
         Address original = new Address(
-            "Casa do João", 11111111, "Brasil", "SP", "São Paulo",
+            "Casa do João", "11111111", "Brasil", "SP", "São Paulo",
             "Bela Vista", "Rua A", 42, "Casa 1"
         );
 
         Map<String, String> map = original.toMap();
-        Address copy = new Address("", 0, "", "", "", "", "", 0, "");
+        Address copy = new Address("", "", "", "", "", "", "", 0, "");
         copy.populate(map);
 
         assertEquals(original.getDescription(), copy.getDescription());
@@ -137,11 +137,11 @@ class AddressTest {
     @Test
     public void testExtremeValues() {
         Address address = new Address(
-            "Teste", 0, "Brasil", "RJ", "Rio", "Copacabana",
+            "Teste", "", "Brasil", "RJ", "Rio", "Copacabana",
             "Rua X", Integer.MAX_VALUE, null
         );
 
-        assertEquals(0, address.getCep());
+        assertEquals("", address.getCep());
         assertEquals(Integer.MAX_VALUE, address.getNumber());
         assertNull(address.getComplement());
     }

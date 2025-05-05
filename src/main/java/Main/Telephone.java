@@ -7,10 +7,10 @@ import Standard.BaseModel;
 
 public class Telephone extends BaseModel {
 	private String description;
-	private int ddd;
-	private int number;
+	private String ddd;
+	private String number;
 	
-	public Telephone (String description, int ddd, int number)
+	public Telephone (String description, String ddd, String number)
 	{
 		super("telefone");
 		this.description = description;
@@ -32,19 +32,19 @@ public class Telephone extends BaseModel {
 		this.description = description;
 	}
 
-	public int getDdd() {
+	public String getDdd() {
 		return ddd;
 	}
 
-	public void setDdd(int ddd) {
+	public void setDdd(String ddd) {
 		this.ddd = ddd;
 	}
 
-	public int getNumber() {
+	public String getNumber() {
 		return number;
 	}
 
-	public void setNumber(int number) {
+	public void setNumber(String number) {
 		this.number = number;
 	}
 	
@@ -60,7 +60,7 @@ public class Telephone extends BaseModel {
 	@Override
 	public void populate(Map<String, String> data) {
 		this.description = data.getOrDefault("descricao", null);
-		this.ddd = data.get("ddd") != null ? Integer.parseInt(data.get("ddd")) : 0;
-		this.number = data.get("numero") != null ? Integer.parseInt(data.get("numero")) : 0;
+		this.ddd = data.getOrDefault("ddd", null);
+		this.number = data.getOrDefault("numero", null);
 	}
 }

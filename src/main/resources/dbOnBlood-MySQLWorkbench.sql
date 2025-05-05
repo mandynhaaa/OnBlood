@@ -10,7 +10,7 @@ CREATE TABLE tipo_Usuario (
 CREATE TABLE endereco (
     id_Endereco INT PRIMARY KEY AUTO_INCREMENT,
     descricao VARCHAR(20),
-    cep INT,
+    cep VARCHAR(10),
     pais VARCHAR(50),
     estado VARCHAR(50),
     cidade VARCHAR(50),
@@ -52,7 +52,7 @@ CREATE TABLE tipo_Sanguineo (
 CREATE TABLE doador (
     id_Doador INT PRIMARY KEY AUTO_INCREMENT,
     data_Nascimento DATE,
-    cpf INT,
+    cpf VARCHAR(20) UNIQUE,
     id_Usuario INT,
     id_Tipo_Sanguineo INT,
     FOREIGN KEY (id_Usuario)
@@ -64,7 +64,7 @@ CREATE TABLE doador (
 CREATE TABLE hemocentro (
     id_Hemocentro INT PRIMARY KEY AUTO_INCREMENT,
     razao_Social VARCHAR(50),
-    cnpj INT,
+    cnpj VARCHAR(20) UNIQUE,
     id_Usuario INT,
     FOREIGN KEY (id_Usuario)
         REFERENCES usuario (id_Usuario)
@@ -107,3 +107,18 @@ CREATE TABLE estoque (
     FOREIGN KEY (id_Tipo_Sanguineo)
         REFERENCES tipo_Sanguineo (id_Tipo_Sanguineo)
 );
+
+INSERT INTO tipo_Usuario (id_Tipo_Usuario, descricao) VALUES 
+(1, "Administrador"),
+(2, "Doador"),
+(3, "Hemocentro");
+
+INSERT INTO tipo_Sanguineo (id_Tipo_Sanguineo, descricao) VALUES 
+(1, "A+"),
+(2, "A-"),
+(3, "B+"),
+(4, "B-"),
+(5, "AB+"),
+(6, "AB-"),
+(7, "O+"),
+(8, "O-");

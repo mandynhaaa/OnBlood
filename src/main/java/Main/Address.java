@@ -7,7 +7,7 @@ import Standard.BaseModel;
 
 public class Address extends BaseModel {
     private String description;
-    private int cep;
+    private String cep;
     private String country;
     private String state;
     private String city;
@@ -16,7 +16,7 @@ public class Address extends BaseModel {
     private int number;
     private String complement;
 
-    public Address(String description, int cep, String country, String state, String city, String neighborhood, String street, int number, String complement) {
+    public Address(String description, String cep, String country, String state, String city, String neighborhood, String street, int number, String complement) {
     	super("endereco");
     	this.description = description;
         this.cep = cep;
@@ -42,11 +42,11 @@ public class Address extends BaseModel {
         this.description = description;
     }
 
-    public int getCep() {
+    public String getCep() {
         return cep;
     }
 
-    public void setCep(int cep) {
+    public void setCep(String cep) {
         this.cep = cep;
     }
 
@@ -124,7 +124,7 @@ public class Address extends BaseModel {
     @Override
     public void populate(Map<String, String> data) {
         this.description = data.getOrDefault("descricao", null);
-        this.cep = data.get("cep") != null ? Integer.parseInt(data.get("cep")) : 0;
+        this.cep = data.getOrDefault("cep", null);
         this.country = data.getOrDefault("pais", null);
         this.state = data.getOrDefault("estado", null);
         this.city = data.getOrDefault("cidade", null);
