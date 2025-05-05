@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import Connection.SQLGenerator;
 import Standard.BaseModel;
+import Standard.PasswordCrypt;
 
 public class User extends BaseModel {
 	private String name;
@@ -25,6 +27,13 @@ public class User extends BaseModel {
 		this.userType = userType;
 		this.telephone = telephone;
 		this.address = address;
+	}
+	
+	public User (String name, String password)
+	{
+		super("usuario");
+		this.name = name;
+		this.password = PasswordCrypt.hash(password);
 	}
 	
 	public User (int id)
@@ -54,7 +63,7 @@ public class User extends BaseModel {
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		this.password = PasswordCrypt.hash(password);
 	}
 
 	public LocalDate getCreationDate() {
@@ -107,8 +116,46 @@ public class User extends BaseModel {
 		this.email = data.getOrDefault("email", null);
 		this.password = data.getOrDefault("senha", null);
 		this.creationDate = LocalDate.parse(data.getOrDefault("data_Criacao", null));
-		this.userType = new UserType(Integer.parseInt(data.getOrDefault("id_Tipo_Usuario", null)));
-		this.telephone = new Telephone(Integer.parseInt(data.getOrDefault("id_Telefone", null)));
-		this.address = new Address(Integer.parseInt(data.getOrDefault("id_Endereco", null)));
+		this.userType = new UserType(data.get("id_Tipo_Usuario") != null ? Integer.parseInt(data.get("id_Tipo_Usuario")) : 0);
+		this.telephone = new Telephone(data.get("id_Telefone") != null ? Integer.parseInt(data.get("id_Telefone")) : 0);
+		this.address = new Address(data.get("id_Endereco") != null ? Integer.parseInt(data.get("id_Endereco")) : 0);
 	}
+	
+	public boolean login() {
+	    User userData = searchByName(this.name);
+
+	    if (userData == null) {
+	        return false;
+	    }
+
+	    return PasswordCrypt.verify(this.password, userData.getPassword());
+	}
+
+	private User searchByName(String name) {
+	    if (name == null || name.isEmpty()) {
+	        return null;
+	    }
+
+	    Map<String, String> filters = new HashMap<>();
+	    filters.put("nome", name);
+
+	    String[][] result = SQLGenerator.selectSQL("usuario", null, filters);
+
+	    if (result == null || result.length < 2) {
+	        return null;
+	    }
+
+	    String[] columns = result[0];
+	    String[] values = result[1];
+
+	    Map<String, String> data = new HashMap<>();
+	    for (int i = 0; i < columns.length; i++) {
+	        data.put(columns[i], values[i]);
+	    }
+
+	    User user = new User(0);
+	    user.populate(data);
+	    return user;
+	}
+
 }

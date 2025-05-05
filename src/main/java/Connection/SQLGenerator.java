@@ -109,7 +109,13 @@ public class SQLGenerator {
         try (Connection conn = new ConnectionSQL().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-            Logger.generateLog("selectSQL: " + sql);
+        	String queryLog = sql.toString();
+        	if (filters != null && !filters.isEmpty()) {
+        	    for (String value : filters.values()) {
+        	        queryLog = queryLog.replaceFirst("\\?", "'" + value.replace("'", "''") + "'");
+        	    }
+        	}
+        	Logger.generateLog("selectSQL: " + queryLog);
 
             if (filters != null && !filters.isEmpty()) {
                 int index = 1;

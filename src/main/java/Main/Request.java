@@ -72,10 +72,10 @@ public class Request extends BaseModel {
 	@Override
 	public void populate(Map<String, String> data) {
 		this.status = data.getOrDefault("status", null);
-		this.volume = Float.parseFloat(data.getOrDefault("volume", null));
+		this.volume = data.get("volume") != null ? Float.parseFloat(data.get("volume")) : 0f;
         this.datetime = LocalDate.parse(data.getOrDefault("data_Hora", null));
-        this.bloodCenter = new BloodCenter(Integer.parseInt(data.getOrDefault("id_Hemocentro", null)));
-        this.bloodType = new BloodType(Integer.parseInt(data.getOrDefault("id_Tipo_Sanguineo", null)));
+        this.bloodCenter = new BloodCenter(data.get("id_Hemocentro") != null ? Integer.parseInt(data.get("id_Hemocentro")) : 0);
+        this.bloodType = new BloodType(data.get("id_Tipo_Sanguineo") != null ? Integer.parseInt(data.get("id_Tipo_Sanguineo")) : 0);
     }
     
 	@Override

@@ -2,6 +2,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import Main.Address;
+import Main.Telephone;
 
 import java.util.Map;
 
@@ -11,7 +12,7 @@ class AddressTest {
     public void testCreateAddressWithData() {
         Address address = new Address(
             "Minha Casa", 
-            12345678, 
+            "12345678", 
             "Brasil", 
             "SC", 
             "Florianópolis", 
@@ -22,7 +23,7 @@ class AddressTest {
         );
 
         assertEquals("Minha Casa", address.getDescription());
-        assertEquals(12345678, address.getCep());
+        assertEquals("12345678", address.getCep());
         assertEquals("Brasil", address.getCountry());
         assertEquals("SC", address.getState());
         assertEquals("Florianópolis", address.getCity());
@@ -36,7 +37,7 @@ class AddressTest {
     public void testToMap() {
         Address address = new Address(
             "Minha Casa", 
-            12345678, 
+            "12345678", 
             "Brasil", 
             "SC", 
             "Florianópolis", 
@@ -74,13 +75,13 @@ class AddressTest {
         );
 
         Address address = new Address(
-            "", 0, "", "", "", "", "", 0, ""
+            "", "", "", "", "", "", "", 0, ""
         );
 
         address.populate(data);
 
         assertEquals("Minha Casa", address.getDescription());
-        assertEquals(12345678, address.getCep());
+        assertEquals("12345678", address.getCep());
         assertEquals("Brasil", address.getCountry());
         assertEquals("SC", address.getState());
         assertEquals("Florianópolis", address.getCity());
@@ -88,5 +89,66 @@ class AddressTest {
         assertEquals("Rua das Flores", address.getStreet());
         assertEquals(100, address.getNumber());
         assertEquals("Apartamento 202", address.getComplement());
+    }
+    
+    @Test
+    public void testPopulateWithMissingFields() {
+        Map<String, String> partialData = Map.of(
+            "descricao", "Endereço Incompleto",
+            "cep", "99999999"
+        );
+
+        Address address = new Address("", "", "", "", "", "", "", 0, "");
+        address.populate(partialData);
+
+        assertEquals("Endereço Incompleto", address.getDescription());
+        assertEquals("99999999", address.getCep());
+        assertNull(address.getCountry());
+        assertNull(address.getState());
+        assertNull(address.getCity());
+        assertNull(address.getNeighborhood());
+        assertNull(address.getStreet());
+        assertEquals(0, address.getNumber());
+        assertNull(address.getComplement());
+    }
+
+    @Test
+    public void testRoundTripMapConversion() {
+        Address original = new Address(
+            "Casa do João", "11111111", "Brasil", "SP", "São Paulo",
+            "Bela Vista", "Rua A", 42, "Casa 1"
+        );
+
+        Map<String, String> map = original.toMap();
+        Address copy = new Address("", "", "", "", "", "", "", 0, "");
+        copy.populate(map);
+
+        assertEquals(original.getDescription(), copy.getDescription());
+        assertEquals(original.getCep(), copy.getCep());
+        assertEquals(original.getCountry(), copy.getCountry());
+        assertEquals(original.getState(), copy.getState());
+        assertEquals(original.getCity(), copy.getCity());
+        assertEquals(original.getNeighborhood(), copy.getNeighborhood());
+        assertEquals(original.getStreet(), copy.getStreet());
+        assertEquals(original.getNumber(), copy.getNumber());
+        assertEquals(original.getComplement(), copy.getComplement());
+    }
+
+    @Test
+    public void testExtremeValues() {
+        Address address = new Address(
+            "Teste", "", "Brasil", "RJ", "Rio", "Copacabana",
+            "Rua X", Integer.MAX_VALUE, null
+        );
+
+        assertEquals("", address.getCep());
+        assertEquals(Integer.MAX_VALUE, address.getNumber());
+        assertNull(address.getComplement());
+    }
+    
+    @Test
+    public void testConstructorWithId() {
+        Address address = new Address(1);
+        assertNotNull(address);
     }
 }
