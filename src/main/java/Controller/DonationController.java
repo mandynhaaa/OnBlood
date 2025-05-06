@@ -32,6 +32,14 @@ public class DonationController {
             stmt.setObject(5, dataHora);
             int rowsInserted = stmt.executeUpdate();
 
+            if (status.equalsIgnoreCase("Realizada")) {
+                int idTipoSanguineo = obterTipoSanguineoPorDoador(idDoador);
+                if (idTipoSanguineo != -1) {
+                	BloodStockController estoqueController = new BloodStockController();
+                	BloodStockController.atualizarEstoquePorDoacao(idHemocentro, idTipoSanguineo, volume);
+                }
+            }
+            
             stmt.close();
             conn.close();
 
@@ -190,5 +198,27 @@ public class DonationController {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    private int obterTipoSanguineoPorDoador(int idDoador) {
+        int idTipoSanguineo = -1;
+        String sql = "SELECT id_tipo_sanguineo FROM Doador WHERE id_doador = ?";
+
+        try (Connection conn = new ConnectionSQL().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idDoador);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                idTipoSanguineo = rs.getInt("id_tipo_sanguineo");
+            }
+
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return idTipoSanguineo;
     }
 }

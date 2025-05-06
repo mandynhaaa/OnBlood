@@ -109,6 +109,7 @@ public class RegisterDonation extends JFrame {
                     boolean sucesso = controller.cadastrarDoacao(idDoador, hemocentro, status, volume, dataHora);
                     if (sucesso) {
                         JOptionPane.showMessageDialog(null, "Doação cadastrada com sucesso!");
+                        dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, "Erro ao cadastrar doação.");
                     }
