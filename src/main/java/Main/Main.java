@@ -21,9 +21,9 @@ public class Main {
 	            "Apartamento 202"
 	        );
 		
-		address.create();
+		//address.create();
 		
-		boolean executando = true;
+		boolean executando = false;
 
         while (executando) {
             String[] opcoes = {
@@ -54,7 +54,7 @@ public class Main {
             }
         }
 
-        JOptionPane.showMessageDialog(null, "Sistema encerrado.");
+        //.showMessageDialog(null, "Sistema encerrado.");
 
 	}
 }
