@@ -7,6 +7,17 @@ CREATE TABLE tipo_Usuario (
     descricao VARCHAR(20)
 );
 
+CREATE TABLE usuario (
+    id_Usuario INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50),
+    email VARCHAR(50),
+    senha VARCHAR(200),
+    data_Criacao DATETIME,
+    id_Tipo_Usuario INT,
+    FOREIGN KEY (id_Tipo_Usuario)
+        REFERENCES tipo_Usuario (id_Tipo_Usuario)
+);
+
 CREATE TABLE endereco (
     id_Endereco INT PRIMARY KEY AUTO_INCREMENT,
     descricao VARCHAR(20),
@@ -17,31 +28,20 @@ CREATE TABLE endereco (
     bairro VARCHAR(50),
     rua VARCHAR(50),
     numero INT,
-    complemento VARCHAR(50)
+    complemento VARCHAR(50),
+	id_Usuario INT,
+    FOREIGN KEY (id_Usuario)
+        REFERENCES usuario (id_Usuario)
 );
 
 CREATE TABLE telefone (
     id_Telefone INT PRIMARY KEY AUTO_INCREMENT,
     descricao VARCHAR(20),
     ddd INT,
-    numero INT
-);
-
-CREATE TABLE usuario (
-    id_Usuario INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(50),
-    email VARCHAR(50),
-    senha VARCHAR(200),
-    data_Criacao DATETIME,
-    id_Endereco INT,
-    id_Telefone INT,
-    id_Tipo_Usuario INT,
-    FOREIGN KEY (id_Endereco)
-        REFERENCES endereco (id_Endereco),
-    FOREIGN KEY (id_Telefone)
-        REFERENCES telefone (id_Telefone),
-    FOREIGN KEY (id_Tipo_Usuario)
-        REFERENCES tipo_Usuario (id_Tipo_Usuario)
+    numero INT,
+	id_Usuario INT,
+    FOREIGN KEY (id_Usuario)
+        REFERENCES usuario (id_Usuario)
 );
 
 CREATE TABLE tipo_Sanguineo (
@@ -108,6 +108,8 @@ CREATE TABLE estoque (
         REFERENCES tipo_Sanguineo (id_Tipo_Sanguineo)
 );
 
+-- Valores padrão
+
 INSERT INTO tipo_Usuario (id_Tipo_Usuario, descricao) VALUES 
 (1, "Administrador"),
 (2, "Doador"),
@@ -122,3 +124,5 @@ INSERT INTO tipo_Sanguineo (id_Tipo_Sanguineo, descricao) VALUES
 (6, "AB-"),
 (7, "O+"),
 (8, "O-");
+
+-- Registros de exemplo

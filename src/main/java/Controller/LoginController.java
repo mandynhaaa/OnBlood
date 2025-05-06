@@ -22,15 +22,16 @@ public class LoginController implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String action = e.getActionCommand();
 		if (action.equals("Login")) {
-			executeLogin(tf_username.getText(), tf_password.getText());
+			executeLogin();
 		}
 	}
 	
-	public void executeLogin(String username, String password) {
+	public void executeLogin() {
+		String username = tf_username.getText();
+		String password = tf_password.getText();
+		
 		User user = new User(username, password);
-		if (user.login()) {
-			JOptionPane.showMessageDialog(null, "Sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-		} else {
+		if (!user.login()) {
 			JOptionPane.showMessageDialog(null, "Usuário ou senha incorreta", "Erro", JOptionPane.ERROR_MESSAGE);
 		}
 	}

@@ -17,13 +17,7 @@ class BloodCenterTest {
         UserType type = new UserType("Admin");
         type.setId(1);
 
-        Telephone phone = new Telephone("Celular", "48", "999999999");
-        phone.setId(2);
-
-        Address address = new Address("Casa", "12345678", "Brasil", "SC", "Florianópolis", "Centro", "Rua A", 100, "Ap 1");
-        address.setId(3);
-
-        User user = new User("João", "joao@email.com", "123456", LocalDate.now(), type, phone, address);
+        User user = new User("João", "joao@email.com", "123456", LocalDate.now(), type);
         user.setId(4);
 
         BloodCenter center = new BloodCenter(12345678901234L, "Banco de Sangue", user);

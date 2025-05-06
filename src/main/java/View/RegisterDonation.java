@@ -32,7 +32,7 @@ public class RegisterDonation extends JFrame {
         setContentPane(contentPane);
         contentPane.setLayout(null);
         
-        JLabel lblDoador = new JLabel("ID Doador:");
+        JLabel lblDoador = new JLabel("Doador:");
         lblDoador.setBounds(30, 30, 80, 20);
         contentPane.add(lblDoador);
 

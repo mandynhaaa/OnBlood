@@ -23,7 +23,7 @@ public class DonationController {
             }
 
             Connection conn = new ConnectionSQL().getConnection();
-            String sql = "INSERT INTO Doacao (id_doador, id_hemocentro, status, volume, data_hora) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO doacao (id_Doador, id_Hemocentro, status, volume, data_Hora) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, idDoador);
             stmt.setInt(2, idHemocentro);
@@ -54,13 +54,13 @@ public class DonationController {
     private int buscarIdHemocentroPorNome(String nome) {
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT id_hemocentro FROM Hemocentro WHERE razao_social = ?";
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE razao_Social = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, nome);
             var rs = stmt.executeQuery();
             int id = -1;
             if (rs.next()) {
-                id = rs.getInt("id_hemocentro");
+                id = rs.getInt("id_Hemocentro");
             }
             rs.close();
             stmt.close();
@@ -76,12 +76,12 @@ public class DonationController {
         List<String> hemocentros = new ArrayList<>();
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT razao_social FROM Hemocentro";
+            String sql = "SELECT razao_Social FROM hemocentro";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                hemocentros.add(rs.getString("razao_social"));
+                hemocentros.add(rs.getString("razao_Social"));
             }
 
             rs.close();
@@ -97,7 +97,7 @@ public class DonationController {
         List<String> doadores = new ArrayList<>();
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT d.id_doador, u.nome FROM Doador d JOIN Usuario u ON d.id_usuario = u.id_usuario";
+            String sql = "SELECT d.id_Doador, u.nome FROM doador d JOIN usuario u ON d.id_Usuario = u.id_Usuario";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
@@ -121,18 +121,18 @@ public class DonationController {
         try {
         	Connection conn = new ConnectionSQL().getConnection();
             String sql = """
-                SELECT d.id_doacao,
-                       u.nome AS nome_doador,
-                       ts.descricao AS tipo_sanguineo,
-                       h.razao_social AS hemocentro,
+                SELECT d.id_Doacao,
+                       u.nome AS nome_Doador,
+                       ts.descricao AS tipo_Sanguineo,
+                       h.razao_Social AS hemocentro,
                        d.status,
                        d.volume,
-                       d.data_hora
-                FROM Doacao d
-                JOIN Doador dd ON d.id_doador = dd.id_doador
-                JOIN Usuario u ON dd.id_usuario = u.id_usuario
-                JOIN Tipo_Sanguineo ts ON dd.id_tipo_sanguineo = ts.id_tipo_sanguineo
-                JOIN Hemocentro h ON d.id_hemocentro = h.id_hemocentro
+                       d.data_Hora
+                FROM doacao d
+                JOIN doador dd ON d.id_Doador = dd.id_Doador
+                JOIN usuario u ON dd.id_Usuario = u.id_Usuario
+                JOIN tipo_Sanguineo ts ON dd.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
+                JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
             """;
 
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -165,7 +165,7 @@ public class DonationController {
             LocalDateTime dataHora = LocalDateTime.parse(dataHoraTexto, formatter);
 
             Connection conn = new ConnectionSQL().getConnection();
-            String sql = "UPDATE Doacao SET status = ?, volume = ?, data_hora = ? WHERE id_doacao = ?";
+            String sql = "UPDATE doacao SET status = ?, volume = ?, data_Hora = ? WHERE id_Doacao = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, status);
             stmt.setInt(2, volume);
@@ -186,7 +186,7 @@ public class DonationController {
     public boolean excluirDoacao(int idDoacao) {
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "DELETE FROM Doacao WHERE id_doacao = ?";
+            String sql = "DELETE FROM doacao WHERE id_Doacao = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, idDoacao);
             int rowsDeleted = stmt.executeUpdate();
@@ -202,7 +202,7 @@ public class DonationController {
     
     private int obterTipoSanguineoPorDoador(int idDoador) {
         int idTipoSanguineo = -1;
-        String sql = "SELECT id_tipo_sanguineo FROM Doador WHERE id_doador = ?";
+        String sql = "SELECT id_Tipo_Sanguineo FROM doador WHERE id_Doador = ?";
 
         try (Connection conn = new ConnectionSQL().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -211,7 +211,7 @@ public class DonationController {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                idTipoSanguineo = rs.getInt("id_tipo_sanguineo");
+                idTipoSanguineo = rs.getInt("id_Tipo_Sanguineo");
             }
 
             rs.close();

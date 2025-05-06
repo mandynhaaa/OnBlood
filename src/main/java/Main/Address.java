@@ -15,8 +15,9 @@ public class Address extends BaseModel {
     private String street;
     private int number;
     private String complement;
+    private User user;
 
-    public Address(String description, String cep, String country, String state, String city, String neighborhood, String street, int number, String complement) {
+    public Address(String description, String cep, String country, String state, String city, String neighborhood, String street, int number, String complement, User user) {
     	super("endereco");
     	this.description = description;
         this.cep = cep;
@@ -27,6 +28,7 @@ public class Address extends BaseModel {
         this.street = street;
         this.number = number;
         this.complement = complement;
+        this.user = user;
     }
 
     public Address(int id) {
@@ -106,6 +108,14 @@ public class Address extends BaseModel {
         this.complement = complement;
     }
 
+    public User getUser() {
+    	return user;
+    }
+    
+    public void setUser(User user) {
+    	this.user = user;
+    }
+    
     @Override
     public Map<String, String> toMap() {
         Map<String, String> data = new HashMap<>();

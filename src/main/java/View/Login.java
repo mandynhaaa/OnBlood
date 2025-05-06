@@ -70,7 +70,7 @@ public class Login extends JFrame {
 		contentPane.add(lbl_senha);
 		
 		JButton btn_Login = new JButton("Login");
-		btn_Login.setBounds(217, 275, 111, 31);
+		btn_Login.setBounds(217, 275, 120, 31);
 		contentPane.add(btn_Login);
 		
 		JLabel lbl_TituloLogin = new JLabel("OnBlood");
@@ -85,5 +85,20 @@ public class Login extends JFrame {
 		
 		LoginController loginController = new LoginController(tf_idUsuario, tf_senha);
 		btn_Login.addActionListener(loginController);
+		
+		JLabel lbl_naopossuiconta = new JLabel("Não possui conta?");
+		lbl_naopossuiconta.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		lbl_naopossuiconta.setBounds(230, 320, 119, 13);
+		contentPane.add(lbl_naopossuiconta);
+		
+		JButton btnRegistrar = new JButton("Registrar-se");
+		btnRegistrar.setBounds(217, 338, 120, 15);
+		contentPane.add(btnRegistrar);
+
+		btnRegistrar.addActionListener(e -> {
+		    new RegisterUser().setVisible(true);
+		    dispose();
+		});
+
 	}
 }

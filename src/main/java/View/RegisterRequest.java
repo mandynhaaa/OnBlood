@@ -53,7 +53,7 @@ public class RegisterRequest extends JFrame {
 
         cbTipoSanguineo = new JComboBox<>();
         cbTipoSanguineo.setBounds(130, 70, 200, 22);
-        List<String> tiposSangue = controller.listarTiposSanguineos(); // ex: ["[1] A+", "[2] A-", ...]
+        List<String> tiposSangue = controller.listarTiposSanguineos();
         if (tiposSangue.isEmpty()) {
             cbTipoSanguineo.addItem("Nenhum cadastrado");
             cbTipoSanguineo.setEnabled(false);

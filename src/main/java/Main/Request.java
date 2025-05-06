@@ -1,6 +1,7 @@
 package Main;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,11 +10,11 @@ import Standard.BaseModel;
 public class Request extends BaseModel {
 	private String status;
 	private float volume;
-	private LocalDate datetime;
+	private LocalDateTime datetime;
 	private BloodCenter bloodCenter;
 	private BloodType bloodType;
 	
-	public Request(String status, float volume, LocalDate datetime, BloodCenter bloodCenter, BloodType bloodType)
+	public Request(String status, float volume, LocalDateTime datetime, BloodCenter bloodCenter, BloodType bloodType)
 	{
 		super("solicitacao");
 		this.status = status;
@@ -45,11 +46,11 @@ public class Request extends BaseModel {
 		this.volume = volume;
 	}
 
-	public LocalDate getDatetime() {
+	public LocalDateTime getDatetime() {
 		return datetime;
 	}
 
-	public void setDatetime(LocalDate datetime) {
+	public void setDatetime(LocalDateTime datetime) {
 		this.datetime = datetime;
 	}
 
@@ -73,7 +74,13 @@ public class Request extends BaseModel {
 	public void populate(Map<String, String> data) {
 		this.status = data.getOrDefault("status", null);
 		this.volume = data.get("volume") != null ? Float.parseFloat(data.get("volume")) : 0f;
-        this.datetime = LocalDate.parse(data.getOrDefault("data_Hora", null));
+
+		String rawDate = data.getOrDefault("data_Hora", null);
+		if (rawDate != null) {
+		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		    this.datetime = LocalDateTime.parse(rawDate, formatter);
+		}
+		
         this.bloodCenter = new BloodCenter(data.get("id_Hemocentro") != null ? Integer.parseInt(data.get("id_Hemocentro")) : 0);
         this.bloodType = new BloodType(data.get("id_Tipo_Sanguineo") != null ? Integer.parseInt(data.get("id_Tipo_Sanguineo")) : 0);
     }
@@ -83,7 +90,7 @@ public class Request extends BaseModel {
         Map<String, String> data = new HashMap<>();
         data.put("status", this.status);
         data.put("volume", String.valueOf(this.volume));
-        data.put("data_Hora", String.valueOf(this.datetime));
+        data.put("data_Hora", this.datetime.toString());
         data.put("id_Hemocentro", String.valueOf(this.bloodCenter.getId()));
         data.put("id_Tipo_Sanguineo", String.valueOf(this.bloodType.getId()));
         return data;

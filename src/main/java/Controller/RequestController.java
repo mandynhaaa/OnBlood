@@ -32,7 +32,6 @@ public class RequestController {
 
             int rowsInserted = stmt.executeUpdate();
 
-            // Atualiza o estoque
             if (status.equalsIgnoreCase("Realizada")) {
                 BloodStockController estoqueController = new BloodStockController();
                 estoqueController.atualizarEstoquePorSolicitacao(idHemocentro, idTipoSanguineo, volume);
