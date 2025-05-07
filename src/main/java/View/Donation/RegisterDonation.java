@@ -1,12 +1,6 @@
 package View.Donation;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
-import java.awt.*;
-import java.awt.event.*;
-
-import Controller.AddressController;
 import Controller.DonationController;
 
 import java.util.List;
@@ -19,6 +13,8 @@ public class RegisterDonation extends JFrame {
     private int idUsuario;
 
     public RegisterDonation(int idUser) {
+    	this.idUsuario = idUser;
+
         setTitle("Cadastro de Doações");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 450, 350);
@@ -55,7 +51,7 @@ public class RegisterDonation extends JFrame {
 
         tfDataHora = new JTextField();
         tfDataHora.setBounds(120, 190, 200, 22);
-        tfDataHora.setToolTipText("Formato: YYYY-MM-DD HH:MM");
+        tfDataHora.setToolTipText("Formato: dd/MM/aaaa HH:mm:ss");
         add(tfDataHora);
 
         JButton btnSalvar = new JButton("Salvar");

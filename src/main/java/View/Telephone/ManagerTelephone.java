@@ -66,7 +66,7 @@ public class ManagerTelephone extends JFrame {
         if (selecionado != null) {
             int id = Integer.parseInt(selecionado.substring(1, selecionado.indexOf("]")));
             int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
+            if (confirm == JOptionPane.YES_NO_OPTION) {
                 controller = new TelephoneController(id, null, null, null, null);
                 controller.executeDelete();
             }

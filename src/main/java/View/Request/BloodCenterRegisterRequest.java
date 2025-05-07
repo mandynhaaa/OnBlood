@@ -77,7 +77,7 @@ public class BloodCenterRegisterRequest extends JFrame {
 
                 String hemocentro = controller.buscarHemocentroPorID(idUsuario);
                 String status = cbStatus.getSelectedItem().toString();
-                int volume = Integer.parseInt(tfVolume.getText());
+                Float volume = Float.parseFloat(tfVolume.getText());
                 String dataHora = tfDataHora.getText();
 
                 boolean sucesso = controller.cadastrarSolicitacao(hemocentro, idTipoSanguineo, status, volume, dataHora);

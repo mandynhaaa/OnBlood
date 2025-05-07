@@ -6,11 +6,11 @@ import java.util.Map;
 import Standard.BaseModel;
 
 public class BloodCenter extends BaseModel {
-	private long cnpj;
+	private String cnpj;
 	private String companyName;
 	private User user;
 	
-	public BloodCenter(long cnpj, String companyName, User user)
+	public BloodCenter(String cnpj, String companyName, User user)
 	{
 		super("hemocentro");
 		this.cnpj = cnpj;
@@ -23,11 +23,11 @@ public class BloodCenter extends BaseModel {
         this.read();
     }
 
-	public long getCnpj() {
+	public String getCnpj() {
 		return cnpj;
 	}
 
-	public void setCnpj(long cnpj) {
+	public void setCnpj(String cnpj) {
 		this.cnpj = cnpj;
 	}
 
@@ -49,7 +49,7 @@ public class BloodCenter extends BaseModel {
    
 	@Override
 	public void populate(Map<String, String> data) {
-        this.cnpj = data.get("cnpj") != null ? Long.parseLong(data.get("cnpj")) : 0;
+        this.cnpj = data.getOrDefault("cnpj", null);
         this.companyName = data.getOrDefault("razao_Social", null);
         this.user = new User(data.get("id_Usuario") != null ? Integer.parseInt(data.get("id_Usuario")) : 0);
     }
@@ -57,7 +57,7 @@ public class BloodCenter extends BaseModel {
 	@Override
 	public Map<String, String> toMap() {
         Map<String, String> data = new HashMap<>();
-        data.put("cnpj", String.valueOf(this.cnpj));
+        data.put("cnpj", this.cnpj);
         data.put("razao_Social", this.companyName);
         data.put("id_Usuario", String.valueOf(this.user.getId()));
         return data;

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class RequestController {
 
-    public boolean cadastrarSolicitacao(String hemocentro, int idTipoSanguineo, String status, int volume, String dataHoraTexto) {
+    public boolean cadastrarSolicitacao(String hemocentro, int idTipoSanguineo, String status, Float volume, String dataHoraTexto) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             LocalDateTime dataHora = LocalDateTime.parse(dataHoraTexto, formatter);
@@ -27,7 +27,7 @@ public class RequestController {
             stmt.setInt(1, idHemocentro);
             stmt.setInt(2, idTipoSanguineo);
             stmt.setString(3, status);
-            stmt.setInt(4, volume);
+            stmt.setFloat(4, volume);
             stmt.setObject(5, dataHora);
 
             int rowsInserted = stmt.executeUpdate();

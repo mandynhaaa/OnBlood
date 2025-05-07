@@ -6,19 +6,18 @@ import Connection.ConnectionSQL;
 import Controller.DonationController;
 import java.awt.*;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class EditDonation extends JFrame {
     private JComboBox<String> comboStatus;
     private JTextField txtVolume, txtDataHora;
     private JButton btnSalvar, btnCancelar;
-    private int idDoacao;
+    private int idDonation;
     private DonationController controller;
-    private ManagerDonation parent;
 
-    public EditDonation(int idDoacao, DonationController controller, ManagerDonation managerDonation) {
-        this.idDoacao = idDoacao;
-        this.controller = controller;
-        this.parent = managerDonation;
+    public EditDonation(int idDonation) {
+        this.idDonation = idDonation;
 
         setTitle("Editar Doação");
         setSize(400, 250);
@@ -35,7 +34,7 @@ public class EditDonation extends JFrame {
         gbc.gridy = 0;
         add(lblStatus, gbc);
 
-        comboStatus = new JComboBox<>(new String[] {"Pendente", "Concluído", "Cancelado"});
+        comboStatus = new JComboBox<>(new String[] {"Pendente", "Realizada", "Cancelada"});
         gbc.gridx = 1;
         gbc.gridy = 0;
         add(comboStatus, gbc);
@@ -72,6 +71,8 @@ public class EditDonation extends JFrame {
 
         btnSalvar.addActionListener(e -> salvarAlteracoes());
         btnCancelar.addActionListener(e -> dispose());
+        
+        controller = new DonationController(idDonation, 0, 0, txtVolume, txtDataHora, comboStatus, null);
 
         carregarDados();
     }
@@ -81,13 +82,20 @@ public class EditDonation extends JFrame {
         	Connection conn = new ConnectionSQL().getConnection();
             String sql = "SELECT status, volume, data_hora FROM Doacao WHERE id_doacao = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idDoacao);
+            stmt.setInt(1, idDonation);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 comboStatus.setSelectedItem(rs.getString("status"));
-                txtVolume.setText(String.valueOf(rs.getInt("volume")));
-                txtDataHora.setText(rs.getString("data_hora"));
+                txtVolume.setText(String.valueOf(rs.getFloat("volume")));
+                
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(rs.getString("data_hora"), formatoEntrada);
+                String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
+                
+                txtDataHora.setText(dataHoraFormatada);
             }
 
             rs.close();
@@ -100,21 +108,7 @@ public class EditDonation extends JFrame {
     }
 
     private void salvarAlteracoes() {
-        try {
-            String status = (String) comboStatus.getSelectedItem();
-            int volume = Integer.parseInt(txtVolume.getText());
-            String dataHora = txtDataHora.getText();
-
-            boolean sucesso = controller.atualizarDoacao(idDoacao, status, volume, dataHora);
-            if (sucesso) {
-                JOptionPane.showMessageDialog(this, "Doação atualizada com sucesso.");
-                parent.carregarDoacoes();
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao atualizar doação.");
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Volume inválido.");
-        }
+        controller.executeUpdate();
+        dispose();
     }
 }

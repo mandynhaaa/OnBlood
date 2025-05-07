@@ -53,7 +53,7 @@ public class ManagerRequest extends JFrame {
             if (selecionado != null) {
                 int id = extrairId(selecionado);
                 int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
-                if (confirm == JOptionPane.YES_OPTION) {
+                if (confirm == JOptionPane.YES_NO_OPTION) {
                     boolean sucesso = controller.excluirSolicitacao(id);
                     if (sucesso) {
                         JOptionPane.showMessageDialog(this, "Solicitação excluída.");

@@ -4,14 +4,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import Connection.ConnectionSQL;
+import Main.Address;
 import Main.BloodCenter;
 import Main.Donation;
 import Main.Donor;
-import Standard.PasswordCrypt;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -38,48 +41,161 @@ public class DonationController {
 		this.cb_donors = cb_donors;	
 	}
 		
-    public void executeRegister() {
-    	try {
-	    	Float volume = Float.parseFloat(tf_volume.getText());
-	        String status = cb_status.getSelectedItem().toString();
-	        int idDonor = Integer.parseInt(cb_donors.getSelectedItem().toString().replaceAll("[^0-9]", ""));
-	        
-	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	        
-	        LocalDateTime datetime = LocalDateTime.now();
-			String rawDate = tf_datetime.getText();
-			if (rawDate != null) {
-				datetime = LocalDateTime.parse(rawDate, formatter);
-			}
-			
-			Donor donor = new Donor(idDonor);
-			BloodCenter bloodCenter = buscarHemocentroPorID(this.id_UserBloodCenter);
-	
-			Donation donation= new Donation(status, volume, datetime, donor, bloodCenter);
-			
-			if (donation.create() > 0) {
-				JOptionPane.showMessageDialog(null, "Doação adicionada com sucesso!");
-	        } else {
-	            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar a doação.");
+	public void executeRegister() {
+	    try {
+	        String volumeText = tf_volume.getText().trim();
+	        if (volumeText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo volume é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
 	        }
-	
+
+	        float volume;
+	        try {
+	            volume = Float.parseFloat(volumeText.replace(",", "."));
+	            if (volume <= 0) {
+	                JOptionPane.showMessageDialog(null, "O volume deve ser maior que zero.", "Erro", JOptionPane.ERROR_MESSAGE);
+	                return;
+	            }
+	        } catch (NumberFormatException e) {
+	            JOptionPane.showMessageDialog(null, "O volume deve ser um número válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        String dataHoraText = tf_datetime.getText().trim();
+	        if (dataHoraText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo data/hora é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        LocalDateTime datetime;
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	        try {
+	            datetime = LocalDateTime.parse(dataHoraText, formatter);
+	        } catch (DateTimeParseException e) {
+	            JOptionPane.showMessageDialog(null, "A data e hora devem estar no formato: dd/MM/yyyy HH:mm:ss", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        Object statusSelected = cb_status.getSelectedItem();
+	        if (statusSelected == null) {
+	            JOptionPane.showMessageDialog(null, "Selecione um status válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	        String status = statusSelected.toString();
+
+	        String selectedDoador = (String) cb_donors.getSelectedItem();
+	        if (selectedDoador == null || !selectedDoador.matches("^\\[\\d+\\].*")) {
+	            JOptionPane.showMessageDialog(null, "Selecione um doador válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        int idDonor;
+	        try {
+	            String idText = selectedDoador.substring(selectedDoador.indexOf('[') + 1, selectedDoador.indexOf(']'));
+	            idDonor = Integer.parseInt(idText);
+	        } catch (Exception ex) {
+	            JOptionPane.showMessageDialog(null, "Erro ao extrair o ID do doador: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        Donor donor = new Donor(idDonor);
+	        BloodCenter bloodCenter = buscarHemocentroPorIdUsuario(id_UserBloodCenter);
+	        Donation donation = new Donation(status, volume, datetime, donor, bloodCenter);
+
+	        if (donation.create() > 0) {
+	            JOptionPane.showMessageDialog(null, "Doação adicionada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+	        } else {
+	            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar a doação.", "Erro", JOptionPane.ERROR_MESSAGE);
+	        }
+
 	        if (status.equalsIgnoreCase("Realizada")) {
 	            int idTipoSanguineo = obterTipoSanguineoPorDoador(idDonor);
 	            if (idTipoSanguineo != -1) {
-	            	BloodStockController estoqueController = new BloodStockController();
-	            	BloodStockController.atualizarEstoquePorDoacao(bloodCenter.getId(), idTipoSanguineo, volume);
+	                BloodStockController.atualizarEstoquePorDoacao(bloodCenter.getId(), idTipoSanguineo, volume);
 	            }
 	        }
-	    } catch (Exception ex) {
-	    	JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
-	    }
 
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(null, "Erro inesperado: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+    public void executeUpdate() {
+    	try {
+    		String volumeText = tf_volume.getText().trim();
+	        if (volumeText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo volume é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        float volume;
+	        try {
+	            volume = Float.parseFloat(volumeText.replace(",", "."));
+	            if (volume <= 0) {
+	                JOptionPane.showMessageDialog(null, "O volume deve ser maior que zero.", "Erro", JOptionPane.ERROR_MESSAGE);
+	                return;
+	            }
+	        } catch (NumberFormatException e) {
+	            JOptionPane.showMessageDialog(null, "O volume deve ser um número válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        String dataHoraText = tf_datetime.getText().trim();
+	        if (dataHoraText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo data/hora é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        LocalDateTime datetime;
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	        try {
+	            datetime = LocalDateTime.parse(dataHoraText, formatter);
+	        } catch (DateTimeParseException e) {
+	            JOptionPane.showMessageDialog(null, "A data e hora devem estar no formato: dd/MM/yyyy HH:mm:ss", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        Object statusSelected = cb_status.getSelectedItem();
+	        if (statusSelected == null) {
+	            JOptionPane.showMessageDialog(null, "Selecione um status válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	        String status = statusSelected.toString();
+	        
+            Donation donation = new Donation(id_Donation);
+            donation.setVolume(volume);
+            donation.setDatetime(datetime);
+            donation.setStatus(status);
+
+            donation.update();
+            JOptionPane.showMessageDialog(null, "Doação alterada com sucesso!");
+            
+	        if (status.equalsIgnoreCase("Realizada")) {
+	            int idTipoSanguineo = obterTipoSanguineoPorDoacao(id_Donation);
+	            if (idTipoSanguineo != -1) {
+	                BloodStockController.atualizarEstoquePorDoacao(obterHemocentroPorDoacao(id_Donation), idTipoSanguineo, volume);
+	            }
+	        }
+	        
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void executeDelete() {
+    	try {
+    		Donation donation = new Donation(this.id_Donation);
+    		donation.delete();
+            JOptionPane.showMessageDialog(null, "Doação removida com sucesso!");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private int buscarIdHemocentroPorNome(String nome) {
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE  razao_Social = ?";
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE razao_Social = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, nome);
             var rs = stmt.executeQuery();
@@ -97,10 +213,10 @@ public class DonationController {
         }
     }
     
-    public BloodCenter buscarHemocentroPorID(int id) {
+    public BloodCenter buscarHemocentroPorIdUsuario(int id) {
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE id_usuario = ?";
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE id_Usuario = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             var rs = stmt.executeQuery();
@@ -124,14 +240,15 @@ public class DonationController {
         List<String> doadores = new ArrayList<>();
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT d.id_Doador, u.nome FROM doador d JOIN usuario u ON d.id_Usuario = u.id_Usuario";
+            String sql = "SELECT d.id_Doador, u.nome, d.cpf FROM doador d JOIN usuario u ON d.id_Usuario = u.id_Usuario";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 int id = rs.getInt("id_doador");
                 String nome = rs.getString("nome");
-                doadores.add("[" + id + "] " + nome);
+                String cpf = rs.getString("cpf");
+                doadores.add("[" + id + "] " + nome + " - " + cpf);
             }
 
             rs.close();
@@ -173,10 +290,16 @@ public class DonationController {
                 String tipo = rs.getString("tipo_sanguineo");
                 String hemocentro = rs.getString("hemocentro");
                 String status = rs.getString("status");
-                int volume = rs.getInt("volume");
+                Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
+                
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-                doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(dataHora, formatoEntrada);
+                String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
+
+                doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHoraFormatada);
             }
 
             rs.close();
@@ -186,47 +309,6 @@ public class DonationController {
             e.printStackTrace();
         }
         return doacoes;
-    }
-    
-    public boolean atualizarDoacao(int idDoacao, String status, int volume, String dataHoraTexto) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            LocalDateTime dataHora = LocalDateTime.parse(dataHoraTexto, formatter);
-
-            Connection conn = new ConnectionSQL().getConnection();
-            String sql = "UPDATE doacao SET status = ?, volume = ?, data_Hora = ? WHERE id_Doacao = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, status);
-            stmt.setInt(2, volume);
-            stmt.setObject(3, dataHora);
-            stmt.setInt(4, idDoacao);
-
-            int rowsUpdated = stmt.executeUpdate();
-            stmt.close();
-            conn.close();
-
-            return rowsUpdated > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    public boolean excluirDoacao(int idDoacao) {
-        try {
-        	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "DELETE FROM doacao WHERE id_Doacao = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idDoacao);
-            int rowsDeleted = stmt.executeUpdate();
-            stmt.close();
-            conn.close();
-
-            return rowsDeleted > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
     }
     
     private int obterTipoSanguineoPorDoador(int idDoador) {
@@ -249,6 +331,52 @@ public class DonationController {
         }
 
         return idTipoSanguineo;
+    }
+    
+    private int obterTipoSanguineoPorDoacao(int idDoacao) {
+        int idTipoSanguineo = -1;
+        String sql = "SELECT id_Tipo_Sanguineo FROM doacao"
+        		+ " INNER JOIN doador ON doador.id_Doador = doacao.id_Doador WHERE id_Doacao = ?";
+        
+
+        try (Connection conn = new ConnectionSQL().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idDoacao);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                idTipoSanguineo = rs.getInt("id_Tipo_Sanguineo");
+            }
+
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return idTipoSanguineo;
+    }
+    
+    private int obterHemocentroPorDoacao(int idDoacao) {
+        int id_Hemocentro = -1;
+        String sql = "SELECT id_Hemocentro FROM doacao WHERE id_Doacao = ?";
+
+        try (Connection conn = new ConnectionSQL().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idDoacao);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+            	id_Hemocentro = rs.getInt("id_Hemocentro");
+            }
+
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return id_Hemocentro;
     }
     
     public List<String> listarDoacoesPorUsuario(int idUsuario) {
@@ -278,7 +406,7 @@ public class DonationController {
                 String tipo = rs.getString("tipo_sanguineo");
                 String hemocentro = rs.getString("hemocentro");
                 String status = rs.getString("status");
-                int volume = rs.getInt("volume");
+                Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
 
                 doacoes.add("[" + id + "] " + tipo + " | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
@@ -342,7 +470,7 @@ public class DonationController {
                 String tipo = rs.getString("tipo_sanguineo");
                 String hemocentro = rs.getString("hemocentro");
                 String status = rs.getString("status");
-                int volume = rs.getInt("volume");
+                Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
 
                 doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);

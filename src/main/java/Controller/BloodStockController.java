@@ -17,44 +17,60 @@ public class BloodStockController {
     }
 
     private static void atualizarEstoque(int idHemocentro, int idTipoSanguineo, Float deltaVolume) {
-        try (Connection conn = new ConnectionSQL().getConnection();) {
-            String selectSql = "SELECT volume FROM Estoque WHERE id_hemocentro = ? AND id_tipo_sanguineo = ?";
+        try (Connection conn = new ConnectionSQL().getConnection()) {
+            String totalSql = "SELECT SUM(volume) as total FROM doacao "
+            		+ "INNER JOIN doador ON doador.id_Doador = doacao.id_Doador "
+            		+ "WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
+            PreparedStatement psTotal = conn.prepareStatement(totalSql);
+            psTotal.setInt(1, idHemocentro);
+            psTotal.setInt(2, idTipoSanguineo);
+            ResultSet rsTotal = psTotal.executeQuery();
+
+            float volumeTotal = 0f;
+            if (rsTotal.next()) {
+                volumeTotal = rsTotal.getFloat("total");
+            }
+
+            rsTotal.close();
+            psTotal.close();
+
+            String selectSql = "SELECT id_Estoque FROM estoque WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
             PreparedStatement psSelect = conn.prepareStatement(selectSql);
             psSelect.setInt(1, idHemocentro);
             psSelect.setInt(2, idTipoSanguineo);
             ResultSet rs = psSelect.executeQuery();
 
-            if (rs.next()) {
-                String volumeAtual = rs.getString("volume");
-                Float novoVolume = Float.parseFloat(volumeAtual) + deltaVolume;
-                if (novoVolume < 0) novoVolume = (float) 0;
+            String dataAtual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-                String updateSql = "UPDATE Estoque SET volume = ?, data_atualizacao = ? WHERE id_hemocentro = ? AND id_tipo_sanguineo = ?";
+            if (rs.next()) {
+                String updateSql = "UPDATE estoque SET volume = ?, data_Atualizacao = ? WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
                 PreparedStatement psUpdate = conn.prepareStatement(updateSql);
-                psUpdate.setFloat(1, novoVolume);
-                psUpdate.setString(2, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                psUpdate.setFloat(1, volumeTotal);
+                psUpdate.setString(2, dataAtual);
                 psUpdate.setInt(3, idHemocentro);
                 psUpdate.setInt(4, idTipoSanguineo);
                 psUpdate.executeUpdate();
                 psUpdate.close();
             } else {
-                if (deltaVolume > 0) {
-                    String insertSql = "INSERT INTO Estoque (id_hemocentro, id_tipo_sanguineo, volume, data_atualizacao) VALUES (?, ?, ?, ?)";
+                if (volumeTotal > 0) {
+                    String insertSql = "INSERT INTO estoque (id_Hemocentro, id_Tipo_Sanguineo, volume, data_Atualizacao) VALUES (?, ?, ?, ?)";
                     PreparedStatement psInsert = conn.prepareStatement(insertSql);
                     psInsert.setInt(1, idHemocentro);
                     psInsert.setInt(2, idTipoSanguineo);
-                    psInsert.setFloat(3, deltaVolume);
-                    psInsert.setString(4, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    psInsert.setFloat(3, volumeTotal);
+                    psInsert.setString(4, dataAtual);
                     psInsert.executeUpdate();
                     psInsert.close();
                 }
             }
+
             rs.close();
             psSelect.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public ResultSet listarEstoque() {
         try {

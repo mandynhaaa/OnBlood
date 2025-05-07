@@ -47,27 +47,12 @@ public class ManagerDonation extends JFrame {
             String selecionado = listDoacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditDonation editor = new EditDonation(id, controller, this);
+                EditDonation editor = new EditDonation(id);
                 editor.setVisible(true);
             }
         });
 
-        btnExcluir.addActionListener(e -> {
-            String selecionado = listDoacoes.getSelectedValue();
-            if (selecionado != null) {
-                int id = extrairId(selecionado);
-                int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
-                if (confirm == JOptionPane.YES_OPTION) {
-                    boolean sucesso = controller.excluirDoacao(id);
-                    if (sucesso) {
-                        JOptionPane.showMessageDialog(this, "Doação excluída.");
-                        carregarDoacoes();
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Erro ao excluir.");
-                    }
-                }
-            }
-        });
+        btnExcluir.addActionListener(e -> excluirDoacao());
         
         btnNova.addActionListener(e -> {
             RegisterDonation telaCadastro = new RegisterDonation(this.idUsuario);
@@ -87,6 +72,18 @@ public class ManagerDonation extends JFrame {
 
     private int extrairId(String texto) {
         return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
+    }
+    
+    private void excluirDoacao() {
+        String selecionado = listDoacoes.getSelectedValue();
+        if (selecionado != null) {
+            int id = extrairId(selecionado);
+            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
+            if (confirm == JOptionPane.YES_NO_OPTION) {
+            	controller = new DonationController(id, 0, 0, null, null, null, null);
+                controller.executeDelete();
+            }
+        }
     }
 
 }
