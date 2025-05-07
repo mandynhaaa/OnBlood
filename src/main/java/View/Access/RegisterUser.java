@@ -3,6 +3,7 @@ package View.Access;
 import java.awt.EventQueue;
 import javax.swing.*;
 import java.awt.Font;
+import java.awt.event.ItemEvent;
 
 import Controller.UserController;
 
@@ -10,10 +11,12 @@ public class RegisterUser extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
-    private JTextField tf_nome;
-    private JTextField tf_email;
-    private JTextField tf_senha;
+    private JTextField tf_nome, tf_email, tf_senha;
+    private JTextField tf_cpf, tf_endereco, tf_razao_Social;
     private JComboBox<String> comboTipoUsuario;
+    private JTextField tf_dataNascimento;
+    private JComboBox<String> combo_tipoSanguineo;
+    private JTextField tf_cnpj;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
@@ -28,67 +31,122 @@ public class RegisterUser extends JFrame {
 
     public RegisterUser() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 550, 500);
+        setBounds(100, 100, 600, 550);
         contentPane = new JPanel();
         setContentPane(contentPane);
         contentPane.setLayout(null);
 
         JLabel lblTitulo = new JLabel("Criar Conta");
         lblTitulo.setFont(new Font("Comic Sans MS", Font.BOLD, 26));
-        lblTitulo.setBounds(200, 40, 180, 40);
+        lblTitulo.setBounds(220, 20, 180, 40);
         contentPane.add(lblTitulo);
 
         JLabel lblNome = new JLabel("Nome:");
-        lblNome.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lblNome.setBounds(100, 110, 100, 25);
+        lblNome.setBounds(100, 80, 100, 25);
         contentPane.add(lblNome);
 
         tf_nome = new JTextField();
-        tf_nome.setBounds(180, 110, 240, 25);
+        tf_nome.setBounds(200, 80, 250, 25);
         contentPane.add(tf_nome);
 
         JLabel lblEmail = new JLabel("E-mail:");
-        lblEmail.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lblEmail.setBounds(100, 150, 100, 25);
+        lblEmail.setBounds(100, 120, 100, 25);
         contentPane.add(lblEmail);
 
         tf_email = new JTextField();
-        tf_email.setBounds(180, 150, 240, 25);
+        tf_email.setBounds(200, 120, 250, 25);
         contentPane.add(tf_email);
 
         JLabel lblSenha = new JLabel("Senha:");
-        lblSenha.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lblSenha.setBounds(100, 190, 100, 25);
+        lblSenha.setBounds(100, 160, 100, 25);
         contentPane.add(lblSenha);
 
         tf_senha = new JTextField();
-        tf_senha.setBounds(180, 190, 240, 25);
+        tf_senha.setBounds(200, 160, 250, 25);
         contentPane.add(tf_senha);
 
         JLabel lblTipo = new JLabel("Tipo:");
-        lblTipo.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lblTipo.setBounds(100, 230, 100, 25);
+        lblTipo.setBounds(100, 200, 100, 25);
         contentPane.add(lblTipo);
 
-        comboTipoUsuario = new JComboBox<>();
-        comboTipoUsuario.setModel(new DefaultComboBoxModel<>(new String[] { "Doador", "Hemocentro" }));
-        comboTipoUsuario.setBounds(180, 230, 240, 25);
+        comboTipoUsuario = new JComboBox<>(new String[] { "Doador", "Hemocentro" });
+        comboTipoUsuario.setBounds(200, 200, 250, 25);
         contentPane.add(comboTipoUsuario);
 
+        tf_cpf = new JTextField();
+        tf_cpf.setBounds(200, 240, 250, 25);
+        contentPane.add(tf_cpf);
+
+        JLabel lblCPF = new JLabel("CPF:");
+        lblCPF.setBounds(100, 240, 100, 25);
+        contentPane.add(lblCPF);
+
+        JLabel lblTipoSanguineo = new JLabel("Tipo Sanguíneo:");
+        lblTipoSanguineo.setBounds(100, 280, 100, 25);
+        contentPane.add(lblTipoSanguineo);
+
+        JComboBox<String> comboTipoSangue = new JComboBox<>(new String[] {
+            "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
+        });
+        comboTipoSangue.setBounds(200, 280, 250, 25);
+        contentPane.add(comboTipoSangue);
+
+        JLabel lblDataNascimento = new JLabel("Nascimento (YYYY-MM-DD):");
+        lblDataNascimento.setBounds(100, 320, 200, 25);
+        contentPane.add(lblDataNascimento);
+
+        JTextField tf_dataNascimento = new JTextField();
+        tf_dataNascimento.setBounds(300, 320, 150, 25);
+        contentPane.add(tf_dataNascimento);
+
+        tf_razao_Social = new JTextField();
+        tf_razao_Social.setBounds(200, 240, 250, 25);
+        contentPane.add(tf_razao_Social);
+        tf_razao_Social.setVisible(false);
+
+        JLabel lblrazao_Social = new JLabel("Razão Social:");
+        lblrazao_Social.setBounds(100, 240, 100, 25);
+        contentPane.add(lblrazao_Social);
+        lblrazao_Social.setVisible(false);
+
+        JTextField tf_cnpj = new JTextField();
+        tf_cnpj.setBounds(200, 280, 250, 25);
+        contentPane.add(tf_cnpj);
+        tf_cnpj.setVisible(false);
+
+        JLabel lblCNPJ = new JLabel("CNPJ:");
+        lblCNPJ.setBounds(100, 280, 100, 25);
+        contentPane.add(lblCNPJ);
+        lblCNPJ.setVisible(false);
+
+        comboTipoUsuario.addItemListener(e -> {
+            boolean isDoador = comboTipoUsuario.getSelectedItem().equals("Doador");
+
+            tf_cpf.setVisible(isDoador);
+            lblCPF.setVisible(isDoador);
+            comboTipoSangue.setVisible(isDoador);
+            lblTipoSanguineo.setVisible(isDoador);
+            tf_dataNascimento.setVisible(isDoador);
+            lblDataNascimento.setVisible(isDoador);
+
+            tf_razao_Social.setVisible(!isDoador);
+            lblrazao_Social.setVisible(!isDoador);
+            tf_cnpj.setVisible(!isDoador);
+            lblCNPJ.setVisible(!isDoador);
+        });
+
         JButton btnCadastrar = new JButton("Criar Conta");
-        btnCadastrar.setBounds(217, 280, 120, 30);
+        btnCadastrar.setBounds(230, 360, 120, 30);
         contentPane.add(btnCadastrar);
 
-		JLabel lbl_japossuiconta = new JLabel("Já possui conta?");
-		lbl_japossuiconta.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lbl_japossuiconta.setBounds(235, 320, 119, 13);
-		contentPane.add(lbl_japossuiconta);
-		
-		JButton btnLogar = new JButton("Logar");
-		btnLogar.setBounds(217, 338, 120, 15);
-		contentPane.add(btnLogar);
+        JButton btnLogar = new JButton("Logar");
+        btnLogar.setBounds(230, 400, 120, 25);
+        contentPane.add(btnLogar);
 
-        UserController controller = new UserController(tf_nome, tf_email, tf_senha, comboTipoUsuario);
+        UserController controller = new UserController(
+        	    tf_nome, tf_email, tf_senha, comboTipoUsuario,
+        	    tf_cpf, tf_razao_Social, tf_dataNascimento, comboTipoSangue, tf_cnpj
+        	);
         btnCadastrar.addActionListener(controller);
 
         btnLogar.addActionListener(e -> {
