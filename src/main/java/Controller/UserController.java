@@ -66,4 +66,5 @@ public class UserController implements ActionListener {
         	JOptionPane.showMessageDialog(null, "Ocorreu um erro no cadastro de usuário");
         }
     }
+    
 }

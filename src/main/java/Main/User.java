@@ -1,10 +1,14 @@
 package Main;
 
 import java.time.format.DateTimeFormatter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import Connection.ConnectionSQL;
 import Connection.SQLGenerator;
 import Standard.BaseModel;
 import Standard.PasswordCrypt;
@@ -141,5 +145,24 @@ public class User extends BaseModel {
 	    user.populate(data);
 	    return user;
 	}
+	
+	public int buscarIdPorNome (String nome) {
+        try (Connection conn = new ConnectionSQL().getConnection()) {
+            String sql = "SELECT id_usuario FROM usuario WHERE nome = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, nome);
+            ResultSet rs = stmt.executeQuery();
+            int id = -1;
+            if (rs.next()) {
+                id = rs.getInt("id_Usuario");
+            }
+            rs.close();
+            stmt.close();
+            return id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
 }
