@@ -2,14 +2,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import Main.Telephone;
+import Main.User;
+import Main.UserType;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 class TelephoneTest {
 
     @Test
     public void testCreateTelephoneWithData() {
-        Telephone phone = new Telephone("Celular", "48", "999999999");
+        UserType userType = new UserType(1);
+        
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
+        
+        Telephone phone = new Telephone("Celular", "48", "999999999", user);
 
         assertEquals("Celular", phone.getDescription());
         assertEquals("48", phone.getDdd());
@@ -18,7 +25,11 @@ class TelephoneTest {
 
     @Test
     public void testToMap() {
-        Telephone phone = new Telephone("Residencial", "11", "12345678");
+        UserType userType = new UserType(1);
+        
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
+        
+        Telephone phone = new Telephone("Residencial", "11", "12345678", user);
 
         Map<String, String> data = phone.toMap();
 
@@ -35,7 +46,7 @@ class TelephoneTest {
             "numero", "88887777"
         );
 
-        Telephone phone = new Telephone("", "", "");
+        Telephone phone = new Telephone("", "", "", null);
         phone.populate(data);
 
         assertEquals("Trabalho", phone.getDescription());
@@ -47,7 +58,7 @@ class TelephoneTest {
     public void testPopulateWithMissingFields() {
         Map<String, String> data = Map.of("descricao", "Telefone desconhecido");
 
-        Telephone phone = new Telephone("", "", "");
+        Telephone phone = new Telephone("", "", "", null);
         phone.populate(data);
 
         assertEquals("Telefone desconhecido", phone.getDescription());
@@ -57,10 +68,14 @@ class TelephoneTest {
 
     @Test
     public void testRoundTripMapConversion() {
-        Telephone original = new Telephone("Fixo", "41", "22223333");
+        UserType userType = new UserType(1);
+        
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
+        
+        Telephone original = new Telephone("Fixo", "41", "22223333", user);
 
         Map<String, String> map = original.toMap();
-        Telephone copy = new Telephone("", "", "");
+        Telephone copy = new Telephone("", "", "", user);
         copy.populate(map);
 
         assertEquals(original.getDescription(), copy.getDescription());
@@ -70,7 +85,7 @@ class TelephoneTest {
 
     @Test
     public void testExtremeValues() {
-        Telephone phone = new Telephone("Teste", "", "");
+        Telephone phone = new Telephone("Teste", "", "", null);
 
         assertEquals("Teste", phone.getDescription());
         assertEquals("", phone.getDdd());

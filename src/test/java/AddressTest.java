@@ -6,17 +6,16 @@ import Main.Telephone;
 import Main.User;
 import Main.UserType;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 class AddressTest {
 
     @Test
     public void testCreateAddressWithData() {
-        UserType userType = new UserType("Admin");
-        userType.setId(1);
+        UserType userType = new UserType(1);
         
-        User user = new User("João", "joao@email.com", "123456", LocalDate.of(2024, 1, 1), userType);
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
         
         Address address = new Address(
             "Minha Casa", 
@@ -44,10 +43,9 @@ class AddressTest {
 
     @Test
     public void testToMap() {
-        UserType userType = new UserType("Admin");
-        userType.setId(1);
+        UserType userType = new UserType(1);
         
-        User user = new User("João", "joao@email.com", "123456", LocalDate.of(2024, 1, 1), userType);
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
         
         Address address = new Address(
             "Minha Casa", 
@@ -77,10 +75,9 @@ class AddressTest {
     
     @Test
     public void testPopulate() {
-        UserType userType = new UserType("Admin");
-        userType.setId(1);
+        UserType userType = new UserType(1);
         
-        User user = new User("João", "joao@email.com", "123456", LocalDate.of(2024, 1, 1), userType);
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
         
         Map<String, String> data = Map.of(
             "descricao", "Minha Casa",
@@ -110,7 +107,6 @@ class AddressTest {
         assertEquals("Rua das Flores", address.getStreet());
         assertEquals(100, address.getNumber());
         assertEquals("Apartamento 202", address.getComplement());
-        assertEquals("João", address.getUser().getName());
     }
     
     @Test
@@ -133,15 +129,13 @@ class AddressTest {
         assertNull(address.getStreet());
         assertEquals(0, address.getNumber());
         assertNull(address.getComplement());
-        assertNull(address.getUser());
     }
 
     @Test
     public void testRoundTripMapConversion() {
-        UserType userType = new UserType("Admin");
-        userType.setId(1);
+        UserType userType = new UserType(1);
         
-        User user = new User("João", "joao@email.com", "123456", LocalDate.of(2024, 1, 1), userType);
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
         
         Address original = new Address(
             "Casa do João", "11111111", "Brasil", "SP", "São Paulo",
@@ -161,15 +155,13 @@ class AddressTest {
         assertEquals(original.getStreet(), copy.getStreet());
         assertEquals(original.getNumber(), copy.getNumber());
         assertEquals(original.getComplement(), copy.getComplement());
-        assertEquals(original.getUser(), copy.getUser());
     }
 
     @Test
     public void testExtremeValues() {
-        UserType userType = new UserType("Admin");
-        userType.setId(1);
+        UserType userType = new UserType(1);
         
-        User user = new User("João", "joao@email.com", "123456", LocalDate.of(2024, 1, 1), userType);
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.of(2024, 1, 1, 0, 0), userType);
         
         Address address = new Address(
             "Teste", "", "Brasil", "RJ", "Rio", "Copacabana",

@@ -14,14 +14,12 @@ public class RegisterDonation extends JFrame {
 
     protected static final int NULL = 0;
 	private JPanel contentPane;
-	private JComboBox<String> cbDoador;
-    private JTextField tfVolume;
-    private JTextField tfDataHora;
-    private JComboBox<String> cbHemocentro;
-    private JComboBox<String> cbStatus;
+    private JTextField tfVolume, tfDataHora;
+    private JComboBox<String> cbDoador, cbStatus;
     private DonationController controller;
+    private int idUsuario;
 
-    public RegisterDonation() {
+    public RegisterDonation(int idUser) {
         controller = new DonationController();
 
         setTitle("Cadastro de Doações");
@@ -53,20 +51,6 @@ public class RegisterDonation extends JFrame {
         JLabel lblHemocentro = new JLabel("Hemocentro:");
         lblHemocentro.setBounds(30, 70, 80, 20);
         contentPane.add(lblHemocentro);
-
-        cbHemocentro = new JComboBox<>();
-        cbHemocentro.setBounds(120, 70, 200, 22);
-
-        List<String> hemocentros = controller.listarHemocentros();
-        if (hemocentros.isEmpty()) {
-            cbHemocentro.addItem("Nenhum cadastrado");
-            cbHemocentro.setEnabled(false);
-        } else {
-            for (String nome : hemocentros) {
-                cbHemocentro.addItem(nome);
-            }
-        }
-        contentPane.add(cbHemocentro);
 
         JLabel lblStatus = new JLabel("Status:");
         lblStatus.setBounds(30, 110, 80, 20);
@@ -101,12 +85,11 @@ public class RegisterDonation extends JFrame {
                 try {
                 	String doadorSelecionado = cbDoador.getSelectedItem().toString();
                 	int idDoador = Integer.parseInt(doadorSelecionado.substring(1, doadorSelecionado.indexOf("]")));
-                    String hemocentro = cbHemocentro.getSelectedItem().toString();
                     String status = cbStatus.getSelectedItem().toString();
                     int volume = Integer.parseInt(tfVolume.getText());
                     String dataHora = tfDataHora.getText();
 
-                    boolean sucesso = controller.cadastrarDoacao(idDoador, hemocentro, status, volume, dataHora);
+                    boolean sucesso = controller.cadastrarDoacao(idDoador, this.idUsuario, status, volume, dataHora);
                     if (sucesso) {
                         JOptionPane.showMessageDialog(null, "Doação cadastrada com sucesso!");
                         dispose();
@@ -125,20 +108,17 @@ public class RegisterDonation extends JFrame {
         contentPane.add(btnCancelar);
         btnCancelar.addActionListener(e -> {
         	dispose();
-            ManagerDonation telaDoacao = new ManagerDonation();
+            ManagerDonation telaDoacao = new ManagerDonation(this.idUsuario);
             telaDoacao.setVisible(true);
         });
         
+        btnSalvar.addActionListener(e -> salvar());
+        btnCancelar.addActionListener(e -> dispose());
+        
     }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-            	RegisterDonation frame = new RegisterDonation();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+    
+    private void salvar() {
+        controller.executeRegister();
+        dispose();
     }
 }

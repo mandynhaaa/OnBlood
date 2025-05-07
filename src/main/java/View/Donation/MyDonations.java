@@ -41,7 +41,10 @@ public class MyDonations extends JFrame {
             listModel.addElement(d);
         }
     }
+<<<<<<< HEAD
 
     public static void main(String[] args) {
     }
+=======
+>>>>>>> stash
 }

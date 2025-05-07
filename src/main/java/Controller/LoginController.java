@@ -7,7 +7,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import Main.User;
-import View.MainMenu;
+import View.Access.MainMenu;
 
 public class LoginController implements ActionListener {
 	
@@ -35,8 +35,8 @@ public class LoginController implements ActionListener {
 	    if (!tempUser.login()) {
 	        JOptionPane.showMessageDialog(null, "Usuário ou senha incorreta", "Erro", JOptionPane.ERROR_MESSAGE);
 	    } else {
-	        User loggedUser = tempUser.searchByName(); // Recupera os dados completos
-	        new MainMenu(loggedUser).setVisible(true); // <-- redireciona para o menu principal
+	        User loggedUser = tempUser.searchByName();
+	        new MainMenu(loggedUser).setVisible(true);
 	    }
 	}
 }

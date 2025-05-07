@@ -2,7 +2,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import Main.BloodCenter;
 import Main.User;
@@ -17,7 +17,7 @@ class BloodCenterTest {
         UserType type = new UserType("Admin");
         type.setId(1);
 
-        User user = new User("João", "joao@email.com", "123456", LocalDate.now(), type);
+        User user = new User("João", "joao@email.com", "123456", LocalDateTime.now(), type);
         user.setId(4);
 
         BloodCenter center = new BloodCenter(12345678901234L, "Banco de Sangue", user);

@@ -11,9 +11,12 @@ public class ManagerDonation extends JFrame {
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
     private DonationController controller;
+    private int idUsuario;
 
-    public ManagerDonation() {
-        controller = new DonationController();
+    public ManagerDonation(int idUser) {
+    	this.idUsuario = idUser;
+        this.controller = new DonationController();
+        
         setTitle("Gerenciar Doações");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 450);
@@ -66,7 +69,7 @@ public class ManagerDonation extends JFrame {
         });
         
         btnNova.addActionListener(e -> {
-            RegisterDonation telaCadastro = new RegisterDonation();
+            RegisterDonation telaCadastro = new RegisterDonation(this.idUsuario);
             telaCadastro.setVisible(true);
         });
         
@@ -75,7 +78,7 @@ public class ManagerDonation extends JFrame {
 
     void carregarDoacoes() {
         listModel.clear();
-        List<String> doacoes = controller.listarDoacoes();
+        List<String> doacoes = controller.listarDoacoesHemocentro(this.idUsuario);
         for (String d : doacoes) {
             listModel.addElement(d);
         }
@@ -85,9 +88,4 @@ public class ManagerDonation extends JFrame {
         return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ManagerDonation().setVisible(true);
-        });
-    }
 }

@@ -77,8 +77,12 @@ public class Request extends BaseModel {
 
 		String rawDate = data.getOrDefault("data_Hora", null);
 		if (rawDate != null) {
-		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		    this.datetime = LocalDateTime.parse(rawDate, formatter);
+		    try {
+		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		        this.datetime = LocalDateTime.parse(rawDate, formatter);
+		    } catch (Exception e) {
+		        this.datetime = LocalDateTime.parse(rawDate);
+		    }
 		}
 		
         this.bloodCenter = new BloodCenter(data.get("id_Hemocentro") != null ? Integer.parseInt(data.get("id_Hemocentro")) : 0);
@@ -90,7 +94,7 @@ public class Request extends BaseModel {
         Map<String, String> data = new HashMap<>();
         data.put("status", this.status);
         data.put("volume", String.valueOf(this.volume));
-        data.put("data_Hora", this.datetime.toString());
+        data.put("data_Hora", this.datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         data.put("id_Hemocentro", String.valueOf(this.bloodCenter.getId()));
         data.put("id_Tipo_Sanguineo", String.valueOf(this.bloodType.getId()));
         return data;

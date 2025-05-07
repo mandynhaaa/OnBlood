@@ -89,7 +89,7 @@ public class User extends BaseModel {
 		data.put("nome", this.name);
 		data.put("email", this.email);
 		data.put("senha", this.password);
-		data.put("data_Criacao", this.creationDate.toString());
+		data.put("data_Criacao", this.creationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 		data.put("id_Tipo_Usuario", String.valueOf(this.userType.getId()));
 		return data;
 	}
@@ -102,8 +102,12 @@ public class User extends BaseModel {
 		
 		String rawDate = data.getOrDefault("data_Criacao", null);
 		if (rawDate != null) {
-		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		    this.creationDate = LocalDateTime.parse(rawDate, formatter);
+		    try {
+		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		        this.creationDate = LocalDateTime.parse(rawDate, formatter);
+		    } catch (Exception e) {
+		        this.creationDate = LocalDateTime.parse(rawDate);
+		    }
 		}
 		
 		this.userType = new UserType(data.get("id_Tipo_Usuario") != null ? Integer.parseInt(data.get("id_Tipo_Usuario")) : 0);
@@ -146,23 +150,4 @@ public class User extends BaseModel {
 	    return user;
 	}
 	
-	public int buscarIdPorNome (String nome) {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT id_usuario FROM usuario WHERE nome = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, nome);
-            ResultSet rs = stmt.executeQuery();
-            int id = -1;
-            if (rs.next()) {
-                id = rs.getInt("id_Usuario");
-            }
-            rs.close();
-            stmt.close();
-            return id;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
 }

@@ -1,6 +1,6 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import Main.Request;
 import Main.BloodCenter;
@@ -17,11 +17,11 @@ class RequestTest {
         BloodType type = new BloodType("A+");
         type.setId(2);
 
-        Request request = new Request("Pendente", 3.5f, LocalDate.of(2025, 4, 28), center, type);
+        Request request = new Request("Pendente", 3.5f, LocalDateTime.of(2025, 4, 28, 0, 0), center, type);
 
         assertEquals("Pendente", request.getStatus());
         assertEquals(3.5f, request.getVolume());
-        assertEquals(LocalDate.of(2025, 4, 28), request.getDatetime());
+        assertEquals(LocalDateTime.of(2025, 4, 28, 0, 0), request.getDatetime());
         assertEquals(center, request.getBloodCenter());
         assertEquals(type, request.getBloodType());
     }
@@ -34,13 +34,13 @@ class RequestTest {
         BloodType type = new BloodType("B+");
         type.setId(20);
 
-        Request request = new Request("Aprovada", 2.2f, LocalDate.of(2025, 4, 29), center, type);
+        Request request = new Request("Aprovada", 2.2f, LocalDateTime.of(2025, 4, 29, 0, 0), center, type);
 
         Map<String, String> map = request.toMap();
 
         assertEquals("Aprovada", map.get("status"));
         assertEquals("2.2", map.get("volume"));
-        assertEquals("2025-04-29", map.get("data_Hora"));
+        assertEquals("2025-04-29 00:00:00", map.get("data_Hora"));
         assertEquals("10", map.get("id_Hemocentro"));
         assertEquals("20", map.get("id_Tipo_Sanguineo"));
     }
@@ -50,7 +50,7 @@ class RequestTest {
         Map<String, String> data = Map.of(
             "status", "Finalizada",
             "volume", "6.6",
-            "data_Hora", "2025-04-30",
+            "data_Hora", "2025-04-30 00:00:00",
             "id_Hemocentro", "111",
             "id_Tipo_Sanguineo", "222"
         );
@@ -60,7 +60,7 @@ class RequestTest {
 
         assertEquals("Finalizada", request.getStatus());
         assertEquals(6.6f, request.getVolume());
-        assertEquals(LocalDate.of(2025, 4, 30), request.getDatetime());
+        assertEquals(LocalDateTime.of(2025, 4, 30, 0, 0), request.getDatetime());
         assertEquals(111, request.getBloodCenter().getId());
         assertEquals(222, request.getBloodType().getId());
     }
@@ -79,7 +79,7 @@ class RequestTest {
         BloodType type = new BloodType("O-");
         type.setId(40);
 
-        Request original = new Request("Cancelada", 4.4f, LocalDate.of(2025, 5, 1), center, type);
+        Request original = new Request("Cancelada", 4.4f, LocalDateTime.of(2025, 5, 1, 0, 0), center, type);
         Map<String, String> map = original.toMap();
 
         Request copy = new Request(0);

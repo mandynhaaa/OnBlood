@@ -137,7 +137,7 @@ public class DonationController {
         return doadores;
     }
     
-    public List<String> listarDoacoes() {
+    public List<String> listarDoacoesHemocentro(int idUsuario) {
         List<String> doacoes = new ArrayList<>();
         try {
         	Connection conn = new ConnectionSQL().getConnection();
@@ -154,9 +154,11 @@ public class DonationController {
                 JOIN usuario u ON dd.id_Usuario = u.id_Usuario
                 JOIN tipo_Sanguineo ts ON dd.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
                 JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
+                WHERE h.id_Usuario = ?
             """;
 
             PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, idUsuario);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {

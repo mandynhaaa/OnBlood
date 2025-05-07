@@ -7,8 +7,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import Controller.LoginController;
+import View.BloodStock.ManagerBloodStock;
 
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.JButton;
@@ -17,29 +19,15 @@ public class Login extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField tf_idUsuario;
-	private JTextField tf_senha;
-	private JLabel lbl_senha;
+	private JTextField tf_idUsuario, tf_senha;
+	private JLabel lbl_idUsuario, lbl_senha;
+	private JButton btn_Login, btnRegistrar;
+	private LoginController controller;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Login frame = new Login();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Login().setVisible(true));
+    }
 
-	/**
-	 * Create the frame.
-	 */
 	public Login() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 550, 480);
@@ -54,7 +42,7 @@ public class Login extends JFrame {
 		contentPane.add(tf_idUsuario);
 		tf_idUsuario.setColumns(10);
 		
-		JLabel lbl_idUsuario = new JLabel("Usuário:");
+		lbl_idUsuario = new JLabel("Usuário:");
 		lbl_idUsuario.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lbl_idUsuario.setBounds(111, 162, 60, 25);
 		contentPane.add(lbl_idUsuario);
@@ -69,7 +57,7 @@ public class Login extends JFrame {
 		lbl_senha.setBounds(111, 218, 60, 25);
 		contentPane.add(lbl_senha);
 		
-		JButton btn_Login = new JButton("Login");
+		btn_Login = new JButton("Login");
 		btn_Login.setBounds(217, 275, 120, 31);
 		contentPane.add(btn_Login);
 		
@@ -83,15 +71,14 @@ public class Login extends JFrame {
 		lbl_bemvindo.setBounds(237, 111, 119, 13);
 		contentPane.add(lbl_bemvindo);
 		
-		LoginController loginController = new LoginController(tf_idUsuario, tf_senha);
-		btn_Login.addActionListener(loginController);
+		btn_Login.addActionListener(e -> logar());
 		
 		JLabel lbl_naopossuiconta = new JLabel("Não possui conta?");
 		lbl_naopossuiconta.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lbl_naopossuiconta.setBounds(230, 320, 119, 13);
 		contentPane.add(lbl_naopossuiconta);
 		
-		JButton btnRegistrar = new JButton("Registrar-se");
+		btnRegistrar = new JButton("Registrar-se");
 		btnRegistrar.setBounds(217, 338, 120, 15);
 		contentPane.add(btnRegistrar);
 
@@ -100,5 +87,11 @@ public class Login extends JFrame {
 		    dispose();
 		});
 
+		controller = new LoginController(tf_idUsuario, tf_senha);
 	}
+	
+    private void logar() {
+        controller.executeLogin();
+        dispose();
+    }
 }
