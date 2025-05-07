@@ -20,8 +20,9 @@ public class RegisterDonation extends JFrame {
 
     public RegisterDonation(int idUser) {
         setTitle("Cadastro de Doações");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 450, 350);
+        setLayout(null);
         
         JLabel lblDoador = new JLabel("Doador:");
         lblDoador.setBounds(30, 30, 80, 20);
@@ -29,16 +30,6 @@ public class RegisterDonation extends JFrame {
 
         cbDoador = new JComboBox<>();
         cbDoador.setBounds(120, 30, 200, 22);
-
-        List<String> doadores = controller.listarDoadores();
-        if (doadores.isEmpty()) {
-            cbDoador.addItem("Nenhum cadastrado");
-            cbDoador.setEnabled(false);
-        } else {
-            for (String doador : doadores) {
-                cbDoador.addItem(doador);
-            }
-        }
         add(cbDoador);
 
         JLabel lblStatus = new JLabel("Status:");
@@ -79,6 +70,16 @@ public class RegisterDonation extends JFrame {
         btnCancelar.addActionListener(e -> dispose());
         
         controller = new DonationController(0, this.idUsuario, 0, tfVolume, tfDataHora, cbStatus, cbDoador);
+        
+        List<String> doadores = controller.listarDoadores();
+        if (doadores.isEmpty()) {
+            cbDoador.addItem("Nenhum cadastrado");
+            cbDoador.setEnabled(false);
+        } else {
+            for (String doador : doadores) {
+                cbDoador.addItem(doador);
+            }
+        }
     }
     
     private void salvar() {
