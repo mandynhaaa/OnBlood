@@ -293,6 +293,51 @@ public class DonationController {
         }
         return doacoes;
     }
+    public List<String> listarTodasDoacoes(String filtroStatus) {
+        List<String> doacoes = new ArrayList<>();
+        try (Connection conn = new ConnectionSQL().getConnection()) {
+            StringBuilder sql = new StringBuilder("""
+                SELECT d.id_Doacao,
+                       u.nome AS nome_Doador,
+                       ts.descricao AS tipo_Sanguineo,
+                       h.razao_Social AS hemocentro,
+                       d.status,
+                       d.volume,
+                       d.data_Hora
+                FROM doacao d
+                JOIN doador dd ON d.id_Doador = dd.id_Doador
+                JOIN usuario u ON dd.id_Usuario = u.id_Usuario
+                JOIN tipo_Sanguineo ts ON dd.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
+                JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
+            """);
+
+
+            PreparedStatement stmt = conn.prepareStatement(sql.toString());
+
+            ResultSet rs = stmt.executeQuery();
+            DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+            while (rs.next()) {
+                int id = rs.getInt("id_doacao");
+                String nome = rs.getString("nome_doador");
+                String tipo = rs.getString("tipo_sanguineo");
+                String hemocentro = rs.getString("hemocentro");
+                String status = rs.getString("status");
+                Float volume = rs.getFloat("volume");
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(rs.getString("data_hora"), formatoEntrada);
+                String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
+
+                doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHoraFormatada);
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return doacoes;
+    }
     
     private int obterTipoSanguineoPorDoador(int idDoador) {
         int idTipoSanguineo = -1;
