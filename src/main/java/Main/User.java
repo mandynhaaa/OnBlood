@@ -142,7 +142,11 @@ public class User extends BaseModel {
 
 	    Map<String, String> data = new HashMap<>();
 	    for (int i = 0; i < columns.length; i++) {
-	        data.put(columns[i], values[i]);
+	    	if (columns[i] == "id_Usuario") {
+	    		data.put("id", values[i]);
+	    	} else {	    		
+	    		data.put(columns[i], values[i]);
+	    	}
 	    }
 
 	    User user = new User(0);

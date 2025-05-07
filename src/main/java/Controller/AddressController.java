@@ -13,7 +13,7 @@ import Connection.ConnectionSQL;
 import Main.Address;
 import Main.User;
 
-public class AddressController implements ActionListener {
+public class AddressController {
 	
 	private int id_Address;
     private JTextField tf_street;
@@ -43,13 +43,6 @@ public class AddressController implements ActionListener {
         this.tf_country = country;
         this.tf_description = description;
         this.cb_users = users;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if ("Adicionar".equals(e.getActionCommand())) {
-            executeRegister();
-        }
     }
 
     public void executeRegister() {

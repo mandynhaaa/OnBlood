@@ -14,7 +14,7 @@ public class MyDonations extends JFrame {
 
     public MyDonations(int idUsuario) {
         this.idUsuario = idUsuario;
-        this.controller = new DonationController();
+        this.controller = new DonationController(0, 0, idUsuario, null, null, null, null);
 
         setTitle("Minhas Doações");
         setSize(600, 400);
@@ -41,10 +41,5 @@ public class MyDonations extends JFrame {
             listModel.addElement(d);
         }
     }
-<<<<<<< HEAD
 
-    public static void main(String[] args) {
-    }
-=======
->>>>>>> stash
 }

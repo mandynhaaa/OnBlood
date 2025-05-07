@@ -1,12 +1,13 @@
 package View.Donation;
 
 import javax.swing.*;
+
+import Controller.AddressController;
 import Controller.DonationController;
 import java.awt.*;
 import java.util.List;
 
 public class ManagerDonation extends JFrame {
-    private static final BloodCenterDonations NULL = null;
 	private JList<String> listDoacoes;
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
@@ -15,7 +16,7 @@ public class ManagerDonation extends JFrame {
 
     public ManagerDonation(int idUser) {
     	this.idUsuario = idUser;
-        this.controller = new DonationController();
+        this.controller = new DonationController(0, idUsuario, 0, null, null, null, null);
         
         setTitle("Gerenciar Doações");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -46,7 +47,7 @@ public class ManagerDonation extends JFrame {
             String selecionado = listDoacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditDonation editor = new EditDonation(id, controller, this, NULL);
+                EditDonation editor = new EditDonation(id, controller, this);
                 editor.setVisible(true);
             }
         });

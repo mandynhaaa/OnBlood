@@ -8,15 +8,15 @@ import Connection.ConnectionSQL;
 
 public class BloodStockController {
 
-    public static void atualizarEstoquePorDoacao(int idHemocentro, int idTipoSanguineo, int volume) {
+    public static void atualizarEstoquePorDoacao(int idHemocentro, int idTipoSanguineo, Float volume) {
         atualizarEstoque(idHemocentro, idTipoSanguineo, volume);
     }
 
-    public void atualizarEstoquePorSolicitacao(int idHemocentro, int idTipoSanguineo, int volume) {
+    public void atualizarEstoquePorSolicitacao(int idHemocentro, int idTipoSanguineo, Float volume) {
         atualizarEstoque(idHemocentro, idTipoSanguineo, -volume);
     }
 
-    private static void atualizarEstoque(int idHemocentro, int idTipoSanguineo, int deltaVolume) {
+    private static void atualizarEstoque(int idHemocentro, int idTipoSanguineo, Float deltaVolume) {
         try (Connection conn = new ConnectionSQL().getConnection();) {
             String selectSql = "SELECT volume FROM Estoque WHERE id_hemocentro = ? AND id_tipo_sanguineo = ?";
             PreparedStatement psSelect = conn.prepareStatement(selectSql);
@@ -25,13 +25,13 @@ public class BloodStockController {
             ResultSet rs = psSelect.executeQuery();
 
             if (rs.next()) {
-                int volumeAtual = rs.getInt("volume");
-                int novoVolume = volumeAtual + deltaVolume;
-                if (novoVolume < 0) novoVolume = 0;
+                String volumeAtual = rs.getString("volume");
+                Float novoVolume = Float.parseFloat(volumeAtual) + deltaVolume;
+                if (novoVolume < 0) novoVolume = (float) 0;
 
                 String updateSql = "UPDATE Estoque SET volume = ?, data_atualizacao = ? WHERE id_hemocentro = ? AND id_tipo_sanguineo = ?";
                 PreparedStatement psUpdate = conn.prepareStatement(updateSql);
-                psUpdate.setInt(1, novoVolume);
+                psUpdate.setFloat(1, novoVolume);
                 psUpdate.setString(2, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                 psUpdate.setInt(3, idHemocentro);
                 psUpdate.setInt(4, idTipoSanguineo);
@@ -43,7 +43,7 @@ public class BloodStockController {
                     PreparedStatement psInsert = conn.prepareStatement(insertSql);
                     psInsert.setInt(1, idHemocentro);
                     psInsert.setInt(2, idTipoSanguineo);
-                    psInsert.setInt(3, deltaVolume);
+                    psInsert.setFloat(3, deltaVolume);
                     psInsert.setString(4, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                     psInsert.executeUpdate();
                     psInsert.close();

@@ -11,8 +11,7 @@ import java.util.List;
 
 public class RegisterAddress extends JFrame {
     private JComboBox<String> cbUsuarios;
-    private JTextField tfRua, tfNumero, tfCidade, tfEstado;
-    private JTextField tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
+    private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
     private AddressController controller;
 
     public RegisterAddress() {
