@@ -221,4 +221,46 @@ public class DonationController {
 
         return idTipoSanguineo;
     }
+    
+    public List<String> listarDoacoesPorUsuario(int idUsuario) {
+        List<String> doacoes = new ArrayList<>();
+        try {
+            Connection conn = new ConnectionSQL().getConnection();
+            String sql = """
+                SELECT d.id_Doacao,
+                       ts.descricao AS tipo_Sanguineo,
+                       h.razao_Social AS hemocentro,
+                       d.status,
+                       d.volume,
+                       d.data_Hora
+                FROM doacao d
+                JOIN doador dd ON d.id_Doador = dd.id_Doador
+                JOIN tipo_Sanguineo ts ON dd.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
+                JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
+                WHERE dd.id_Usuario = ?
+            """;
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, idUsuario);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id_doacao");
+                String tipo = rs.getString("tipo_sanguineo");
+                String hemocentro = rs.getString("hemocentro");
+                String status = rs.getString("status");
+                int volume = rs.getInt("volume");
+                String dataHora = rs.getString("data_hora");
+
+                doacoes.add("[" + id + "] " + tipo + " | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return doacoes;
+    }
 }

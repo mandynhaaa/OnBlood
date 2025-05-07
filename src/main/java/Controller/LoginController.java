@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import Main.User;
+import View.MainMenu;
 
 public class LoginController implements ActionListener {
 	
@@ -27,12 +28,15 @@ public class LoginController implements ActionListener {
 	}
 	
 	public void executeLogin() {
-		String username = tf_username.getText();
-		String password = tf_password.getText();
-		
-		User user = new User(username, password);
-		if (!user.login()) {
-			JOptionPane.showMessageDialog(null, "Usuário ou senha incorreta", "Erro", JOptionPane.ERROR_MESSAGE);
-		}
+	    String username = tf_username.getText();
+	    String password = tf_password.getText();
+	    
+	    User tempUser = new User(username, password);
+	    if (!tempUser.login()) {
+	        JOptionPane.showMessageDialog(null, "Usuário ou senha incorreta", "Erro", JOptionPane.ERROR_MESSAGE);
+	    } else {
+	        User loggedUser = tempUser.searchByName(); // Recupera os dados completos
+	        new MainMenu(loggedUser).setVisible(true); // <-- redireciona para o menu principal
+	    }
 	}
 }
