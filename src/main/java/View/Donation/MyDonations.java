@@ -43,10 +43,5 @@ public class MyDonations extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Simulação de login
-        //int idUsuarioLogado = 5; // Substitua pelo ID real
-        //SwingUtilities.invokeLater(() -> {
-        //    new MyDonations(idUsuarioLogado).setVisible(true);
-        //});
     }
 }

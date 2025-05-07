@@ -6,7 +6,8 @@ import java.awt.*;
 import java.util.List;
 
 public class ManagerDonation extends JFrame {
-    private JList<String> listDoacoes;
+    private static final BloodCenterDonations NULL = null;
+	private JList<String> listDoacoes;
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
     private DonationController controller;
@@ -42,7 +43,7 @@ public class ManagerDonation extends JFrame {
             String selecionado = listDoacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditDonation editor = new EditDonation(id, controller, this);
+                EditDonation editor = new EditDonation(id, controller, this, NULL);
                 editor.setVisible(true);
             }
         });

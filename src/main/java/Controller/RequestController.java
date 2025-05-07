@@ -136,6 +136,27 @@ public class RequestController {
             return -1;
         }
     }
+    
+    public String buscarHemocentroPorID(int id) {
+        try {
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT razao_social FROM hemocentro WHERE id_usuario = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            var rs = stmt.executeQuery();
+            String nome = "";
+            if (rs.next()) {
+            	nome = rs.getString("razao_social");
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            return nome;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
     public List<String> listarTiposSanguineos() {
         List<String> tipos = new ArrayList<>();
@@ -176,4 +197,66 @@ public class RequestController {
         }
         return hemocentros;
     }
+    
+    public List<String> listarSolicitacoesPorHemocentro(int idUsuario) {
+        List<String> solicitacoes = new ArrayList<>();
+        try {
+            Connection conn = new ConnectionSQL().getConnection();
+
+            String sqlHemocentro = "SELECT id_Hemocentro FROM hemocentro WHERE id_Usuario = ?";
+            PreparedStatement stmtHemocentro = conn.prepareStatement(sqlHemocentro);
+            stmtHemocentro.setInt(1, idUsuario);
+            ResultSet rsHemocentro = stmtHemocentro.executeQuery();
+
+            int idHemocentro = -1;
+            if (rsHemocentro.next()) {
+                idHemocentro = rsHemocentro.getInt("id_Hemocentro");
+            }
+
+            rsHemocentro.close();
+            stmtHemocentro.close();
+
+            if (idHemocentro == -1) {
+                conn.close();
+                return solicitacoes; // retorna vazio se não encontrar o hemocentro
+            }
+
+            String sql = """
+            	    SELECT d.id_Solicitacao,
+            	           d.status,
+            	           ts.descricao AS tipo_Sanguineo,
+            	           h.razao_Social AS hemocentro,
+            	           d.volume,
+            	           d.data_Hora
+            	    FROM solicitacao d
+            	    JOIN tipo_Sanguineo ts ON d.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
+            	    JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
+            	    WHERE d.id_Hemocentro = ?
+            	""";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, idHemocentro);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id_solicitacao");
+                String tipo = rs.getString("tipo_sanguineo");
+                String hemocentro = rs.getString("hemocentro");
+                String status = rs.getString("status");
+                int volume = rs.getInt("volume");
+                String dataHora = rs.getString("data_hora");
+
+                solicitacoes.add("[" + id + "] " + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return solicitacoes;
+    }
+    
+    
 }

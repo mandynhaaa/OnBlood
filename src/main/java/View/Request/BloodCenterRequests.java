@@ -1,20 +1,24 @@
 package View.Request;
 
 import javax.swing.*;
+import Controller.DonationController;
 import Controller.RequestController;
+
 import java.awt.*;
 import java.util.List;
 
-public class ManagerRequest extends JFrame {
-    private static final BloodCenterRequests NULL = null;
+public class BloodCenterRequests extends JFrame {
+    private static final ManagerRequest NULL = null;
 	private JList<String> listSolicitacoes;
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
     private RequestController controller;
+    private int idUsuario;
 
-    public ManagerRequest() {
+    public BloodCenterRequests(int idUsuario) {
+    	this.idUsuario = idUsuario;
         controller = new RequestController();
-        setTitle("Gerenciar Solicitações");
+        setTitle("Gerenciar Solicitacoes");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 450);
         setLocationRelativeTo(null);
@@ -26,14 +30,14 @@ public class ManagerRequest extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel panelBotoes = new JPanel();
-        btnAtualizar = new JButton("Atualizar");
-        btnNova = new JButton("Nova Solicitação");
         btnEditar = new JButton("Editar");
         btnExcluir = new JButton("Excluir");
-
+        btnNova = new JButton("Nova Solicitação");
+        btnAtualizar = new JButton("Atualizar");
+        
         panelBotoes.add(btnAtualizar);
         panelBotoes.add(btnNova);
-        panelBotoes.add(btnEditar);
+        panelBotoes.add(btnEditar);      
         panelBotoes.add(btnExcluir);
         add(panelBotoes, BorderLayout.SOUTH);
 
@@ -43,7 +47,7 @@ public class ManagerRequest extends JFrame {
             String selecionado = listSolicitacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditRequest editor = new EditRequest(id, controller, this, NULL);
+                EditRequest editor = new EditRequest(id, controller, NULL, this);
                 editor.setVisible(true);
             }
         });
@@ -64,20 +68,20 @@ public class ManagerRequest extends JFrame {
                 }
             }
         });
-
+        
         btnNova.addActionListener(e -> {
-            RegisterRequest telaCadastro = new RegisterRequest();
+        	BloodCenterRegisterRequest telaCadastro = new BloodCenterRegisterRequest(idUsuario);
             telaCadastro.setVisible(true);
         });
-
+        
         btnAtualizar.addActionListener(e -> carregarSolicitacoes());
     }
 
     void carregarSolicitacoes() {
         listModel.clear();
-        List<String> solicitacoes = controller.listarSolicitacoes();
-        for (String s : solicitacoes) {
-            listModel.addElement(s);
+        List<String> solicitacoes = controller.listarSolicitacoesPorHemocentro(idUsuario);
+        for (String d : solicitacoes) {
+            listModel.addElement(d);
         }
     }
 

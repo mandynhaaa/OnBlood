@@ -54,7 +54,7 @@ public class DonationController {
     private int buscarIdHemocentroPorNome(String nome) {
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE razao_Social = ?";
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE  razao_Social = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, nome);
             var rs = stmt.executeQuery();
@@ -72,11 +72,32 @@ public class DonationController {
         }
     }
     
+    public String buscarHemocentroPorID(int id) {
+        try {
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT razao_social FROM hemocentro WHERE id_usuario = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            var rs = stmt.executeQuery();
+            String nome = "";
+            if (rs.next()) {
+            	nome = rs.getString("razao_social");
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            return nome;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    
     public List<String> listarHemocentros() {
         List<String> hemocentros = new ArrayList<>();
         try {
         	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT razao_Social FROM hemocentro";
+            String sql = "SELECT razao_Social FROM hemocentro WHERE d.id_Hemocentro = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
@@ -253,6 +274,70 @@ public class DonationController {
                 String dataHora = rs.getString("data_hora");
 
                 doacoes.add("[" + id + "] " + tipo + " | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return doacoes;
+    }
+    
+    public List<String> listarDoacoesPorHemocentro(int idUsuario) {
+        List<String> doacoes = new ArrayList<>();
+        try {
+            Connection conn = new ConnectionSQL().getConnection();
+
+            String sqlHemocentro = "SELECT id_Hemocentro FROM hemocentro WHERE id_Usuario = ?";
+            PreparedStatement stmtHemocentro = conn.prepareStatement(sqlHemocentro);
+            stmtHemocentro.setInt(1, idUsuario);
+            ResultSet rsHemocentro = stmtHemocentro.executeQuery();
+
+            int idHemocentro = -1;
+            if (rsHemocentro.next()) {
+                idHemocentro = rsHemocentro.getInt("id_Hemocentro");
+            }
+
+            rsHemocentro.close();
+            stmtHemocentro.close();
+
+            if (idHemocentro == -1) {
+                conn.close();
+                return doacoes; // retorna vazio se não encontrar o hemocentro
+            }
+
+            String sql = """
+                SELECT d.id_Doacao,
+                       u.nome AS nome_Doador,
+                       ts.descricao AS tipo_Sanguineo,
+                       h.razao_Social AS hemocentro,
+                       d.status,
+                       d.volume,
+                       d.data_Hora
+                FROM doacao d
+                JOIN doador dd ON d.id_Doador = dd.id_Doador
+                JOIN usuario u ON dd.id_Usuario = u.id_Usuario
+                JOIN tipo_Sanguineo ts ON dd.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
+                JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
+                WHERE d.id_Hemocentro = ?
+            """;
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, idHemocentro);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id_doacao");
+                String nome = rs.getString("nome_doador");
+                String tipo = rs.getString("tipo_sanguineo");
+                String hemocentro = rs.getString("hemocentro");
+                String status = rs.getString("status");
+                int volume = rs.getInt("volume");
+                String dataHora = rs.getString("data_hora");
+
+                doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
             }
 
             rs.close();

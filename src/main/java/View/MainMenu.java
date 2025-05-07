@@ -3,7 +3,9 @@ package View;
 import javax.swing.*;
 import java.awt.*;
 import Main.User;
+import View.Donation.BloodCenterDonations;
 import View.Donation.MyDonations;
+import View.Request.BloodCenterRequests;
 
 public class MainMenu extends JFrame {
 
@@ -46,12 +48,12 @@ public class MainMenu extends JFrame {
 
         // HEMOCENTRO
         } else if (userTypeId == 3) {
-            addButton("Minhas Doações", e -> {
-                // abrir doações do hemocentro logado
-            });
+        	addButton("Minhas Doações", e -> {
+        	    new BloodCenterDonations(user.buscarIdPorNome(user.getName())).setVisible(true);
+        	});
 
             addButton("Minhas Solicitações", e -> {
-                // abrir solicitações do hemocentro
+            	 new BloodCenterRequests(user.buscarIdPorNome(user.getName())).setVisible(true);
             });
 
         // DOADOR

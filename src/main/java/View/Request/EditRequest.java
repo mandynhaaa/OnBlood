@@ -3,6 +3,7 @@ package View.Request;
 import javax.swing.*;
 import Connection.ConnectionSQL;
 import Controller.RequestController;
+import View.Donation.BloodCenterDonations;
 
 import java.awt.*;
 import java.sql.*;
@@ -16,7 +17,7 @@ public class EditRequest extends JFrame {
     private RequestController controller;
     private ManagerRequest parent;
 
-    public EditRequest(int idSolicitacao, RequestController controller, ManagerRequest parent) {
+    public EditRequest(int idSolicitacao, RequestController controller, ManagerRequest parent, BloodCenterRequests BloodCenterRequests) {
         this.idSolicitacao = idSolicitacao;
         this.controller = controller;
         this.parent = parent;

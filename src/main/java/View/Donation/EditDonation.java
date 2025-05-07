@@ -15,10 +15,10 @@ public class EditDonation extends JFrame {
     private DonationController controller;
     private ManagerDonation parent;
 
-    public EditDonation(int idDoacao, DonationController controller, ManagerDonation parent) {
+    public EditDonation(int idDoacao, DonationController controller, ManagerDonation managerDonation, BloodCenterDonations bloodCenterDonations) {
         this.idDoacao = idDoacao;
         this.controller = controller;
-        this.parent = parent;
+        this.parent = managerDonation;
 
         setTitle("Editar Doação");
         setSize(400, 250);
