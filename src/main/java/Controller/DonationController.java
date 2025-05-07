@@ -191,27 +191,6 @@ public class DonationController {
             ex.printStackTrace();
         }
     }
-
-    private int buscarIdHemocentroPorNome(String nome) {
-        try {
-        	Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE razao_Social = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, nome);
-            var rs = stmt.executeQuery();
-            int id = -1;
-            if (rs.next()) {
-                id = rs.getInt("id_Hemocentro");
-            }
-            rs.close();
-            stmt.close();
-            conn.close();
-            return id;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
     
     public BloodCenter buscarHemocentroPorIdUsuario(int id) {
         try {
@@ -260,11 +239,10 @@ public class DonationController {
         return doadores;
     }
     
-    public List<String> listarDoacoesHemocentro(int idUsuario) {
+    public List<String> listarDoacoesHemocentro(int idUsuario, String filtroStatus) {
         List<String> doacoes = new ArrayList<>();
-        try {
-        	Connection conn = new ConnectionSQL().getConnection();
-            String sql = """
+        try (Connection conn = new ConnectionSQL().getConnection()) {
+            StringBuilder sql = new StringBuilder("""
                 SELECT d.id_Doacao,
                        u.nome AS nome_Doador,
                        ts.descricao AS tipo_Sanguineo,
@@ -278,11 +256,22 @@ public class DonationController {
                 JOIN tipo_Sanguineo ts ON dd.id_Tipo_Sanguineo = ts.id_Tipo_Sanguineo
                 JOIN hemocentro h ON d.id_Hemocentro = h.id_Hemocentro
                 WHERE h.id_Usuario = ?
-            """;
+            """);
 
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            if (!filtroStatus.equalsIgnoreCase("Todos")) {
+                sql.append(" AND d.status = ?");
+            }
+
+            PreparedStatement stmt = conn.prepareStatement(sql.toString());
             stmt.setInt(1, idUsuario);
+
+            if (!filtroStatus.equalsIgnoreCase("Todos")) {
+                stmt.setString(2, filtroStatus);
+            }
+
             ResultSet rs = stmt.executeQuery();
+            DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
             while (rs.next()) {
                 int id = rs.getInt("id_doacao");
@@ -291,12 +280,7 @@ public class DonationController {
                 String hemocentro = rs.getString("hemocentro");
                 String status = rs.getString("status");
                 Float volume = rs.getFloat("volume");
-                String dataHora = rs.getString("data_hora");
-                
-                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
-                LocalDateTime dataHoraConvertida = LocalDateTime.parse(dataHora, formatoEntrada);
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(rs.getString("data_hora"), formatoEntrada);
                 String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
 
                 doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHoraFormatada);
@@ -304,7 +288,6 @@ public class DonationController {
 
             rs.close();
             stmt.close();
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -379,10 +362,11 @@ public class DonationController {
         return id_Hemocentro;
     }
     
-    public List<String> listarDoacoesPorUsuario(int idUsuario) {
+    public List<String> listarDoacoesPorUsuario(int idUsuario, String status, String hemocentroFiltro) {
         List<String> doacoes = new ArrayList<>();
         try {
             Connection conn = new ConnectionSQL().getConnection();
+            
             String sql = """
                 SELECT d.id_Doacao,
                        ts.descricao AS tipo_Sanguineo,
@@ -397,19 +381,36 @@ public class DonationController {
                 WHERE dd.id_Usuario = ?
             """;
 
+            if (status != null && !status.equalsIgnoreCase("Todos")) {
+                sql += " AND d.status = ?";
+            }
+
+            if (hemocentroFiltro != null && !hemocentroFiltro.equalsIgnoreCase("Todos")) {
+                sql += " AND h.razao_Social = ?";
+            }
+
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, idUsuario);
+            int index = 2;
+
+            if (status != null && !status.equalsIgnoreCase("Todos")) {
+                stmt.setString(index++, status);
+            }
+            if (hemocentroFiltro != null && !hemocentroFiltro.equalsIgnoreCase("Todos")) {
+                stmt.setString(index, hemocentroFiltro);
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 int id = rs.getInt("id_doacao");
                 String tipo = rs.getString("tipo_sanguineo");
                 String hemocentro = rs.getString("hemocentro");
-                String status = rs.getString("status");
+                String statusDoacao = rs.getString("status");
                 Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
 
-                doacoes.add("[" + id + "] " + tipo + " | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+                doacoes.add("[" + id + "] " + tipo + " | " + hemocentro + " | " + statusDoacao + " | " + volume + "mL | " + dataHora);
             }
 
             rs.close();
@@ -441,7 +442,7 @@ public class DonationController {
 
             if (idHemocentro == -1) {
                 conn.close();
-                return doacoes; // retorna vazio se não encontrar o hemocentro
+                return doacoes; 
             }
 
             String sql = """
@@ -483,5 +484,28 @@ public class DonationController {
             e.printStackTrace();
         }
         return doacoes;
+    }
+    
+    public List<String> listarHemocentros() {
+        List<String> hemocentros = new ArrayList<>();
+        try {
+            Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT razao_Social FROM hemocentro";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            hemocentros.add("Todos");
+
+            while (rs.next()) {
+                hemocentros.add(rs.getString("razao_Social"));
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return hemocentros;
     }
 }
