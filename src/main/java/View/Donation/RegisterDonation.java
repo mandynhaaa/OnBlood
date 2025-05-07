@@ -1,4 +1,4 @@
-package View;
+package View.Donation;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

@@ -13,11 +13,9 @@ import Connection.ConnectionSQL;
 import Main.Address;
 import Main.User;
 
-
-
 public class AddressController implements ActionListener {
 	
-	private int idAddress;
+	private int id_Address;
     private JTextField tf_street;
     private JTextField tf_number;
     private JTextField tf_city;
@@ -30,11 +28,11 @@ public class AddressController implements ActionListener {
     private JComboBox<String> cb_users;
 
     public AddressController(
-        int idAddress, JTextField street, JTextField number, JTextField city, JTextField state,
+        int id_Address, JTextField street, JTextField number, JTextField city, JTextField state,
         JTextField neighborhood, JTextField complement, JTextField cep,
         JTextField country, JTextField description, JComboBox<String> users
     ) {
-    	this.idAddress = idAddress;
+    	this.id_Address = id_Address;
         this.tf_street = street;
         this.tf_number = number;
         this.tf_city = city;
@@ -85,7 +83,7 @@ public class AddressController implements ActionListener {
     
     public void executeUpdate() {
     	try {
-            Address address = new Address(this.idAddress);
+            Address address = new Address(this.id_Address);
             address.setStreet(tf_street.getText());
             address.setNumber(Integer.parseInt(tf_number.getText()));
             address.setCity(tf_city.getText());
@@ -97,6 +95,7 @@ public class AddressController implements ActionListener {
             address.setDescription(tf_description.getText());
 
             address.update();
+            JOptionPane.showMessageDialog(null, "Endereço alterado com sucesso!");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -106,7 +105,7 @@ public class AddressController implements ActionListener {
         List<String> addresses = new ArrayList<>();
         try (Connection conn = new ConnectionSQL().getConnection()) {
             String sql = """
-                SELECT e.id_Endereco, u.nome, e.rua, e.numero, e.cidade, e.estado
+                SELECT e.id_Endereco, e.descricao, e.rua, e.numero, e.bairro, e.cidade, e.estado, e.cep
                 FROM endereco e
                 JOIN usuario u ON e.id_Usuario = u.id_Usuario
             """;
@@ -115,12 +114,14 @@ public class AddressController implements ActionListener {
 
             while (rs.next()) {
                 int id = rs.getInt("id_Endereco");
-                String userName = rs.getString("nome");
+                String description = rs.getString("descricao");
                 String street = rs.getString("rua");
                 String number = rs.getString("numero");
+                String neighborhood = rs.getString("bairro");
                 String city = rs.getString("cidade");
                 String state = rs.getString("estado");
-                addresses.add("[" + id + "] " + userName + ": " + street + ", " + number + " - " + city + "/" + state);
+                String cep = rs.getString("cep");
+                addresses.add("[" + id + "] " + description + ": " + street + " n° " + number + ", " + neighborhood + " - " + city + " / " + state + " - " + cep);
             }
 
             rs.close();
@@ -130,10 +131,11 @@ public class AddressController implements ActionListener {
         return addresses;
     }
 
-    public void deleteAddress() {
+    public void executeDelete() {
     	try {
-            Address address = new Address(this.idAddress);
+            Address address = new Address(this.id_Address);
             address.delete();
+            JOptionPane.showMessageDialog(null, "Endereço removido com sucesso!");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

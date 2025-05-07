@@ -37,8 +37,8 @@ CREATE TABLE endereco (
 CREATE TABLE telefone (
     id_Telefone INT PRIMARY KEY AUTO_INCREMENT,
     descricao VARCHAR(20),
-    ddd INT,
-    numero INT,
+    ddd VARCHAR(5),
+    numero VARCHAR(15),
 	id_Usuario INT,
     FOREIGN KEY (id_Usuario)
         REFERENCES usuario (id_Usuario)
@@ -126,3 +126,4 @@ INSERT INTO tipo_Sanguineo (id_Tipo_Sanguineo, descricao) VALUES
 (8, "O-");
 
 -- Registros de exemplo
+

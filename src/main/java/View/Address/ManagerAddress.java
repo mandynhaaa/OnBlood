@@ -1,11 +1,10 @@
-package View;
+package View.Address;
 
 import javax.swing.*;
 import Controller.AddressController;
+
 import java.awt.*;
 import java.util.List;
-
-import View.EditAddress;
 
 public class ManagerAddress extends JFrame {
     private JList<String> listEnderecos;
@@ -77,9 +76,10 @@ public class ManagerAddress extends JFrame {
                         null, null, null,
                         null, null, null
                     );
-                controller.deleteAddress();
+                controller.executeDelete();
             }
         }
+        carregarEnderecos();
     }
     
     private int extrairId(String texto) {

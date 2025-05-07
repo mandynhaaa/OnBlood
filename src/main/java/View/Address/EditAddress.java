@@ -1,4 +1,4 @@
-package View;
+package View.Address;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
@@ -12,8 +12,7 @@ import java.sql.*;
 import Connection.ConnectionSQL;
 
 public class EditAddress extends JFrame {
-    private JTextField tfRua, tfNumero, tfCidade, tfEstado;
-    private JTextField tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
+    private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
     private JButton btnSalvar, btnCancelar;
     private int idEndereco;
     private AddressController controller;

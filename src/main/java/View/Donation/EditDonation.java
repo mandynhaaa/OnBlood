@@ -1,27 +1,26 @@
-package View;
+package View.Donation;
 
 import javax.swing.*;
-import Connection.ConnectionSQL;
-import Controller.RequestController;
 
+import Connection.ConnectionSQL;
+import Controller.DonationController;
 import java.awt.*;
 import java.sql.*;
 
-public class EditRequest extends JFrame {
-
+public class EditDonation extends JFrame {
     private JComboBox<String> comboStatus;
     private JTextField txtVolume, txtDataHora;
     private JButton btnSalvar, btnCancelar;
-    private int idSolicitacao;
-    private RequestController controller;
-    private ManagerRequest parent;
+    private int idDoacao;
+    private DonationController controller;
+    private ManagerDonation parent;
 
-    public EditRequest(int idSolicitacao, RequestController controller, ManagerRequest parent) {
-        this.idSolicitacao = idSolicitacao;
+    public EditDonation(int idDoacao, DonationController controller, ManagerDonation parent) {
+        this.idDoacao = idDoacao;
         this.controller = controller;
         this.parent = parent;
 
-        setTitle("Editar Solicitação");
+        setTitle("Editar Doação");
         setSize(400, 250);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -36,7 +35,7 @@ public class EditRequest extends JFrame {
         gbc.gridy = 0;
         add(lblStatus, gbc);
 
-        comboStatus = new JComboBox<>(new String[]{"Pendente", "Realizada", "Cancelada"});
+        comboStatus = new JComboBox<>(new String[] {"Pendente", "Concluído", "Cancelado"});
         gbc.gridx = 1;
         gbc.gridy = 0;
         add(comboStatus, gbc);
@@ -79,10 +78,10 @@ public class EditRequest extends JFrame {
 
     private void carregarDados() {
         try {
-            Connection conn = new ConnectionSQL().getConnection();
-            String sql = "SELECT status, volume, data_hora FROM Solicitacao WHERE id_solicitacao = ?";
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT status, volume, data_hora FROM Doacao WHERE id_doacao = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idSolicitacao);
+            stmt.setInt(1, idDoacao);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -96,7 +95,7 @@ public class EditRequest extends JFrame {
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados da solicitação.");
+            JOptionPane.showMessageDialog(this, "Erro ao carregar dados da doação.");
         }
     }
 
@@ -106,13 +105,13 @@ public class EditRequest extends JFrame {
             int volume = Integer.parseInt(txtVolume.getText());
             String dataHora = txtDataHora.getText();
 
-            boolean sucesso = controller.atualizarSolicitacao(idSolicitacao, status, volume, dataHora);
+            boolean sucesso = controller.atualizarDoacao(idDoacao, status, volume, dataHora);
             if (sucesso) {
-                JOptionPane.showMessageDialog(this, "Solicitação atualizada com sucesso.");
-                parent.carregarSolicitacoes();
+                JOptionPane.showMessageDialog(this, "Doação atualizada com sucesso.");
+                parent.carregarDoacoes();
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Erro ao atualizar solicitação.");
+                JOptionPane.showMessageDialog(this, "Erro ao atualizar doação.");
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Volume inválido.");

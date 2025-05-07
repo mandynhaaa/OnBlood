@@ -1,82 +1,82 @@
-package View;
+package View.Request;
 
 import javax.swing.*;
-import Controller.DonationController;
+import Controller.RequestController;
 import java.awt.*;
 import java.util.List;
 
-public class ManagerDonation extends JFrame {
-    private JList<String> listDoacoes;
+public class ManagerRequest extends JFrame {
+    private JList<String> listSolicitacoes;
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
-    private DonationController controller;
+    private RequestController controller;
 
-    public ManagerDonation() {
-        controller = new DonationController();
-        setTitle("Gerenciar Doações");
+    public ManagerRequest() {
+        controller = new RequestController();
+        setTitle("Gerenciar Solicitações");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 450);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         listModel = new DefaultListModel<>();
-        listDoacoes = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(listDoacoes);
+        listSolicitacoes = new JList<>(listModel);
+        JScrollPane scrollPane = new JScrollPane(listSolicitacoes);
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel panelBotoes = new JPanel();
+        btnAtualizar = new JButton("Atualizar");
+        btnNova = new JButton("Nova Solicitação");
         btnEditar = new JButton("Editar");
         btnExcluir = new JButton("Excluir");
-        btnNova = new JButton("Nova Doação");
-        btnAtualizar = new JButton("Atualizar");
-        
+
         panelBotoes.add(btnAtualizar);
         panelBotoes.add(btnNova);
-        panelBotoes.add(btnEditar);      
+        panelBotoes.add(btnEditar);
         panelBotoes.add(btnExcluir);
         add(panelBotoes, BorderLayout.SOUTH);
 
-        carregarDoacoes();
+        carregarSolicitacoes();
 
         btnEditar.addActionListener(e -> {
-            String selecionado = listDoacoes.getSelectedValue();
+            String selecionado = listSolicitacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditDonation editor = new EditDonation(id, controller, this);
+                EditRequest editor = new EditRequest(id, controller, this);
                 editor.setVisible(true);
             }
         });
 
         btnExcluir.addActionListener(e -> {
-            String selecionado = listDoacoes.getSelectedValue();
+            String selecionado = listSolicitacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
                 int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
                 if (confirm == JOptionPane.YES_OPTION) {
-                    boolean sucesso = controller.excluirDoacao(id);
+                    boolean sucesso = controller.excluirSolicitacao(id);
                     if (sucesso) {
-                        JOptionPane.showMessageDialog(this, "Doação excluída.");
-                        carregarDoacoes();
+                        JOptionPane.showMessageDialog(this, "Solicitação excluída.");
+                        carregarSolicitacoes();
                     } else {
                         JOptionPane.showMessageDialog(this, "Erro ao excluir.");
                     }
                 }
             }
         });
-        
+
         btnNova.addActionListener(e -> {
-            RegisterDonation telaCadastro = new RegisterDonation();
+            RegisterRequest telaCadastro = new RegisterRequest();
             telaCadastro.setVisible(true);
         });
-        
-        btnAtualizar.addActionListener(e -> carregarDoacoes());
+
+        btnAtualizar.addActionListener(e -> carregarSolicitacoes());
     }
 
-    void carregarDoacoes() {
+    void carregarSolicitacoes() {
         listModel.clear();
-        List<String> doacoes = controller.listarDoacoes();
-        for (String d : doacoes) {
-            listModel.addElement(d);
+        List<String> solicitacoes = controller.listarSolicitacoes();
+        for (String s : solicitacoes) {
+            listModel.addElement(s);
         }
     }
 
@@ -86,7 +86,7 @@ public class ManagerDonation extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ManagerDonation().setVisible(true);
+            new ManagerRequest().setVisible(true);
         });
     }
 }

@@ -1,4 +1,4 @@
-package View;
+package View.Address;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;

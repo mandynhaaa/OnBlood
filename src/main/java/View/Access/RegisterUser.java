@@ -1,4 +1,4 @@
-package View;
+package View.Access;
 
 import java.awt.EventQueue;
 import javax.swing.*;
