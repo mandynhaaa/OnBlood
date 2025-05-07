@@ -140,17 +140,15 @@ public class User extends BaseModel {
 	    String[] columns = result[0];
 	    String[] values = result[1];
 
-	    Map<String, String> data = new HashMap<>();
+	    int idUser = 0;
+	    
 	    for (int i = 0; i < columns.length; i++) {
-	    	if (columns[i] == "id_Usuario") {
-	    		data.put("id", values[i]);
-	    	} else {	    		
-	    		data.put(columns[i], values[i]);
+	    	if ("id_Usuario".equals(columns[i])) {
+	    	    idUser = Integer.parseInt(values[i]);
 	    	}
 	    }
 
-	    User user = new User(0);
-	    user.populate(data);
+	    User user = new User(idUser);
 	    return user;
 	}
 	
