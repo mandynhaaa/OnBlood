@@ -1,7 +1,11 @@
 package View;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+
 import Controller.AddressController;
+import Standard.OnlyNumbersDocumentFilter;
+
 import java.awt.*;
 import java.sql.*;
 
@@ -9,80 +13,81 @@ import Connection.ConnectionSQL;
 
 public class EditAddress extends JFrame {
     private JTextField tfRua, tfNumero, tfCidade, tfEstado;
+    private JTextField tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
     private JButton btnSalvar, btnCancelar;
     private int idEndereco;
     private AddressController controller;
     private ManagerAddress parent;
 
-    public EditAddress(int idEndereco, AddressController controller, ManagerAddress parent) {
+    public EditAddress(int idEndereco, ManagerAddress parent) {
         this.idEndereco = idEndereco;
-        this.controller = controller;
         this.parent = parent;
 
         setTitle("Editar Endereço");
-        setSize(400, 300);
+        setSize(450, 520);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(null);
 
-        JLabel lblRua = new JLabel("Rua:");
-        lblRua.setBounds(30, 30, 100, 20);
-        add(lblRua);
-
-        tfRua = new JTextField();
-        tfRua.setBounds(130, 30, 200, 22);
-        add(tfRua);
-
-        JLabel lblNumero = new JLabel("Número:");
-        lblNumero.setBounds(30, 70, 100, 20);
-        add(lblNumero);
-
-        tfNumero = new JTextField();
-        tfNumero.setBounds(130, 70, 200, 22);
-        add(tfNumero);
-
-        JLabel lblCidade = new JLabel("Cidade:");
-        lblCidade.setBounds(30, 110, 100, 20);
-        add(lblCidade);
-
-        tfCidade = new JTextField();
-        tfCidade.setBounds(130, 110, 200, 22);
-        add(tfCidade);
-
-        JLabel lblEstado = new JLabel("Estado:");
-        lblEstado.setBounds(30, 150, 100, 20);
-        add(lblEstado);
-
-        tfEstado = new JTextField();
-        tfEstado.setBounds(130, 150, 200, 22);
-        add(tfEstado);
+        int y = 30;
+        tfDescricao = createField("Descrição:", y);
+        tfCep = createField("CEP:", y += 40);
+        tfPais = createField("País:", y += 40);
+        tfEstado = createField("Estado:", y += 40);
+        tfCidade = createField("Cidade:", y += 40);
+        tfBairro = createField("Bairro:", y += 40);
+        tfRua = createField("Rua:", y += 40);
+        tfNumero = createField("Número:", y += 40);
+        tfComplemento = createField("Complemento:", y += 40);
+        
+        ((AbstractDocument) tfNumero.getDocument()).setDocumentFilter(new OnlyNumbersDocumentFilter());
 
         btnSalvar = new JButton("Salvar");
-        btnSalvar.setBounds(80, 200, 100, 25);
+        btnSalvar.setBounds(100, y + 50, 100, 25);
         add(btnSalvar);
 
         btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(200, 200, 100, 25);
+        btnCancelar.setBounds(220, y + 50, 100, 25);
         add(btnCancelar);
 
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
+        controller = new AddressController(
+        	this.idEndereco, tfRua, tfNumero, tfCidade, tfEstado,
+        	tfBairro, tfComplemento, tfCep, tfPais, tfDescricao, null
+        );
+
         carregarDados();
+    }
+
+    private JTextField createField(String label, int y) {
+        JLabel lbl = new JLabel(label);
+        lbl.setBounds(30, y, 100, 20);
+        add(lbl);
+        JTextField tf = new JTextField();
+        tf.setBounds(130, y, 250, 22);
+        add(tf);
+        return tf;
     }
 
     private void carregarDados() {
         try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT rua, numero, cidade, estado FROM endereco WHERE id_Endereco = ?";
+            String sql = "SELECT descricao, cep, pais, estado, cidade, bairro, rua, numero, complemento FROM endereco WHERE id_Endereco = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, idEndereco);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                tfDescricao.setText(rs.getString("descricao"));
+                tfCep.setText(rs.getString("cep"));
+                tfPais.setText(rs.getString("pais"));
+                tfEstado.setText(rs.getString("estado"));
+                tfCidade.setText(rs.getString("cidade"));
+                tfBairro.setText(rs.getString("bairro"));
                 tfRua.setText(rs.getString("rua"));
                 tfNumero.setText(rs.getString("numero"));
-                tfCidade.setText(rs.getString("cidade"));
-                tfEstado.setText(rs.getString("estado"));
+                tfComplemento.setText(rs.getString("complemento"));
             }
 
             rs.close();
@@ -92,28 +97,16 @@ public class EditAddress extends JFrame {
             JOptionPane.showMessageDialog(this, "Erro ao carregar dados do endereço.");
         }
     }
-
+    
     private void salvar() {
-        String rua = tfRua.getText();
-        String numero = tfNumero.getText();
-        String cidade = tfCidade.getText();
-        String estado = tfEstado.getText();
-
-        boolean sucesso = controller.atualizarEndereco(idEndereco, rua, numero, cidade, estado);
-        if (sucesso) {
-            JOptionPane.showMessageDialog(this, "Endereço atualizado com sucesso.");
-            parent.carregarEnderecos();
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Erro ao atualizar endereço.");
-        }
+        controller.executeUpdate();
+        dispose();
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            AddressController ctrl = new AddressController();
             ManagerAddress parent = new ManagerAddress();
-            EditAddress editor = new EditAddress(1, ctrl, parent);
+            EditAddress editor = new EditAddress(1, parent);
             editor.setVisible(true);
         });
     }

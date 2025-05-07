@@ -1,31 +1,109 @@
 package Controller;
 
-import java.sql.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.*;
+import java.sql.*;
+
 import Connection.ConnectionSQL;
+import Main.Address;
+import Main.User;
 
-public class AddressController {
 
-    public boolean cadastrarEndereco(int idUsuario, String rua, String numero, String cidade, String estado) {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "INSERT INTO endereco (id_Usuario, rua, numero, cidade, estado) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idUsuario);
-            stmt.setString(2, rua);
-            stmt.setString(3, numero);
-            stmt.setString(4, cidade);
-            stmt.setString(5, estado);
-            return stmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+
+public class AddressController implements ActionListener {
+	
+	private int idAddress;
+    private JTextField tf_street;
+    private JTextField tf_number;
+    private JTextField tf_city;
+    private JTextField tf_state;
+    private JTextField tf_neighborhood;
+    private JTextField tf_complement;
+    private JTextField tf_cep;
+    private JTextField tf_country;
+    private JTextField tf_description;
+    private JComboBox<String> cb_users;
+
+    public AddressController(
+        int idAddress, JTextField street, JTextField number, JTextField city, JTextField state,
+        JTextField neighborhood, JTextField complement, JTextField cep,
+        JTextField country, JTextField description, JComboBox<String> users
+    ) {
+    	this.idAddress = idAddress;
+        this.tf_street = street;
+        this.tf_number = number;
+        this.tf_city = city;
+        this.tf_state = state;
+        this.tf_neighborhood = neighborhood;
+        this.tf_complement = complement;
+        this.tf_cep = cep;
+        this.tf_country = country;
+        this.tf_description = description;
+        this.cb_users = users;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if ("Adicionar".equals(e.getActionCommand())) {
+            executeRegister();
         }
     }
 
-    public List<String> listarEnderecos() {
-        List<String> enderecos = new ArrayList<>();
+    public void executeRegister() {
+        try {
+            int userId = Integer.parseInt(cb_users.getSelectedItem().toString().replaceAll("[^0-9]", ""));
+            
+            User user = new User(userId);
+            
+            Address address = new Address(
+            	tf_description.getText(),
+            	tf_cep.getText(),
+            	tf_country.getText(),
+            	tf_state.getText(),
+            	tf_city.getText(),
+            	tf_neighborhood.getText(),
+                tf_street.getText(),
+                Integer.parseInt(tf_number.getText()),
+                tf_complement.getText(),
+                user
+            );
+
+            if (address.create() > 0) {
+                JOptionPane.showMessageDialog(null, "Endereço adicionado com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar o endereço.");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+    }
+    
+    public void executeUpdate() {
+    	try {
+            Address address = new Address(this.idAddress);
+            address.setStreet(tf_street.getText());
+            address.setNumber(Integer.parseInt(tf_number.getText()));
+            address.setCity(tf_city.getText());
+            address.setState(tf_state.getText());
+            address.setNeighborhood(tf_neighborhood.getText());
+            address.setComplement(tf_complement.getText());
+            address.setCep(tf_cep.getText());
+            address.setCountry(tf_country.getText());
+            address.setDescription(tf_description.getText());
+
+            address.update();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public List<String> listAddresses() {
+        List<String> addresses = new ArrayList<>();
         try (Connection conn = new ConnectionSQL().getConnection()) {
             String sql = """
                 SELECT e.id_Endereco, u.nome, e.rua, e.numero, e.cidade, e.estado
@@ -37,35 +115,32 @@ public class AddressController {
 
             while (rs.next()) {
                 int id = rs.getInt("id_Endereco");
-                String nome = rs.getString("nome");
-                String rua = rs.getString("rua");
-                String numero = rs.getString("numero");
-                String cidade = rs.getString("cidade");
-                String estado = rs.getString("estado");
-                enderecos.add("[" + id + "] " + nome + ": " + rua + ", " + numero + " - " + cidade + "/" + estado);
+                String userName = rs.getString("nome");
+                String street = rs.getString("rua");
+                String number = rs.getString("numero");
+                String city = rs.getString("cidade");
+                String state = rs.getString("estado");
+                addresses.add("[" + id + "] " + userName + ": " + street + ", " + number + " - " + city + "/" + state);
             }
 
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return enderecos;
+        return addresses;
     }
 
-    public boolean excluirEndereco(int idEndereco) {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "DELETE FROM endereco WHERE id_Endereco = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idEndereco);
-            return stmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    public void deleteAddress() {
+    	try {
+            Address address = new Address(this.idAddress);
+            address.delete();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
-    public List<String> listarUsuarios() {
-        List<String> usuarios = new ArrayList<>();
+    public List<String> listUsers() {
+        List<String> users = new ArrayList<>();
         try (Connection conn = new ConnectionSQL().getConnection()) {
             String sql = "SELECT id_Usuario, nome FROM usuario";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -73,31 +148,15 @@ public class AddressController {
 
             while (rs.next()) {
                 int id = rs.getInt("id_Usuario");
-                String nome = rs.getString("nome");
-                usuarios.add("[" + id + "] " + nome);
+                String name = rs.getString("nome");
+                users.add("[" + id + "] " + name);
             }
 
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return usuarios;
-    }
-    
-    public boolean atualizarEndereco(int idEndereco, String rua, String numero, String cidade, String estado) {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "UPDATE endereco SET rua = ?, numero = ?, cidade = ?, estado = ? WHERE id_Endereco = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, rua);
-            stmt.setString(2, numero);
-            stmt.setString(3, cidade);
-            stmt.setString(4, estado);
-            stmt.setInt(5, idEndereco);
-            return stmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        return users;
     }
 
 }

@@ -15,7 +15,6 @@ public class ManagerAddress extends JFrame {
 
 
     public ManagerAddress() {
-        controller = new AddressController();
         setTitle("Gerenciar Endereços");
         setSize(600, 400);
         setLocationRelativeTo(null);
@@ -33,7 +32,6 @@ public class ManagerAddress extends JFrame {
         btnEditar = new JButton("Editar");
         btnExcluir = new JButton("Excluir");
 
-
         panelBotoes.add(btnAtualizar);
         panelBotoes.add(btnNovo);
         panelBotoes.add(btnEditar);
@@ -47,7 +45,7 @@ public class ManagerAddress extends JFrame {
             String selecionado = listEnderecos.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditAddress editor = new EditAddress(id, controller, this);
+                EditAddress editor = new EditAddress(id, this);
                 editor.setVisible(true);
             }
         });
@@ -57,7 +55,12 @@ public class ManagerAddress extends JFrame {
 
     public void carregarEnderecos() {
         listModel.clear();
-        List<String> enderecos = controller.listarEnderecos();
+        controller = new AddressController(
+        		0, null, null, null, null,
+                null, null, null,
+                null, null, null
+            );
+        List<String> enderecos = controller.listAddresses();
         for (String e : enderecos) {
             listModel.addElement(e);
         }
@@ -67,14 +70,14 @@ public class ManagerAddress extends JFrame {
         String selecionado = listEnderecos.getSelectedValue();
         if (selecionado != null) {
             int id = Integer.parseInt(selecionado.substring(1, selecionado.indexOf("]")));
-            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
+            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                if (controller.excluirEndereco(id)) {
-                    JOptionPane.showMessageDialog(this, "Endereço excluído.");
-                    carregarEnderecos();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Erro ao excluir.");
-                }
+                controller = new AddressController(id,
+                        null, null, null, null,
+                        null, null, null,
+                        null, null, null
+                    );
+                controller.deleteAddress();
             }
         }
     }

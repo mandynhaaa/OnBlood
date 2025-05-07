@@ -128,6 +128,7 @@ public class Address extends BaseModel {
         data.put("rua", this.street);
         data.put("numero", String.valueOf(this.number));
         data.put("complemento", this.complement);
+        data.put("id_Usuario", String.valueOf(this.user.getId()));
         return data;
     }	
     
@@ -142,5 +143,6 @@ public class Address extends BaseModel {
         this.street = data.getOrDefault("rua", null);
         this.number = data.get("numero") != null ? Integer.parseInt(data.get("numero")) : 0;
         this.complement = data.getOrDefault("complemento", null);
+        this.user = new User(data.get("id_Usuario") != null ? Integer.parseInt(data.get("id_Usuario")) : 0);
     }
 }
