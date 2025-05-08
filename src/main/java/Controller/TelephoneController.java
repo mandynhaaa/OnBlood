@@ -16,39 +16,30 @@ import Connection.ConnectionSQL;
 import Main.Telephone;
 import Main.User;
 
-public class TelephoneController implements ActionListener {
+public class TelephoneController {
 	
 	private int id_Telephone;
+	private int id_Usuario;
     private JTextField tf_number;
     private JTextField tf_Ddd;
     private JTextField tf_description;
-    private JComboBox<String> cb_users;
 
-    public TelephoneController(int id_Telephone, JTextField tf_description, JTextField tf_Ddd, JTextField tf_number, JComboBox<String> cb_users) {
+    public TelephoneController(int id_Telephone, int id_Usuario, JTextField tf_description, JTextField tf_Ddd, JTextField tf_number) {
     	this.id_Telephone = id_Telephone;
+    	this.id_Usuario = id_Usuario;
     	this.tf_description = tf_description;
         this.tf_Ddd = tf_Ddd;
         this.tf_number = tf_number;
-        this.cb_users = cb_users;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if ("Adicionar".equals(e.getActionCommand())) {
-            executeRegister();
-        }
     }
 
     public void executeRegister() {
         try {
-            int userId = Integer.parseInt(cb_users.getSelectedItem().toString().replaceAll("[^0-9]", ""));
-            
             if (tf_number.getText().isEmpty()) {
             	JOptionPane.showMessageDialog(null, "O número não pode estar vazio.");
             	return;
             }
             
-            User user = new User(userId);
+            User user = new User(id_Usuario);
             
             Telephone phone = new Telephone(
             	tf_description.getText(),
@@ -115,26 +106,6 @@ public class TelephoneController implements ActionListener {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    public List<String> listUsers() {
-        List<String> users = new ArrayList<>();
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT id_Usuario, nome FROM usuario";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id_Usuario");
-                String name = rs.getString("nome");
-                users.add("[" + id + "] " + name);
-            }
-
-            rs.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return users;
     }
 
 }

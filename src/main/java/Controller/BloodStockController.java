@@ -5,74 +5,97 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import Connection.ConnectionSQL;
+import Main.BloodCenter;
 
 public class BloodStockController {
+	private int id_Usuario;
+	
+	public BloodStockController(int id_Usuario) {
+		this.id_Usuario = id_Usuario;
+	}
+	
+	public BloodStockController() {
+	}
 
-    public static void atualizarEstoquePorDoacao(int idHemocentro, int idTipoSanguineo, Float volume) {
-        atualizarEstoque(idHemocentro, idTipoSanguineo, volume);
-    }
+	public static void atualizarEstoque(int idHemocentro, int idTipoSanguineo) {
+	    try (Connection conn = new ConnectionSQL().getConnection()) {
 
-    public void atualizarEstoquePorSolicitacao(int idHemocentro, int idTipoSanguineo, Float volume) {
-        atualizarEstoque(idHemocentro, idTipoSanguineo, -volume);
-    }
+	        String sqlDoacoes = """
+	            SELECT SUM(d.volume) AS total_doado
+	            FROM doacao d
+	            INNER JOIN doador dr ON dr.id_Doador = d.id_Doador
+	            WHERE d.id_Hemocentro = ? AND dr.id_Tipo_Sanguineo = ? AND d.status = "Realizada"
+	        """;
+	        PreparedStatement psDoacoes = conn.prepareStatement(sqlDoacoes);
+	        psDoacoes.setInt(1, idHemocentro);
+	        psDoacoes.setInt(2, idTipoSanguineo);
+	        ResultSet rsDoacoes = psDoacoes.executeQuery();
 
-    private static void atualizarEstoque(int idHemocentro, int idTipoSanguineo, Float deltaVolume) {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String totalSql = "SELECT SUM(volume) as total FROM doacao "
-            		+ "INNER JOIN doador ON doador.id_Doador = doacao.id_Doador "
-            		+ "WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
-            PreparedStatement psTotal = conn.prepareStatement(totalSql);
-            psTotal.setInt(1, idHemocentro);
-            psTotal.setInt(2, idTipoSanguineo);
-            ResultSet rsTotal = psTotal.executeQuery();
+	        float totalDoado = 0f;
+	        if (rsDoacoes.next()) {
+	            totalDoado = rsDoacoes.getFloat("total_doado");
+	        }
+	        rsDoacoes.close();
+	        psDoacoes.close();
 
-            float volumeTotal = 0f;
-            if (rsTotal.next()) {
-                volumeTotal = rsTotal.getFloat("total");
-            }
+	        String sqlSolicitacoes = """
+	            SELECT SUM(s.volume) AS total_solicitado
+	            FROM solicitacao s
+	            WHERE s.id_Hemocentro = ? AND s.id_Tipo_Sanguineo = ? AND s.status = "Realizada"
+	        """;
+	        PreparedStatement psSolicitacoes = conn.prepareStatement(sqlSolicitacoes);
+	        psSolicitacoes.setInt(1, idHemocentro);
+	        psSolicitacoes.setInt(2, idTipoSanguineo);
+	        ResultSet rsSolicitacoes = psSolicitacoes.executeQuery();
 
-            rsTotal.close();
-            psTotal.close();
+	        float totalSolicitado = 0f;
+	        if (rsSolicitacoes.next()) {
+	            totalSolicitado = rsSolicitacoes.getFloat("total_solicitado");
+	        }
+	        rsSolicitacoes.close();
+	        psSolicitacoes.close();
 
-            String selectSql = "SELECT id_Estoque FROM estoque WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
-            PreparedStatement psSelect = conn.prepareStatement(selectSql);
-            psSelect.setInt(1, idHemocentro);
-            psSelect.setInt(2, idTipoSanguineo);
-            ResultSet rs = psSelect.executeQuery();
+	        float volumeFinal = totalDoado - totalSolicitado;
+	        if (volumeFinal < 0) volumeFinal = 0;
 
-            String dataAtual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+	        String dataAtual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-            if (rs.next()) {
-                String updateSql = "UPDATE estoque SET volume = ?, data_Atualizacao = ? WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
-                PreparedStatement psUpdate = conn.prepareStatement(updateSql);
-                psUpdate.setFloat(1, volumeTotal);
-                psUpdate.setString(2, dataAtual);
-                psUpdate.setInt(3, idHemocentro);
-                psUpdate.setInt(4, idTipoSanguineo);
-                psUpdate.executeUpdate();
-                psUpdate.close();
-            } else {
-                if (volumeTotal > 0) {
-                    String insertSql = "INSERT INTO estoque (id_Hemocentro, id_Tipo_Sanguineo, volume, data_Atualizacao) VALUES (?, ?, ?, ?)";
-                    PreparedStatement psInsert = conn.prepareStatement(insertSql);
-                    psInsert.setInt(1, idHemocentro);
-                    psInsert.setInt(2, idTipoSanguineo);
-                    psInsert.setFloat(3, volumeTotal);
-                    psInsert.setString(4, dataAtual);
-                    psInsert.executeUpdate();
-                    psInsert.close();
-                }
-            }
+	        String selectSql = "SELECT id_Estoque FROM estoque WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
+	        PreparedStatement psSelect = conn.prepareStatement(selectSql);
+	        psSelect.setInt(1, idHemocentro);
+	        psSelect.setInt(2, idTipoSanguineo);
+	        ResultSet rs = psSelect.executeQuery();
 
-            rs.close();
-            psSelect.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+	        if (rs.next()) {
+	            String updateSql = "UPDATE estoque SET volume = ?, data_Atualizacao = ? WHERE id_Hemocentro = ? AND id_Tipo_Sanguineo = ?";
+	            PreparedStatement psUpdate = conn.prepareStatement(updateSql);
+	            psUpdate.setFloat(1, volumeFinal);
+	            psUpdate.setString(2, dataAtual);
+	            psUpdate.setInt(3, idHemocentro);
+	            psUpdate.setInt(4, idTipoSanguineo);
+	            psUpdate.executeUpdate();
+	            psUpdate.close();
+	        } else if (volumeFinal > 0) {
+	            String insertSql = "INSERT INTO estoque (id_Hemocentro, id_Tipo_Sanguineo, volume, data_Atualizacao) VALUES (?, ?, ?, ?)";
+	            PreparedStatement psInsert = conn.prepareStatement(insertSql);
+	            psInsert.setInt(1, idHemocentro);
+	            psInsert.setInt(2, idTipoSanguineo);
+	            psInsert.setFloat(3, volumeFinal);
+	            psInsert.setString(4, dataAtual);
+	            psInsert.executeUpdate();
+	            psInsert.close();
+	        }
 
+	        rs.close();
+	        psSelect.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
 
-    public ResultSet listarEstoque() {
+    public ResultSet listarEstoqueHemocentro() {
+    	BloodCenter bloodCenter = buscarHemocentroPorIdUsuario(id_Usuario);
+    	
         try {
             Connection conn = new ConnectionSQL().getConnection();
             String sql = """
@@ -81,16 +104,43 @@ public class BloodStockController {
                     ts.descricao AS tipo_sanguineo, 
                     h.razao_social 
                 FROM 
-                    Estoque e
+                    estoque e
                 JOIN 
-                    Tipo_Sanguineo ts ON e.id_tipo_sanguineo = ts.id_tipo_sanguineo
+                    tipo_Sanguineo ts ON e.id_tipo_sanguineo = ts.id_tipo_sanguineo
                 JOIN 
-                    Hemocentro h ON e.id_hemocentro = h.id_hemocentro
+                    hemocentro h ON e.id_hemocentro = h.id_hemocentro
+                WHERE h.id_Hemocentro = ?
             """;
-            return conn.prepareStatement(sql).executeQuery();
+            
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, bloodCenter.getId());
+            return stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    
+    public BloodCenter buscarHemocentroPorIdUsuario(int id) {
+        try {
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE id_Usuario = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            var rs = stmt.executeQuery();
+            
+            int id_Hemocentro = 0;
+            if (rs.next()) {
+            	id_Hemocentro = Integer.parseInt(rs.getString("id_Hemocentro"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return new BloodCenter(id_Hemocentro);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new BloodCenter(0);
         }
     }
 }

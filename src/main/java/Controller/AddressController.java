@@ -16,6 +16,7 @@ import Main.User;
 public class AddressController {
 	
 	private int id_Address;
+	private int id_Usuario;
     private JTextField tf_street;
     private JTextField tf_number;
     private JTextField tf_city;
@@ -25,14 +26,14 @@ public class AddressController {
     private JTextField tf_cep;
     private JTextField tf_country;
     private JTextField tf_description;
-    private JComboBox<String> cb_users;
 
     public AddressController(
-        int id_Address, JTextField street, JTextField number, JTextField city, JTextField state,
+        int id_Address, int id_Usuario, JTextField street, JTextField number, JTextField city, JTextField state,
         JTextField neighborhood, JTextField complement, JTextField cep,
-        JTextField country, JTextField description, JComboBox<String> users
+        JTextField country, JTextField description
     ) {
     	this.id_Address = id_Address;
+    	this.id_Usuario = id_Usuario;
         this.tf_street = street;
         this.tf_number = number;
         this.tf_city = city;
@@ -42,14 +43,11 @@ public class AddressController {
         this.tf_cep = cep;
         this.tf_country = country;
         this.tf_description = description;
-        this.cb_users = users;
     }
 
     public void executeRegister() {
         try {
-            int userId = Integer.parseInt(cb_users.getSelectedItem().toString().replaceAll("[^0-9]", ""));
-            
-            User user = new User(userId);
+            User user = new User(id_Usuario);
             
             Address address = new Address(
             	tf_description.getText(),
@@ -132,26 +130,6 @@ public class AddressController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    public List<String> listUsers() {
-        List<String> users = new ArrayList<>();
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT id_Usuario, nome FROM usuario";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id_Usuario");
-                String name = rs.getString("nome");
-                users.add("[" + id + "] " + name);
-            }
-
-            rs.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return users;
     }
 
 }

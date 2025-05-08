@@ -13,9 +13,8 @@ public class EditTelephone extends JFrame {
     private TelephoneController controller;
     private ManagerTelephone parent;
 
-    public EditTelephone(int id_Telefone, ManagerTelephone parent) {
+    public EditTelephone(int id_Telefone) {
         this.id_Telefone = id_Telefone;
-        this.parent = parent;
 
         setTitle("Editar Telefone");
         setSize(450, 350);
@@ -39,7 +38,7 @@ public class EditTelephone extends JFrame {
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
-        controller = new TelephoneController(this.id_Telefone, tfDescricao, tfDdd, tfNumero, null);
+        controller = new TelephoneController(this.id_Telefone, 0, tfDescricao, tfDdd, tfNumero);
 
         carregarDados();
     }
@@ -80,11 +79,4 @@ public class EditTelephone extends JFrame {
         dispose();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ManagerTelephone parent = new ManagerTelephone();
-            EditTelephone editor = new EditTelephone(1, parent);
-            editor.setVisible(true);
-        });
-    }
 }

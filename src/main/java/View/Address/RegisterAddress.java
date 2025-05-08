@@ -10,23 +10,17 @@ import java.awt.*;
 import java.util.List;
 
 public class RegisterAddress extends JFrame {
-    private JComboBox<String> cbUsuarios;
     private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
     private AddressController controller;
+    private int idUsuario;
 
-    public RegisterAddress() {
+    public RegisterAddress(int idUsuario) {
+    	this.idUsuario = idUsuario;
+    	
         setTitle("Cadastro de Endereço");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 400, 530);
         setLayout(null);
-
-        JLabel lblUsuario = new JLabel("Usuário:");
-        lblUsuario.setBounds(30, 20, 100, 20);
-        add(lblUsuario);
-
-        cbUsuarios = new JComboBox<>();
-        cbUsuarios.setBounds(130, 20, 220, 22);
-        add(cbUsuarios);
 
         JLabel lblDescricao = new JLabel("Descrição:");
         lblDescricao.setBounds(30, 60, 100, 20);
@@ -105,27 +99,15 @@ public class RegisterAddress extends JFrame {
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
-        controller = new AddressController(0,
+        controller = new AddressController(0, idUsuario,
             tfRua, tfNumero, tfCidade, tfEstado,
             tfBairro, tfComplemento, tfCep,
-            tfPais, tfDescricao, cbUsuarios
+            tfPais, tfDescricao
         );
-
-        List<String> usuarios = controller.listUsers();
-        if (usuarios.isEmpty()) {
-            cbUsuarios.addItem("Nenhum cadastrado");
-            cbUsuarios.setEnabled(false);
-        } else {
-            for (String u : usuarios) cbUsuarios.addItem(u);
-        }
     }
 
     private void salvar() {
         controller.executeRegister();
         dispose();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new RegisterAddress().setVisible(true));
     }
 }

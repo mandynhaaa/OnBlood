@@ -7,14 +7,19 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ManagerBloodStock extends JFrame {
     private JTable tabela;
     private DefaultTableModel modelo;
     private BloodStockController controller;
+    private int idUsuario;
 
-    public ManagerBloodStock() {
-        controller = new BloodStockController();
+    public ManagerBloodStock(int idUser) {
+    	this.idUsuario = idUser;
+    	
+        controller = new BloodStockController(idUser);
 
         setTitle("Visualizar Estoque");
         setSize(800, 400);
@@ -31,7 +36,7 @@ public class ManagerBloodStock extends JFrame {
         JScrollPane scrollPane = new JScrollPane(tabela);
         add(scrollPane, BorderLayout.CENTER);
 
-        JButton btnAtualizar = new JButton("Atualizar Estoque");
+        JButton btnAtualizar = new JButton("Atualizar");
         btnAtualizar.addActionListener(e -> carregarEstoque());
         add(btnAtualizar, BorderLayout.SOUTH);
 
@@ -41,14 +46,20 @@ public class ManagerBloodStock extends JFrame {
     private void carregarEstoque() {
         modelo.setRowCount(0);
         try {
-            ResultSet rs = controller.listarEstoque();
+            ResultSet rs = controller.listarEstoqueHemocentro();
             while (rs != null && rs.next()) {
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(rs.getString("data_atualizacao"), formatoEntrada);
+                String dataFormatada = dataHoraConvertida.format(formatoSaida);
+                
                 modelo.addRow(new Object[] {
                         rs.getInt("id_estoque"),
                         rs.getString("razao_social"),
                         rs.getString("tipo_sanguineo"),
-                        rs.getInt("volume"),
-                        rs.getString("data_atualizacao")
+                        rs.getFloat("volume"),
+                        dataFormatada
                 });
             }
         } catch (SQLException e) {
@@ -56,7 +67,4 @@ public class ManagerBloodStock extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManagerBloodStock().setVisible(true));
-    }
 }

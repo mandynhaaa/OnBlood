@@ -1,14 +1,195 @@
 package Controller;
 
 import Connection.ConnectionSQL;
+import Main.BloodCenter;
+import Main.BloodType;
+import Main.Request;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+
 public class RequestController {
+	private int id_Request;
+	private int id_UserBloodCenter;
+    private JTextField tf_volume;
+    private JTextField tf_datetime;
+    private JComboBox<String> cb_tipoSanguineo;
+    private JComboBox<String> cb_status;
+	
+	public RequestController(int id_Request, int id_UserBloodCenter, JTextField tf_volume, JTextField tf_datetime, JComboBox<String> cb_tipoSanguineo, JComboBox<String> cb_status) {
+		this.id_Request = id_Request;
+		this.id_UserBloodCenter = id_UserBloodCenter;
+		this.tf_volume = tf_volume;
+		this.tf_datetime = tf_datetime;
+		this.cb_tipoSanguineo = cb_tipoSanguineo;
+		this.cb_status = cb_status;
+	}
+	
+	public void executeRegister() {
+	    try {
+	        String volumeText = tf_volume.getText().trim();
+	        if (volumeText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo volume é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        float volume;
+	        try {
+	            volume = Float.parseFloat(volumeText.replace(",", "."));
+	            if (volume <= 0) {
+	                JOptionPane.showMessageDialog(null, "O volume deve ser maior que zero.", "Erro", JOptionPane.ERROR_MESSAGE);
+	                return;
+	            }
+	        } catch (NumberFormatException e) {
+	            JOptionPane.showMessageDialog(null, "O volume deve ser um número válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        String dataHoraText = tf_datetime.getText().trim();
+	        if (dataHoraText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo data/hora é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        LocalDateTime datetime;
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	        try {
+	            datetime = LocalDateTime.parse(dataHoraText, formatter);
+	        } catch (DateTimeParseException e) {
+	            JOptionPane.showMessageDialog(null, "A data e hora devem estar no formato: dd/MM/yyyy HH:mm:ss", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        Object statusSelected = cb_status.getSelectedItem();
+	        if (statusSelected == null) {
+	            JOptionPane.showMessageDialog(null, "Selecione um status válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	        String status = statusSelected.toString();
+	        
+	        String selectedBloodType = (String) cb_tipoSanguineo.getSelectedItem();
+	        if (selectedBloodType == null || !selectedBloodType.matches("^\\[\\d+\\].*")) {
+	            JOptionPane.showMessageDialog(null, "Selecione um tipo sanguíneo válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        int idTipoSanguineo;
+	        try {
+	            String idText = selectedBloodType.substring(selectedBloodType.indexOf('[') + 1, selectedBloodType.indexOf(']'));
+	            idTipoSanguineo = Integer.parseInt(idText);
+	        } catch (Exception ex) {
+	            JOptionPane.showMessageDialog(null, "Erro ao extrair o ID do tipo sanguíneo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        BloodCenter bloodCenter = buscarHemocentroPorIdUsuario(id_UserBloodCenter);
+	        BloodType bloodType = new BloodType(idTipoSanguineo);
+	        Request request = new Request(status, volume, datetime, bloodCenter, bloodType);
+
+	        if (request.create() > 0) {
+	            JOptionPane.showMessageDialog(null, "Solicitação adicionada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+	        } else {
+	            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar a solicitação.", "Erro", JOptionPane.ERROR_MESSAGE);
+	        }
+
+	        BloodStockController.atualizarEstoque(bloodCenter.getId(), idTipoSanguineo);
+
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(null, "Erro inesperado: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+    public void executeUpdate() {
+	    try {
+	        String volumeText = tf_volume.getText().trim();
+	        if (volumeText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo volume é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        float volume;
+	        try {
+	            volume = Float.parseFloat(volumeText.replace(",", "."));
+	            if (volume <= 0) {
+	                JOptionPane.showMessageDialog(null, "O volume deve ser maior que zero.", "Erro", JOptionPane.ERROR_MESSAGE);
+	                return;
+	            }
+	        } catch (NumberFormatException e) {
+	            JOptionPane.showMessageDialog(null, "O volume deve ser um número válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        String dataHoraText = tf_datetime.getText().trim();
+	        if (dataHoraText.isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "O campo data/hora é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        LocalDateTime datetime;
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	        try {
+	            datetime = LocalDateTime.parse(dataHoraText, formatter);
+	        } catch (DateTimeParseException e) {
+	            JOptionPane.showMessageDialog(null, "A data e hora devem estar no formato: dd/MM/yyyy HH:mm:ss", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        Object statusSelected = cb_status.getSelectedItem();
+	        if (statusSelected == null) {
+	            JOptionPane.showMessageDialog(null, "Selecione um status válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	        String status = statusSelected.toString();
+	        
+	        String selectedBloodType = (String) cb_tipoSanguineo.getSelectedItem();
+	        if (selectedBloodType == null || !selectedBloodType.matches("^\\[\\d+\\].*")) {
+	            JOptionPane.showMessageDialog(null, "Selecione um tipo sanguíneo válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        int idTipoSanguineo;
+	        try {
+	            String idText = selectedBloodType.substring(selectedBloodType.indexOf('[') + 1, selectedBloodType.indexOf(']'));
+	            idTipoSanguineo = Integer.parseInt(idText);
+	        } catch (Exception ex) {
+	            JOptionPane.showMessageDialog(null, "Erro ao extrair o ID do tipo sanguíneo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        BloodType bloodType = new BloodType(idTipoSanguineo);
+	        Request request = new Request(id_Request);
+	        request.setBloodType(bloodType);
+	        request.setStatus(status);
+	        request.setDatetime(datetime);
+	        request.setVolume(volume);
+
+	        request.update();
+	        JOptionPane.showMessageDialog(null, "Solicitação alterada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+            BloodStockController.atualizarEstoque(request.getBloodCenter().getId(), idTipoSanguineo);
+	        
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(null, "Erro inesperado: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	    }
+    }
+    
+    public void executeDelete() {
+    	try {
+    		Request request = new Request(id_Request);
+    		request.delete();
+            JOptionPane.showMessageDialog(null, "Solicitação removida com sucesso!");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public boolean cadastrarSolicitacao(String hemocentro, int idTipoSanguineo, String status, Float volume, String dataHoraTexto) {
         try {
@@ -34,7 +215,7 @@ public class RequestController {
 
             if (status.equalsIgnoreCase("Realizada")) {
                 BloodStockController estoqueController = new BloodStockController();
-                estoqueController.atualizarEstoquePorSolicitacao(idHemocentro, idTipoSanguineo, volume);
+                estoqueController.atualizarEstoque(idHemocentro, idTipoSanguineo);
             }
 
             stmt.close();
@@ -65,10 +246,16 @@ public class RequestController {
                 String hemocentro = rs.getString("razao_social");
                 String tipo = rs.getString("tipo_sanguineo");
                 String status = rs.getString("status");
-                int volume = rs.getInt("volume");
+                Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
 
-                solicitacoes.add("[" + id + "] " + hemocentro + " | " + tipo + " | " + status + " | " + volume + "mL | " + dataHora);
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(dataHora, formatoEntrada);
+                String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
+                
+                solicitacoes.add("[" + id + "] " + hemocentro + " | " + tipo + " | " + status + " | " + volume + "mL | " + dataHoraFormatada);
             }
 
             rs.close();
@@ -77,45 +264,6 @@ public class RequestController {
             e.printStackTrace();
         }
         return solicitacoes;
-    }
-    
-    public boolean atualizarSolicitacao(int idSolicitacao, String status, int volume, String dataHoraTexto) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            LocalDateTime dataHora = LocalDateTime.parse(dataHoraTexto, formatter);
-
-            Connection conn = new ConnectionSQL().getConnection();
-            String sql = "UPDATE Solicitacao SET status = ?, volume = ?, data_hora = ? WHERE id_solicitacao = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, status);
-            stmt.setInt(2, volume);
-            stmt.setObject(3, dataHora);
-            stmt.setInt(4, idSolicitacao);
-
-            int rowsUpdated = stmt.executeUpdate();
-            stmt.close();
-            conn.close();
-
-            return rowsUpdated > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean excluirSolicitacao(int id) {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "DELETE FROM Solicitacao WHERE id_solicitacao = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
-            int rowsDeleted = stmt.executeUpdate();
-
-            stmt.close();
-            return rowsDeleted > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     private int buscarIdHemocentroPorNome(String nome) {
@@ -161,12 +309,12 @@ public class RequestController {
     public List<String> listarTiposSanguineos() {
         List<String> tipos = new ArrayList<>();
         try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT id_tipo_sanguineo, descricao FROM Tipo_Sanguineo";
+            String sql = "SELECT id_Tipo_Sanguineo, descricao FROM tipo_Sanguineo";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int id = rs.getInt("id_tipo_sanguineo");
+                int id = rs.getInt("id_Tipo_Sanguineo");
                 String desc = rs.getString("descricao");
                 tipos.add("[" + id + "] " + desc);
             }
@@ -243,10 +391,16 @@ public class RequestController {
                 String tipo = rs.getString("tipo_sanguineo");
                 String hemocentro = rs.getString("hemocentro");
                 String status = rs.getString("status");
-                int volume = rs.getInt("volume");
+                Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
+                
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-                solicitacoes.add("[" + id + "] " + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(dataHora, formatoEntrada);
+                String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
+
+                solicitacoes.add("[" + id + "] " + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHoraFormatada);
             }
 
             rs.close();
@@ -258,5 +412,26 @@ public class RequestController {
         return solicitacoes;
     }
     
-    
+    public BloodCenter buscarHemocentroPorIdUsuario(int id) {
+        try {
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE id_Usuario = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            var rs = stmt.executeQuery();
+            
+            int id_Hemocentro = 0;
+            if (rs.next()) {
+            	id_Hemocentro = Integer.parseInt(rs.getString("id_Hemocentro"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return new BloodCenter(id_Hemocentro);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new BloodCenter(0);
+        }
+    }
 }

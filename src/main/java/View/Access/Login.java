@@ -92,6 +92,5 @@ public class Login extends JFrame {
 	
     private void logar() {
         controller.executeLogin();
-        dispose();
     }
 }

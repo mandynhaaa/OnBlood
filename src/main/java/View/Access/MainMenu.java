@@ -6,6 +6,7 @@ import Main.User;
 import View.BloodStock.ManagerBloodStock;
 import View.Donation.ManagerDonation;
 import View.Donation.MyDonations;
+import View.Request.ManagerRequest;
 
 public class MainMenu extends JFrame {
 
@@ -53,7 +54,15 @@ public class MainMenu extends JFrame {
             });
 
             addButton("Solicitações", e -> {
-                // abrir solicitações do hemocentro
+            	new ManagerRequest(user.getId()).setVisible(true);
+            });
+            
+            addButton("Estoque", e -> {
+            	new ManagerBloodStock(user.getId()).setVisible(true);
+            });
+            
+            addButton("Configurações de Conta", e -> {
+            	new AccountConfiguration(user.getId(), userTypeId).setVisible(true);
             });
 
         // DOADOR
@@ -61,6 +70,10 @@ public class MainMenu extends JFrame {
         	addButton("Minhas Doações", e -> {
         	    new MyDonations(user.getId()).setVisible(true);
         	});
+        	
+            addButton("Configurações de Conta", e -> {
+            	new AccountConfiguration(user.getId(), userTypeId).setVisible(true);
+            });
         }
 
         JButton logoutButton = new JButton("Sair");

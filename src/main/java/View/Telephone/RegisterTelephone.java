@@ -6,23 +6,17 @@ import java.awt.*;
 import java.util.List;
 
 public class RegisterTelephone extends JFrame {
-    private JComboBox<String> cbUsuarios;
     private JTextField tf_description, tf_ddd, tf_number;
     private TelephoneController controller;
+    private int idUsuario;
 
-    public RegisterTelephone() {
+    public RegisterTelephone(int idUsuario) {
+    	this.idUsuario = idUsuario;
+    	
         setTitle("Cadastro de Telefone");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 400, 450);
         setLayout(null);
-
-        JLabel lblUsuario = new JLabel("Usuário:");
-        lblUsuario.setBounds(30, 20, 100, 20);
-        add(lblUsuario);
-
-        cbUsuarios = new JComboBox<>();
-        cbUsuarios.setBounds(130, 20, 220, 22);
-        add(cbUsuarios);
 
         JLabel lblDescricao = new JLabel("Descrição:");
         lblDescricao.setBounds(30, 60, 100, 20);
@@ -59,15 +53,8 @@ public class RegisterTelephone extends JFrame {
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
-        controller = new TelephoneController(0, tf_description, tf_ddd, tf_number, cbUsuarios);
+        controller = new TelephoneController(0, idUsuario, tf_description, tf_ddd, tf_number);
 
-        List<String> usuarios = controller.listUsers();
-        if (usuarios.isEmpty()) {
-            cbUsuarios.addItem("Nenhum cadastrado");
-            cbUsuarios.setEnabled(false);
-        } else {
-            for (String u : usuarios) cbUsuarios.addItem(u);
-        }
     }
 
     private void salvar() {
@@ -75,7 +62,4 @@ public class RegisterTelephone extends JFrame {
         dispose();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new RegisterTelephone().setVisible(true));
-    }
 }

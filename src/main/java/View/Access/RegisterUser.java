@@ -3,7 +3,7 @@ package View.Access;
 import java.awt.EventQueue;
 import javax.swing.*;
 import java.awt.Font;
-import java.awt.event.ItemEvent;
+import java.util.List;
 
 import Controller.UserController;
 
@@ -15,8 +15,9 @@ public class RegisterUser extends JFrame {
     private JTextField tf_cpf, tf_endereco, tf_razao_Social;
     private JComboBox<String> comboTipoUsuario;
     private JTextField tf_dataNascimento;
-    private JComboBox<String> combo_tipoSanguineo;
+    private JComboBox<String> comboTipoSangue;
     private JTextField tf_cnpj;
+    private UserController controller;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
@@ -85,13 +86,12 @@ public class RegisterUser extends JFrame {
         lblTipoSanguineo.setBounds(100, 280, 100, 25);
         contentPane.add(lblTipoSanguineo);
 
-        JComboBox<String> comboTipoSangue = new JComboBox<>(new String[] {
-            "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
-        });
+        comboTipoSangue = new JComboBox<>();
         comboTipoSangue.setBounds(200, 280, 250, 25);
         contentPane.add(comboTipoSangue);
 
-        JLabel lblDataNascimento = new JLabel("Nascimento (YYYY-MM-DD):");
+        JLabel lblDataNascimento = new JLabel("Nascimento:");
+        lblDataNascimento.setToolTipText("Formato: dd/MM/aaa");
         lblDataNascimento.setBounds(100, 320, 200, 25);
         contentPane.add(lblDataNascimento);
 
@@ -143,15 +143,28 @@ public class RegisterUser extends JFrame {
         btnLogar.setBounds(230, 400, 120, 25);
         contentPane.add(btnLogar);
 
-        UserController controller = new UserController(
+        controller = new UserController(0, 0,
         	    tf_nome, tf_email, tf_senha, comboTipoUsuario,
         	    tf_cpf, tf_razao_Social, tf_dataNascimento, comboTipoSangue, tf_cnpj
         	);
-        btnCadastrar.addActionListener(controller);
+        btnCadastrar.addActionListener(e -> {
+            controller.executeRegister();
+            dispose();
+        });
 
         btnLogar.addActionListener(e -> {
             new Login().setVisible(true);
             dispose();
         });
+        
+        List<String> tiposSangue = controller.listarTiposSanguineos();
+        if (tiposSangue.isEmpty()) {
+        	comboTipoSangue.addItem("Nenhum cadastrado");
+        	comboTipoSangue.setEnabled(false);
+        } else {
+            for (String tipo : tiposSangue) {
+            	comboTipoSangue.addItem(tipo);
+            }
+        }
     }
 }

@@ -108,13 +108,10 @@ public class DonationController {
 	            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar a doação.", "Erro", JOptionPane.ERROR_MESSAGE);
 	        }
 
-	        if (status.equalsIgnoreCase("Realizada")) {
-	            int idTipoSanguineo = obterTipoSanguineoPorDoador(idDonor);
-	            if (idTipoSanguineo != -1) {
-	                BloodStockController.atualizarEstoquePorDoacao(bloodCenter.getId(), idTipoSanguineo, volume);
-	            }
-	        }
-
+            int idTipoSanguineo = obterTipoSanguineoPorDoador(idDonor);
+            if (idTipoSanguineo != -1) {
+                BloodStockController.atualizarEstoque(bloodCenter.getId(), idTipoSanguineo);
+            }
 	    } catch (Exception ex) {
 	        JOptionPane.showMessageDialog(null, "Erro inesperado: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
 	    }
@@ -168,14 +165,12 @@ public class DonationController {
             donation.setStatus(status);
 
             donation.update();
-            JOptionPane.showMessageDialog(null, "Doação alterada com sucesso!");
+            JOptionPane.showMessageDialog(null, "Doação alterada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             
-	        if (status.equalsIgnoreCase("Realizada")) {
-	            int idTipoSanguineo = obterTipoSanguineoPorDoacao(id_Donation);
-	            if (idTipoSanguineo != -1) {
-	                BloodStockController.atualizarEstoquePorDoacao(obterHemocentroPorDoacao(id_Donation), idTipoSanguineo, volume);
-	            }
-	        }
+            int idTipoSanguineo = obterTipoSanguineoPorDoacao(id_Donation);
+            if (idTipoSanguineo != -1) {
+                BloodStockController.atualizarEstoque(obterHemocentroPorDoacao(id_Donation), idTipoSanguineo);
+            }
 	        
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -184,7 +179,7 @@ public class DonationController {
     
     public void executeDelete() {
     	try {
-    		Donation donation = new Donation(this.id_Donation);
+    		Donation donation = new Donation(id_Donation);
     		donation.delete();
             JOptionPane.showMessageDialog(null, "Doação removida com sucesso!");
         } catch (Exception ex) {
@@ -472,8 +467,14 @@ public class DonationController {
                 String status = rs.getString("status");
                 Float volume = rs.getFloat("volume");
                 String dataHora = rs.getString("data_hora");
+                
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-                doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHora);
+                LocalDateTime dataHoraConvertida = LocalDateTime.parse(dataHora, formatoEntrada);
+                String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
+
+                doacoes.add("[" + id + "] " + nome + " (" + tipo + ") | " + hemocentro + " | " + status + " | " + volume + "mL | " + dataHoraFormatada);
             }
 
             rs.close();

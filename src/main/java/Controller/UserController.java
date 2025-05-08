@@ -2,12 +2,21 @@ package Controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
+import javax.swing.text.DateFormatter;
 
 import java.sql.*;
 
+import Main.BloodCenter;
+import Main.BloodType;
+import Main.Donor;
 import Main.User;
 import Main.UserType;
 import Standard.PasswordCrypt;
@@ -15,18 +24,21 @@ import View.Access.Login;
 import View.Access.RegisterUser;
 import Connection.ConnectionSQL;
 
-public class UserController implements ActionListener {
+public class UserController {
 
+	private int id_Usuario, id_userType;
     private JTextField tf_name, tf_email, tf_password;
     private JComboBox<String> combo_Type;
     private JTextField tf_cpf, tf_razao_Social, tf_endereco, tf_cnpj;
     private JTextField tf_dataNascimento;
     private JComboBox<String> comboTipoSanguineo;
 
-    public UserController(JTextField name, JTextField email, JTextField password,
+    public UserController(int id_Usuario, int id_userType, JTextField name, JTextField email, JTextField password,
             JComboBox<String> type, JTextField cpf,
             JTextField razao_Social, JTextField dataNascimento,
             JComboBox<String> tipoSanguineo, JTextField cnpj) {
+    	this.id_Usuario = id_Usuario;
+    	this.id_userType = id_userType;
     	this.tf_name = name;
         this.tf_email = email;
         this.tf_password = password;
@@ -36,13 +48,6 @@ public class UserController implements ActionListener {
         this.tf_dataNascimento = dataNascimento;
         this.comboTipoSanguineo = tipoSanguineo;
         this.tf_cnpj = cnpj;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals("Criar Conta")) {
-            executeRegister();
-        }
     }
 
     public void executeRegister() {
@@ -70,15 +75,16 @@ public class UserController implements ActionListener {
 
         int userId = user.create();
         if (userId > 0) {
-            boolean success = false;
+        	int idDoador = 0;
+        	int idHemocentro = 0;
 
-            if (idType == 2) { // Doador
-                success = createDoador(userId, tf_cpf.getText());
+            if (idType == 2) {
+                idDoador = createDoador(userId);
             } else {
-                success = createHemocentro(userId, tf_razao_Social.getText());
+                idHemocentro = createHemocentro(userId);
             }
 
-            if (success) {
+            if (idDoador > 0 || idHemocentro > 0) {
                 JOptionPane.showMessageDialog(null, "Usuário cadastrado com sucesso!");
                 new Login().setVisible(true);
             } else {
@@ -89,51 +95,187 @@ public class UserController implements ActionListener {
             JOptionPane.showMessageDialog(null, "Erro ao criar usuário.");
         }
     }
+    
+    public void executeUpdate() {
+        String name = tf_name.getText();
+        String email = tf_email.getText();
+        String password = tf_password.getText();
 
-    private boolean createDoador(int userId, String cpfStr) {
-        try (Connection conn = new ConnectionSQL().getConnection();) {
-            String sql = "INSERT INTO doador (id_Usuario, cpf, data_Nascimento, id_Tipo_Sanguineo) VALUES (?, ?, ?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, userId);
-            stmt.setString(2, cpfStr);
-            stmt.setDate(3, java.sql.Date.valueOf(tf_dataNascimento.getText()));
-            stmt.setInt(4, getBloodTypeIdByName(comboTipoSanguineo.getSelectedItem().toString()));
-            int rows = stmt.executeUpdate();
-            return rows > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        if (name.isEmpty() || email.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios.");
+            return;
+        }
+
+        UserType userType = new UserType(id_userType);
+        User user = new User(id_Usuario);
+        user.setName(name);
+        user.setEmail(email);
+        
+        if (!password.isEmpty()) {        	
+        	user.setPassword(password);
+        }
+        
+        user.update();
+        JOptionPane.showMessageDialog(null, "Usuário alterado com sucesso!");
+
+        if (id_userType == 2) {
+            updateDoador(id_Usuario);
+        } else {
+            updateHemocentro(id_Usuario);
         }
     }
 
-    private boolean createHemocentro(int userId, String razao_Social) {
-        try (Connection conn = new ConnectionSQL().getConnection();) {
-            String cnpj = tf_cnpj.getText();
+    private int createDoador(int userId) {
+    	
+        String selectedBloodType = (String) comboTipoSanguineo.getSelectedItem();
+        if (selectedBloodType == null || !selectedBloodType.matches("^\\[\\d+\\].*")) {
+            JOptionPane.showMessageDialog(null, "Selecione um tipo sanguíneo válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return 0;
+        }
 
-            String sql = "INSERT INTO hemocentro (id_Usuario, razao_Social, cnpj) VALUES (?, ?, ?)";
+        int idTipoSanguineo = 1;
+        try {
+            String idText = selectedBloodType.substring(selectedBloodType.indexOf('[') + 1, selectedBloodType.indexOf(']'));
+            idTipoSanguineo = Integer.parseInt(idText);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao extrair o ID do tipo sanguíneo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        LocalDate birthDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+        	birthDate = LocalDate.parse(tf_dataNascimento.getText(), formatter);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(null, "A data deve estar no formato: dd/MM/yyyy", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        String cpf = tf_cpf.getText();
+        
+        User user = new User(userId);
+        BloodType bloodType = new BloodType(idTipoSanguineo);
+        Donor donor = new Donor(cpf, birthDate, user, bloodType);
+        return donor.create();
+    }
+    
+    private void updateDoador(int userId) {
+        String selectedBloodType = (String) comboTipoSanguineo.getSelectedItem();
+        if (selectedBloodType == null || !selectedBloodType.matches("^\\[\\d+\\].*")) {
+            JOptionPane.showMessageDialog(null, "Selecione um tipo sanguíneo válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int idTipoSanguineo = 1;
+        try {
+            String idText = selectedBloodType.substring(selectedBloodType.indexOf('[') + 1, selectedBloodType.indexOf(']'));
+            idTipoSanguineo = Integer.parseInt(idText);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao extrair o ID do tipo sanguíneo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        LocalDate birthDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+        	birthDate = LocalDate.parse(tf_dataNascimento.getText(), formatter);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(null, "A data deve estar no formato: dd/MM/yyyy", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
+        BloodType bloodType = new BloodType(idTipoSanguineo);
+        
+        Donor donor = buscarDoadorPorIdUsuario(userId);
+        donor.setCpf(tf_cpf.getText());
+        donor.setBirthDate(birthDate);
+        donor.setBloodType(bloodType);
+        donor.update();
+        
+        return;
+    }
+
+    private int createHemocentro(int userId) {
+    	String cnpj = tf_cnpj.getText();
+    	String razao_Social = tf_razao_Social.getText();
+    	
+    	User user = new User(userId);
+        BloodCenter bloodCenter = new BloodCenter(cnpj, razao_Social, user);
+        return bloodCenter.create();
+    }
+    
+    private void updateHemocentro(int userId) {
+    	String cnpj = tf_cnpj.getText();
+    	String razao_Social = tf_razao_Social.getText();
+    	
+    	BloodCenter bloodCenter = buscarHemocentroPorIdUsuario(userId);
+    	bloodCenter.setCnpj(tf_cnpj.getText());
+    	bloodCenter.setCompanyName(tf_razao_Social.getText());
+    	bloodCenter.update();
+    	
+        return ;
+    }
+    
+    public List<String> listarTiposSanguineos() {
+        List<String> tipos = new ArrayList<>();
+        try (Connection conn = new ConnectionSQL().getConnection()) {
+            String sql = "SELECT id_Tipo_Sanguineo, descricao FROM tipo_Sanguineo";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, userId);
-            stmt.setString(2, razao_Social);
-            stmt.setString(3, cnpj);
-            int rows = stmt.executeUpdate();
-            return rows > 0;
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id_Tipo_Sanguineo");
+                String desc = rs.getString("descricao");
+                tipos.add("[" + id + "] " + desc);
+            }
+
+            rs.close();
+            stmt.close();
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+        }
+        return tipos;
+    }
+    
+    public Donor buscarDoadorPorIdUsuario(int id) {
+        try {
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT id_Doador FROM doador WHERE id_Usuario = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            var rs = stmt.executeQuery();
+            
+            int id_Doador = 0;
+            if (rs.next()) {
+            	id_Doador = Integer.parseInt(rs.getString("id_Doador"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return new Donor(id_Doador);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Donor(0);
         }
     }
     
-    private int getBloodTypeIdByName(String name) {
-        switch (name) {
-            case "A+": return 1;
-            case "A-": return 2;
-            case "B+": return 3;
-            case "B-": return 4;
-            case "AB+": return 5;
-            case "AB-": return 6;
-            case "O+": return 7;
-            case "O-": return 8;
-            default: return 0;
+    public BloodCenter buscarHemocentroPorIdUsuario(int id) {
+        try {
+        	Connection conn = new ConnectionSQL().getConnection();
+            String sql = "SELECT id_Hemocentro FROM hemocentro WHERE id_Usuario = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            var rs = stmt.executeQuery();
+            
+            int id_Hemocentro = 0;
+            if (rs.next()) {
+            	id_Hemocentro = Integer.parseInt(rs.getString("id_Hemocentro"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return new BloodCenter(id_Hemocentro);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new BloodCenter(0);
         }
     }
 }
