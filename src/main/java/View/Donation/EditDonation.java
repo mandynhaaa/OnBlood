@@ -49,7 +49,8 @@ public class EditDonation extends JFrame {
         gbc.gridy = 1;
         add(txtVolume, gbc);
 
-        JLabel lblDataHora = new JLabel("Data e Hora (yyyy-MM-dd HH:mm):");
+        JLabel lblDataHora = new JLabel("Data e Hora");
+        lblDataHora.setToolTipText("Formato: dd/MM/aaa HH:mm:ss");
         gbc.gridx = 0;
         gbc.gridy = 2;
         add(lblDataHora, gbc);

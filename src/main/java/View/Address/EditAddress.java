@@ -16,11 +16,9 @@ public class EditAddress extends JFrame {
     private JButton btnSalvar, btnCancelar;
     private int idEndereco;
     private AddressController controller;
-    private ManagerAddress parent;
 
-    public EditAddress(int idEndereco, ManagerAddress parent) {
+    public EditAddress(int idEndereco) {
         this.idEndereco = idEndereco;
-        this.parent = parent;
 
         setTitle("Editar Endereço");
         setSize(450, 520);
@@ -52,10 +50,7 @@ public class EditAddress extends JFrame {
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
-        controller = new AddressController(
-        	this.idEndereco, tfRua, tfNumero, tfCidade, tfEstado,
-        	tfBairro, tfComplemento, tfCep, tfPais, tfDescricao, null
-        );
+        controller = new AddressController(this.idEndereco, 0, tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao);
 
         carregarDados();
     }
@@ -102,11 +97,4 @@ public class EditAddress extends JFrame {
         dispose();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ManagerAddress parent = new ManagerAddress();
-            EditAddress editor = new EditAddress(1, parent);
-            editor.setVisible(true);
-        });
-    }
 }

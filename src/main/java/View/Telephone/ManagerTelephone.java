@@ -11,9 +11,11 @@ public class ManagerTelephone extends JFrame {
     private DefaultListModel<String> listModel;
     private JButton btnExcluir, btnNovo, btnAtualizar, btnEditar;
     private TelephoneController controller;
+    private int idUsuario;
 
-
-    public ManagerTelephone() {
+    public ManagerTelephone(int idUsuario) {
+    	this.idUsuario = idUsuario;
+    	
         setTitle("Gerenciar Telefones");
         setSize(600, 400);
         setLocationRelativeTo(null);
@@ -38,13 +40,13 @@ public class ManagerTelephone extends JFrame {
         add(panelBotoes, BorderLayout.SOUTH);
 
         btnAtualizar.addActionListener(e -> carregarTelefones());
-        btnNovo.addActionListener(e -> new RegisterTelephone().setVisible(true));
+        btnNovo.addActionListener(e -> new RegisterTelephone(idUsuario).setVisible(true));
         btnExcluir.addActionListener(e -> excluirEndereco());
         btnEditar.addActionListener(e -> {
             String selecionado = listTelefones.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditTelephone editor = new EditTelephone(id, this);
+                EditTelephone editor = new EditTelephone(id);
                 editor.setVisible(true);
             }
         });
@@ -54,7 +56,7 @@ public class ManagerTelephone extends JFrame {
 
     public void carregarTelefones() {
         listModel.clear();
-        controller = new TelephoneController(0, null, null, null, null);
+        controller = new TelephoneController(0, idUsuario, null, null, null);
         List<String> telefones = controller.listTelephones();
         for (String e : telefones) {
             listModel.addElement(e);
@@ -67,7 +69,7 @@ public class ManagerTelephone extends JFrame {
             int id = Integer.parseInt(selecionado.substring(1, selecionado.indexOf("]")));
             int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_NO_OPTION) {
-                controller = new TelephoneController(id, null, null, null, null);
+                controller = new TelephoneController(id, idUsuario, null, null, null);
                 controller.executeDelete();
             }
         }
@@ -78,7 +80,4 @@ public class ManagerTelephone extends JFrame {
         return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManagerTelephone().setVisible(true));
-    }
 }

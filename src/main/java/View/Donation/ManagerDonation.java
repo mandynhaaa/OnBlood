@@ -1,6 +1,5 @@
 package View.Donation;
 
-import javax.swing.*;
 import Controller.DonationController;
 import java.awt.*;
 import java.util.List;
@@ -65,7 +64,7 @@ public class ManagerDonation extends JFrame {
         btnExcluir.addActionListener(e -> excluirDoacao());
 
         btnNova.addActionListener(e -> {
-            RegisterDonation telaCadastro = new RegisterDonation(this.idUsuario);
+            RegisterDonation telaCadastro = new RegisterDonation(idUsuario);
             telaCadastro.setVisible(true);
         });
 
@@ -80,14 +79,16 @@ public class ManagerDonation extends JFrame {
     void carregarDoacoes() {
         listModel.clear();
         
-        List<String> doacoes;
+        //List<String> doacoes;
 
-        if (userTypeId == 1) {
-            doacoes = controller.listarTodasDoacoes(NULL);
-        } else {
-        	String statusSelecionado = (String) comboFiltroStatus.getSelectedItem();
-            doacoes = controller.listarDoacoesHemocentro(this.idUsuario, statusSelecionado);
-        }
+        //if (userTypeId == 1) {
+        //    doacoes = controller.listarTodasDoacoes(NULL);
+        //} else {
+        //	String statusSelecionado = (String) comboFiltroStatus.getSelectedItem();
+        //doacoes = controller.listarDoacoesHemocentro(this.idUsuario, statusSelecionado);
+        //}
+
+        List<String> doacoes = controller.listarDoacoesHemocentro(idUsuario);
 
         for (String d : doacoes) {
             listModel.addElement(d);

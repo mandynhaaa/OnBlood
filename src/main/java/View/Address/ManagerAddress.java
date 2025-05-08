@@ -11,9 +11,11 @@ public class ManagerAddress extends JFrame {
     private DefaultListModel<String> listModel;
     private JButton btnExcluir, btnNovo, btnAtualizar, btnEditar;
     private AddressController controller;
+    private int idUsuario;
 
-
-    public ManagerAddress() {
+    public ManagerAddress(int idUsuario) {
+    	this.idUsuario = idUsuario;
+    	
         setTitle("Gerenciar Endereços");
         setSize(600, 400);
         setLocationRelativeTo(null);
@@ -38,13 +40,13 @@ public class ManagerAddress extends JFrame {
         add(panelBotoes, BorderLayout.SOUTH);
 
         btnAtualizar.addActionListener(e -> carregarEnderecos());
-        btnNovo.addActionListener(e -> new RegisterAddress().setVisible(true));
+        btnNovo.addActionListener(e -> new RegisterAddress(idUsuario).setVisible(true));
         btnExcluir.addActionListener(e -> excluirEndereco());
         btnEditar.addActionListener(e -> {
             String selecionado = listEnderecos.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditAddress editor = new EditAddress(id, this);
+                EditAddress editor = new EditAddress(id);
                 editor.setVisible(true);
             }
         });
@@ -54,11 +56,7 @@ public class ManagerAddress extends JFrame {
 
     public void carregarEnderecos() {
         listModel.clear();
-        controller = new AddressController(
-        		0, null, null, null, null,
-                null, null, null,
-                null, null, null
-            );
+        controller = new AddressController(0, idUsuario, null, null, null, null, null, null, null, null, null);
         List<String> enderecos = controller.listAddresses();
         for (String e : enderecos) {
             listModel.addElement(e);
@@ -71,11 +69,7 @@ public class ManagerAddress extends JFrame {
             int id = Integer.parseInt(selecionado.substring(1, selecionado.indexOf("]")));
             int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                controller = new AddressController(id,
-                        null, null, null, null,
-                        null, null, null,
-                        null, null, null
-                    );
+                controller = new AddressController(id, idUsuario, null, null, null, null, null, null, null, null, null);
                 controller.executeDelete();
             }
         }
@@ -86,7 +80,4 @@ public class ManagerAddress extends JFrame {
         return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManagerAddress().setVisible(true));
-    }
 }

@@ -1,19 +1,22 @@
 package View.Request;
 
 import javax.swing.*;
+
 import Controller.RequestController;
 import java.awt.*;
 import java.util.List;
 
 public class ManagerRequest extends JFrame {
-    private static final BloodCenterRequests NULL = null;
 	private JList<String> listSolicitacoes;
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
     private RequestController controller;
+    private int idUsuario;
 
-    public ManagerRequest() {
-        controller = new RequestController();
+    public ManagerRequest(int idUser) {
+    	this.idUsuario = idUser;
+        this.controller = new RequestController(0, idUsuario, null, null, null, null);
+        
         setTitle("Gerenciar Solicitações");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 450);
@@ -43,30 +46,15 @@ public class ManagerRequest extends JFrame {
             String selecionado = listSolicitacoes.getSelectedValue();
             if (selecionado != null) {
                 int id = extrairId(selecionado);
-                EditRequest editor = new EditRequest(id, controller, this, NULL);
+                EditRequest editor = new EditRequest(id);
                 editor.setVisible(true);
             }
         });
 
-        btnExcluir.addActionListener(e -> {
-            String selecionado = listSolicitacoes.getSelectedValue();
-            if (selecionado != null) {
-                int id = extrairId(selecionado);
-                int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
-                if (confirm == JOptionPane.YES_NO_OPTION) {
-                    boolean sucesso = controller.excluirSolicitacao(id);
-                    if (sucesso) {
-                        JOptionPane.showMessageDialog(this, "Solicitação excluída.");
-                        carregarSolicitacoes();
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Erro ao excluir.");
-                    }
-                }
-            }
-        });
+        btnExcluir.addActionListener(e -> excluirSolicitacao());
 
         btnNova.addActionListener(e -> {
-            RegisterRequest telaCadastro = new RegisterRequest();
+            RegisterRequest telaCadastro = new RegisterRequest(idUsuario);
             telaCadastro.setVisible(true);
         });
 
@@ -84,10 +72,17 @@ public class ManagerRequest extends JFrame {
     private int extrairId(String texto) {
         return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ManagerRequest().setVisible(true);
-        });
+    
+    private void excluirSolicitacao() {
+        String selecionado = listSolicitacoes.getSelectedValue();
+        if (selecionado != null) {
+            int id = extrairId(selecionado);
+            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
+            if (confirm == JOptionPane.YES_NO_OPTION) {
+            	controller = new RequestController(id, 0, null, null, null, null);
+                controller.executeDelete();
+            }
+        }
     }
+
 }
