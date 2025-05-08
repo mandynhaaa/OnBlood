@@ -1,0 +1,54 @@
+OnBlood
+
+
+Instalação
+
+Recomendações
+1. IDE
+- Recomendamos fortemente o uso da IDE Eclipse, especificamente na versão 2025-03 para windows que já contempla os requisitos 1 e 2 listados abaixo.
+
+https://www.eclipse.org/downloads/packages/
+https://www.eclipse.org/downloads/download.php?file=/oomph/epp/2025-03/R/eclipse-inst-jre-win64.exe
+
+Requisitos
+1. Java JDK 21
+- Necessário para compilar e executar o projeto;
+- Download: https://www.oracle.com/br/java/technologies/downloads/
+
+
+2. Apache Maven
+- Utilizado para gerenciamento de dependências e build do projeto;
+- Instalação: https://maven.apache.org/install.html
+
+3. MySQL Server
+- Necessário para persistir os dados.
+- Versão recomendada: MySQL 8.0+
+- Download: https://dev.mysql.com/downloads/
+
+Criar uma conexão local e importar o script dbOnBlood-MySQLWorkbench.sql.
+
+Garantir que a conexão tenha os seguintes dados de acesso:
+
+Connection Name: "dbOnBlood";
+Hostname: 127.0.0.1;
+Port: 3306;
+username = "root";
+password = "admin";
+
+OU altere os dados no arquivo ConnectionSQL.java.
+
+Clonagem do Projeto
+A seguir serão listados os passos para rodar o projeto OnBlood na sua máquina utilizando a IDE recomendada.
+
+Após abrir o Eclipse, acesse o menu File -> Import -> Git.
+É possível utilizar qualquer uma das opções.
+
+
+Obtenha o link do repositório pelo GitHub.
+Informe a URI do projeto e já serão preenchidos os campos de Host e Repository Path.
+
+Para Authentication será necessário informar seu usuário do GitHub e um token gerado na sua do GitHub.
+
+
+Rodando o Projeto
+Para rodar o projeto, basta acessar a branch main e rodar o arquivo Login.java ou RegisterUser.Java localizados em src/main/java/View/Access.
