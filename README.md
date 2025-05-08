@@ -65,4 +65,5 @@ Para Authentication será necessário informar seu usuário do GitHub e um token
 
 ## Rodando o Projeto
 Para rodar o projeto, basta acessar a branch main e rodar o arquivo Login.java ou RegisterUser.Java localizados em src/main/java/View/Access.
+
 ![image](https://github.com/user-attachments/assets/41dc149b-9535-45cd-a618-d511805ac356)
