@@ -126,4 +126,27 @@ INSERT INTO tipo_Sanguineo (id_Tipo_Sanguineo, descricao) VALUES
 (8, "O-");
 
 -- Registros de exemplo
+insert into usuario (nome, email, senha, data_Criacao, id_Tipo_Usuario) values 
+('João', 'joao@gmail.com', '$2a$10$7xR8gNYOoYQZ/S85fvRIfuSWWKp50WtDn4uSYpG2QM7SUFIyUw5y.', '2025-05-07 22:17:43', '2'),
+('hemocentro', 'hemocentro@gmail.com', '$2a$10$.vkiJUEjFNMtD85mUV1Nge28M8fUJw7zCYEBN6hM9OrSPRGZ9lqoK', '2025-05-07 22:18:22', '3'),
+('Maria', 'maria@gmail.com', '$2a$10$YcOx5UxqsCsFEChWEMs1FOV4sJcycWa58ts21ja.Q1xzAxXlGLTUG', '2025-05-07 22:30:22', '2'),
+('hemocentro sangue', 'doesangue@gmail.com', '$2a$10$b6TcLABCZHBZuh9NcBUFbuDoVmmW6d.6/Yej9NpUWFGUWfSOFCO6q', '2025-05-07 22:38:09', '3');
 
+insert into doador (data_Nascimento, cpf, id_Usuario, id_Tipo_Sanguineo) values 
+ ('2000-01-01', '123.456.789-10', '1', '7'),
+ ('2000-12-20', '456.123.789-71', '3', '3');
+ 
+ insert into hemocentro (razao_Social, cnpj, id_Usuario) values
+('hemocentro', '987654/0001-23', '2'),
+('hemocentro sangue', '741852/0001-25', '4');
+
+insert into doacao (status, volume, data_Hora, id_Doador, id_Hemocentro) values
+('Pendente', '250.5', '2025-05-07 10:10:10', '1', '1'),
+('Realizada', '250.5', '2025-06-01 10:00:00', '1', '2'),
+('Pendente', '500', '2025-06-01 10:30:00', '2', '2');
+
+insert into solicitacao (status, volume, data_Hora, id_Hemocentro, id_Tipo_Sanguineo) values 
+('Realizada', '100', '2025-06-01 10:00:00', '2', '7');
+
+insert into estoque (data_Atualizacao, volume, id_Hemocentro, id_Tipo_Sanguineo) values
+('2025-05-07 22:42:31', '150.5', '2', '7');
