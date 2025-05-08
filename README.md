@@ -59,8 +59,10 @@ Obtenha o link do repositório pelo GitHub:
 
 Informe a URI do projeto e já serão preenchidos os campos de Host e Repository Path.
 
-Para Authentication será necessário informar seu usuário do GitHub e um token.
+Para Authentication será necessário informar seu usuário do GitHub e um token gerado na sua do GitHub.
 
 ![image](https://github.com/user-attachments/assets/044eba8f-87ac-4838-a2ca-e49f9d8b3065)
 
-
+## Rodando o Projeto
+Para rodar o projeto, basta acessar a branch main e rodar o arquivo Login.java ou RegisterUser.Java localizados em src/main/java/View/Access.
+![image](https://github.com/user-attachments/assets/41dc149b-9535-45cd-a618-d511805ac356)
