@@ -16,7 +16,7 @@ class DonorTest {
         BloodType type = new BloodType("A+");
         type.setId(2);
 
-        Donor donor = new Donor(123456789, LocalDate.of(1990, 5, 10), user, type);
+        Donor donor = new Donor("123456789", LocalDate.of(1990, 5, 10), user, type);
 
         assertEquals(123456789, donor.getCpf());
         assertEquals(LocalDate.of(1990, 5, 10), donor.getBirthDate());
@@ -32,7 +32,7 @@ class DonorTest {
         BloodType type = new BloodType("B-");
         type.setId(20);
 
-        Donor donor = new Donor(987654321, LocalDate.of(1985, 1, 20), user, type);
+        Donor donor = new Donor("987654321", LocalDate.of(1985, 1, 20), user, type);
 
         Map<String, String> map = donor.toMap();
 
@@ -74,7 +74,7 @@ class DonorTest {
         BloodType type = new BloodType("AB+");
         type.setId(4);
 
-        Donor original = new Donor(222333444, LocalDate.of(1999, 12, 31), user, type);
+        Donor original = new Donor("222333444", LocalDate.of(1999, 12, 31), user, type);
         Map<String, String> map = original.toMap();
 
         Donor copy = new Donor(0);

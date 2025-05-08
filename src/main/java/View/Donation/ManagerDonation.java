@@ -4,6 +4,16 @@ import Controller.DonationController;
 import java.awt.*;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 public class ManagerDonation extends JFrame {
     private static final String NULL = null;
 	private JList<String> listDoacoes;
@@ -78,17 +88,9 @@ public class ManagerDonation extends JFrame {
 
     void carregarDoacoes() {
         listModel.clear();
-        
-        //List<String> doacoes;
 
-        //if (userTypeId == 1) {
-        //    doacoes = controller.listarTodasDoacoes(NULL);
-        //} else {
-        //	String statusSelecionado = (String) comboFiltroStatus.getSelectedItem();
-        //doacoes = controller.listarDoacoesHemocentro(this.idUsuario, statusSelecionado);
-        //}
-
-        List<String> doacoes = controller.listarDoacoesHemocentro(idUsuario);
+        String statusSelecionado = (String) comboFiltroStatus.getSelectedItem();
+        List<String> doacoes = controller.listarDoacoesHemocentro(idUsuario, statusSelecionado);
 
         for (String d : doacoes) {
             listModel.addElement(d);

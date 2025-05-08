@@ -14,7 +14,7 @@ class DonationTest {
         Donor donor = new Donor(10);
         donor.setId(10);
 
-        BloodCenter center = new BloodCenter(12345678901234L, "Hemocentro A", new User(1));
+        BloodCenter center = new BloodCenter("12345678901234", "Hemocentro A", new User(1));
         center.setId(20);
 
         Donation donation = new Donation("Confirmada", 8.0f, LocalDateTime.of(2025, 4, 24, 0, 0), donor, center);
@@ -31,7 +31,7 @@ class DonationTest {
         Donor donor = new Donor(100);
         donor.setId(100);
 
-        BloodCenter center = new BloodCenter(12345678901234L, "Hemocentro B", new User(1));
+        BloodCenter center = new BloodCenter("12345678901234", "Hemocentro B", new User(1));
         center.setId(200);
 
         Donation donation = new Donation("Agendada", 5.5f, LocalDateTime.of(2025, 4, 25, 0, 0), donor, center);
@@ -76,7 +76,7 @@ class DonationTest {
         Donor donor = new Donor(99);
         donor.setId(99);
 
-        BloodCenter center = new BloodCenter(12345678900000L, "Hemocentro Z", new User(1));
+        BloodCenter center = new BloodCenter("12345678900000", "Hemocentro Z", new User(1));
         center.setId(88);
 
         Donation original = new Donation("Cancelada", 9.9f, LocalDateTime.of(2025, 4, 27, 0, 0), donor, center);

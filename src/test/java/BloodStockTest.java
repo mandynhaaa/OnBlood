@@ -13,7 +13,7 @@ class BloodStockTest {
 
     @Test
     public void testCreateBloodStockWithData() {
-        BloodCenter center = new BloodCenter(10L, "Hemocentro Central", new User(1));
+        BloodCenter center = new BloodCenter("10", "Hemocentro Central", new User(1));
         center.setId(100);
 
         BloodType type = new BloodType(1);
@@ -29,7 +29,7 @@ class BloodStockTest {
 
     @Test
     public void testToMap() {
-        BloodCenter center = new BloodCenter(10L, "Hemocentro", new User(1));
+        BloodCenter center = new BloodCenter("10", "Hemocentro", new User(1));
         center.setId(300);
 
         BloodType type = new BloodType(2);
@@ -73,7 +73,7 @@ class BloodStockTest {
 
     @Test
     public void testRoundTripMapConversion() {
-        BloodCenter center = new BloodCenter(999L, "Banco de Sangue", new User(1));
+        BloodCenter center = new BloodCenter("999", "Banco de Sangue", new User(1));
         center.setId(888);
 
         BloodType type = new BloodType(3);

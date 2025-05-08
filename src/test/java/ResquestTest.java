@@ -11,7 +11,7 @@ class RequestTest {
 
     @Test
     public void testCreateRequestWithData() {
-        BloodCenter center = new BloodCenter(12345678901234L, "Hemocentro 1", new User(1));
+        BloodCenter center = new BloodCenter("12345678901234", "Hemocentro 1", new User(1));
         center.setId(1);
 
         BloodType type = new BloodType("A+");
@@ -28,7 +28,7 @@ class RequestTest {
 
     @Test
     public void testToMap() {
-        BloodCenter center = new BloodCenter(12345678900000L, "Hemocentro 2", new User(1));
+        BloodCenter center = new BloodCenter("12345678900000", "Hemocentro 2", new User(1));
         center.setId(10);
 
         BloodType type = new BloodType("B+");
@@ -73,7 +73,7 @@ class RequestTest {
 
     @Test
     public void testRoundTripMapConversion() {
-        BloodCenter center = new BloodCenter(12345678900001L, "Hemocentro 3", new User(1));
+        BloodCenter center = new BloodCenter("12345678900001", "Hemocentro 3", new User(1));
         center.setId(30);
 
         BloodType type = new BloodType("O-");

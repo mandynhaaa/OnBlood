@@ -20,7 +20,7 @@ class BloodCenterTest {
         User user = new User("João", "joao@email.com", "123456", LocalDateTime.now(), type);
         user.setId(4);
 
-        BloodCenter center = new BloodCenter(12345678901234L, "Banco de Sangue", user);
+        BloodCenter center = new BloodCenter("12345678901234", "Banco de Sangue", user);
 
         assertEquals(12345678901234L, center.getCnpj());
         assertEquals("Banco de Sangue", center.getCompanyName());
@@ -32,7 +32,7 @@ class BloodCenterTest {
         User user = new User(5);
         user.setId(5);
 
-        BloodCenter center = new BloodCenter(123456789, "Hemocentro A", user);
+        BloodCenter center = new BloodCenter("123456789", "Hemocentro A", user);
         Map<String, String> map = center.toMap();
 
         assertEquals("123456789", map.get("cnpj"));
@@ -48,7 +48,7 @@ class BloodCenterTest {
             "id_Usuario", "7"
         );
 
-        BloodCenter center = new BloodCenter(0, null, null);
+        BloodCenter center = new BloodCenter(null, null, null);
         center.populate(data);
 
         assertEquals(111111111, center.getCnpj());
@@ -61,7 +61,7 @@ class BloodCenterTest {
     public void testPopulateWithMissingFields() {
         Map<String, String> data = Map.of("razao_Social", "Sem CNPJ");
 
-        BloodCenter center = new BloodCenter(0L, "", new User(1));
+        BloodCenter center = new BloodCenter(null, "", new User(1));
         center.populate(data);
 
         assertEquals(0L, center.getCnpj());
@@ -74,10 +74,10 @@ class BloodCenterTest {
         User user = new User(9);
         user.setId(9);
 
-        BloodCenter original = new BloodCenter(987654321, "Hemocentro Z", user);
+        BloodCenter original = new BloodCenter("987654321", "Hemocentro Z", user);
         Map<String, String> map = original.toMap();
 
-        BloodCenter copy = new BloodCenter(0, null, null);
+        BloodCenter copy = new BloodCenter(null, null, null);
         copy.populate(map);
 
         assertEquals(original.getCnpj(), copy.getCnpj());
