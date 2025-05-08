@@ -36,7 +36,7 @@ public class MainMenu extends JFrame {
             });
 
             addButton("Gerenciar Doações", e -> {
-                // abrir tela
+            	new ManagerDonation(user.getId(), user.getUserType().getId()).setVisible(true);
             });
 
             addButton("Gerenciar Solicitações", e -> {
@@ -50,7 +50,7 @@ public class MainMenu extends JFrame {
         // HEMOCENTRO
         } else if (userTypeId == 3) {
             addButton("Doações", e -> {
-            	new ManagerDonation(user.getId()).setVisible(true);
+            	new ManagerDonation(user.getId(), user.getUserType().getId()).setVisible(true);
             });
 
             addButton("Solicitações", e -> {
