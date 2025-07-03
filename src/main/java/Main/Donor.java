@@ -1,79 +1,50 @@
 package Main;
 
+import org.bson.Document;
+
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.ZoneId;
+import java.util.Date;
 
-import Standard.BaseModel;
+public class Donor {
+    private String cpf;
+    private LocalDate birthDate;
+    private String bloodType;
 
-public class Donor extends BaseModel {
-	private String cpf;
-	private LocalDate birthDate;
-	private User user;
-	private BloodType bloodType;
-	
-	public Donor(String cpf, LocalDate birthDate, User user, BloodType bloodType)
-	{
-		super("doador");
-		this.cpf = cpf;
-		this.birthDate = birthDate;
-		this.user = user;
-		this.bloodType = bloodType;
-	}
-	
-	public Donor(int id)
-	{
-		super("doador", id);
-		this.read();
-	}
-	
-	public String getCpf() {
-		return cpf;
-	}
-
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
-	}
-
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
-
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public BloodType getBloodType() {
-		return bloodType;
-	}
-
-	public void setBloodType(BloodType bloodType) {
-		this.bloodType = bloodType;
-	}
-
-	@Override
-	public void populate(Map<String, String> data) {
-        this.cpf = data.getOrDefault("cpf", null);
-        this.birthDate = LocalDate.parse(data.getOrDefault("data_Nascimento", null));
-        this.user = new User(data.get("id_Usuario") != null ? Integer.parseInt(data.get("id_Usuario")) : 0);
-        this.bloodType = new BloodType(data.get("id_Tipo_Sanguineo") != null ? Integer.parseInt(data.get("id_Tipo_Sanguineo")) : 0);
+    public Donor(String cpf, LocalDate birthDate, String bloodType) {
+        this.cpf = cpf;
+        this.birthDate = birthDate;
+        this.bloodType = bloodType;
     }
     
-	@Override
-	public Map<String, String> toMap() {
-        Map<String, String> data = new HashMap<>();
-        data.put("cpf", this.cpf);
-        data.put("data_Nascimento", String.valueOf(this.birthDate));
-        data.put("id_Usuario", String.valueOf(this.user.getId()));
-        data.put("id_Tipo_Sanguineo", String.valueOf(this.bloodType.getId()));
-        return data;
+    public Donor() {}
+
+    public String getCpf() { return cpf; }
+    public void setCpf(String cpf) { this.cpf = cpf; }
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    public String getBloodType() { return bloodType; }
+    public void setBloodType(String bloodType) { this.bloodType = bloodType; }
+    
+    public Document toDoc() {
+        return new Document("cpf", this.cpf)
+                .append("data_nascimento", this.birthDate)
+                .append("tipo_sanguineo", this.bloodType);
+    }
+
+    public static Donor fromDoc(Document doc) {
+        if (doc == null) return null;
+        Donor donor = new Donor();
+        donor.cpf = doc.getString("cpf");
+        
+        Object birthDateObj = doc.get("data_nascimento");
+        if (birthDateObj instanceof Date) {
+            donor.birthDate = ((Date) birthDateObj).toInstant()
+              .atZone(ZoneId.systemDefault())
+              .toLocalDate();
+        }
+
+        donor.bloodType = doc.getString("tipo_sanguineo");
+        return donor;
     }
 }

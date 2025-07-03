@@ -1,73 +1,82 @@
 package Standard;
 
-import java.util.HashMap;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.InsertOneResult;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import Connection.MongoConnection;
 import java.util.Map;
 
-import Connection.SQLGenerator;
-
 public abstract class BaseModel {
-    protected String table;
-    protected int id;
+    protected String collectionName;
+    protected ObjectId id;
 
-    public BaseModel(String table) {
-        this.table = table;
+    public BaseModel(String collectionName) {
+        this.collectionName = collectionName;
     }
 
-    public BaseModel(String table, int id) {
-        this.table = table;
+    public BaseModel(String collectionName, ObjectId id) {
+        this.collectionName = collectionName;
         this.id = id;
         read();
     }
+    
+    public MongoCollection<Document> getCollection() {
+        MongoDatabase db = MongoConnection.getDatabase();
+        return db.getCollection(this.collectionName);
+    }
 
-    public int create() {
-        int generatedId = SQLGenerator.insertSQL(table, toMap());
-        this.id = generatedId;
-        return generatedId;
+    public ObjectId create() {
+        Document doc = toDoc();
+        InsertOneResult result = getCollection().insertOne(doc);
+        this.id = result.getInsertedId().asObjectId().getValue();
+        return this.id;
     }
 
     public void read() {
-        if (this.id <= 0) {
+        if (this.id == null) {
             return;
         }
-
-        Map<String, String> filters = new HashMap<>();
-        String idTable = "id_" + table.substring(0, 1).toUpperCase() + table.substring(1).toLowerCase();
-        filters.put(idTable, String.valueOf(this.id));
-
-        String[][] result = SQLGenerator.selectSQL(table, null, filters);
-
-        if (result.length < 2) {
-            return;
+        Document doc = getCollection().find(Filters.eq("_id", this.id)).first();
+        if (doc != null) {
+            populateFromDoc(doc);
         }
-
-        String[] columns = result[0];
-        String[] values = result[1];
-
-        Map<String, String> data = new HashMap<>();
-        for (int i = 0; i < columns.length; i++) {
-            data.put(columns[i], values[i]);
-        }
-
-        populate(data);
     }
 
     public void update() {
-        SQLGenerator.updateSQL(table, this.id, toMap());
+        if (this.id == null) return;
+        Document doc = toDoc();
+        getCollection().updateOne(Filters.eq("_id", this.id), new Document("$set", doc));
     }
 
     public void delete() {
-        SQLGenerator.deleteSQL(table, this.id);
+        if (this.id == null) return;
+        getCollection().deleteOne(Filters.eq("_id", this.id));
     }
 
-    public int getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 
-    public abstract Map<String, String> toMap();
+    public abstract Document toDoc();
 
-    public abstract void populate(Map<String, String> data);
+
+    public abstract void populateFromDoc(Document data);
+    
+
+    @Deprecated
+    public Map<String, String> toMap() {
+        throw new UnsupportedOperationException("Use toDoc() for MongoDB operations.");
+    }
+
+    @Deprecated
+    public void populate(Map<String, String> data) {
+        throw new UnsupportedOperationException("Use populateFromDoc(Document) for MongoDB operations.");
+    }
 }

@@ -1,82 +1,71 @@
 package View.Telephone;
 
-import javax.swing.*;
 import Controller.TelephoneController;
-import Connection.ConnectionSQL;
+import Main.User;
+import org.bson.types.ObjectId;
 
-import java.sql.*;
+import javax.swing.*;
+import java.awt.*;
 
 public class EditTelephone extends JFrame {
     private JTextField tfDescricao, tfDdd, tfNumero;
-    private JButton btnSalvar, btnCancelar;
-    private int id_Telefone;
     private TelephoneController controller;
-    private ManagerTelephone parent;
+    private ManagerTelephone parentView;
+    private ObjectId idUsuario;
+    private ObjectId idTelefone;
 
-    public EditTelephone(int id_Telefone) {
-        this.id_Telefone = id_Telefone;
+    public EditTelephone(ObjectId idUsuario, ObjectId idTelefone, ManagerTelephone parentView) {
+        this.idUsuario = idUsuario;
+        this.idTelefone = idTelefone;
+        this.parentView = parentView;
 
         setTitle("Editar Telefone");
-        setSize(450, 350);
-        setLocationRelativeTo(null);
+        setSize(400, 250);
+        setLocationRelativeTo(parentView);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(null);
-
-        int y = 30;
-        tfDescricao = createField("Descrição:", y);
-        tfDdd = createField("DDD:", y += 50);
-        tfNumero = createField("Número:", y += 50);
-
-        btnSalvar = new JButton("Salvar");
-        btnSalvar.setBounds(130, y + 60, 90, 25);
+        setLayout(new GridLayout(4, 2, 10, 10));
+        ((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        
+        add(new JLabel("Descrição:"));
+        tfDescricao = new JTextField();
+        add(tfDescricao);
+        
+        add(new JLabel("DDD:"));
+        tfDdd = new JTextField();
+        add(tfDdd);
+        
+        add(new JLabel("Número:"));
+        tfNumero = new JTextField();
+        add(tfNumero);
+        
+        JButton btnSalvar = new JButton("Salvar");
         add(btnSalvar);
-
-        btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(230, y + 60, 90, 25);
+        JButton btnCancelar = new JButton("Cancelar");
         add(btnCancelar);
 
+        controller = new TelephoneController(idUsuario, idTelefone, tfDescricao, tfDdd, tfNumero);
+        
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
-
-        controller = new TelephoneController(this.id_Telefone, 0, tfDescricao, tfDdd, tfNumero);
-
+        
         carregarDados();
     }
 
-    private JTextField createField(String label, int y) {
-        JLabel lbl = new JLabel(label);
-        lbl.setBounds(30, y, 100, 20);
-        add(lbl);
-        JTextField tf = new JTextField();
-        tf.setBounds(130, y, 250, 22);
-        add(tf);
-        return tf;
-    }
-
     private void carregarDados() {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT descricao, ddd, numero FROM telefone WHERE id_Telefone = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id_Telefone);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                tfDescricao.setText(rs.getString("descricao"));
-                tfDdd.setText(rs.getString("ddd"));
-                tfNumero.setText(rs.getString("numero"));
-            }
-
-            rs.close();
-            stmt.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados do telefone.");
-        }
+        User user = new User(idUsuario);
+        user.getTelephones().stream()
+            .filter(p -> p.getId().equals(idTelefone))
+            .findFirst()
+            .ifPresent(phone -> {
+                tfDescricao.setText(phone.getDescription());
+                tfDdd.setText(phone.getDdd());
+                tfNumero.setText(phone.getNumber());
+            });
     }
 
     private void salvar() {
         controller.executeUpdate();
+        parentView.carregarTelefones();
         dispose();
     }
-
 }

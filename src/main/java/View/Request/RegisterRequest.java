@@ -1,91 +1,59 @@
 package View.Request;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
 import Controller.RequestController;
-
-import java.util.List;
+import org.bson.types.ObjectId;
+import javax.swing.*;
+import java.awt.*;
 
 public class RegisterRequest extends JFrame {
 
-    private JPanel contentPane;
-    private JComboBox<String> cbHemocentro, cbTipoSanguineo, cbStatus;
+    private JComboBox<String> cbTipoSanguineo, cbStatus;
     private JTextField tfVolume, tfDataHora;
     private RequestController controller;
-    private int idUsuario;
+    private ManagerRequest parentView;
 
-    public RegisterRequest(int idUser) {
-    	this.idUsuario = idUser;
+    public RegisterRequest(ObjectId idHemocentro, ManagerRequest parentView) {
+        this.parentView = parentView;
 
         setTitle("Cadastro de Solicitação");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 450, 350);
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+        setBounds(100, 100, 450, 300);
+        setLocationRelativeTo(parentView);
+        setLayout(new GridLayout(5, 2, 10, 10));
+        ((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
-        JLabel lblTipo = new JLabel("Tipo Sanguíneo:");
-        lblTipo.setBounds(30, 70, 100, 20);
-        contentPane.add(lblTipo);
-
+        add(new JLabel("Tipo Sanguíneo:"));
         cbTipoSanguineo = new JComboBox<>();
-        cbTipoSanguineo.setBounds(130, 70, 200, 22);
-        contentPane.add(cbTipoSanguineo);
+        add(cbTipoSanguineo);
 
-        JLabel lblVolume = new JLabel("Volume (mL):");
-        lblVolume.setBounds(30, 110, 100, 20);
-        contentPane.add(lblVolume);
-
+        add(new JLabel("Volume (mL):"));
         tfVolume = new JTextField();
-        tfVolume.setBounds(130, 110, 200, 22);
-        contentPane.add(tfVolume);
+        add(tfVolume);
 
-        JLabel lblDataHora = new JLabel("Data e Hora:");
-        lblDataHora.setBounds(30, 150, 100, 20);
-        contentPane.add(lblDataHora);
-
+        add(new JLabel("Data e Hora (dd/MM/yyyy HH:mm:ss):"));
         tfDataHora = new JTextField();
-        tfDataHora.setBounds(130, 150, 200, 22);
-        tfDataHora.setToolTipText("Formato: dd/MM/aaa HH:mm:ss");
-        contentPane.add(tfDataHora);
+        add(tfDataHora);
 
-        JLabel lblStatus = new JLabel("Status:");
-        lblStatus.setBounds(30, 190, 100, 20);
-        contentPane.add(lblStatus);
-
-        cbStatus = new JComboBox<>(new String[] {"Pendente", "Realizada", "Cancelada"});
-        cbStatus.setBounds(130, 190, 200, 22);
-        contentPane.add(cbStatus);
+        add(new JLabel("Status:"));
+        cbStatus = new JComboBox<>(new String[]{"Pendente", "Realizada", "Cancelada"});
+        add(cbStatus);
 
         JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setBounds(130, 240, 90, 25);
-        btnSalvar.addActionListener(e -> salvar());
-        contentPane.add(btnSalvar);
-
+        add(btnSalvar);
+        
         JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(240, 240, 90, 25);
-        btnCancelar.addActionListener(e -> {
-            dispose();
-        });
-        contentPane.add(btnCancelar);
-        
-        controller = new RequestController(0, this.idUsuario, tfVolume, tfDataHora, cbTipoSanguineo, cbStatus);
-        
-        List<String> tiposSangue = controller.listarTiposSanguineos();
-        if (tiposSangue.isEmpty()) {
-            cbTipoSanguineo.addItem("Nenhum cadastrado");
-            cbTipoSanguineo.setEnabled(false);
-        } else {
-            for (String tipo : tiposSangue) {
-                cbTipoSanguineo.addItem(tipo);
-            }
-        }
+        add(btnCancelar);
+
+        controller = new RequestController(null, idHemocentro, tfVolume, tfDataHora, cbTipoSanguineo, cbStatus);
+        controller.listarTiposSanguineos().forEach(cbTipoSanguineo::addItem);
+
+        btnSalvar.addActionListener(e -> salvar());
+        btnCancelar.addActionListener(e -> dispose());
     }
-    
+
     private void salvar() {
         controller.executeRegister();
+        parentView.carregarSolicitacoes();
         dispose();
     }
 }

@@ -1,80 +1,62 @@
 package Main;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
 import Standard.BaseModel;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class BloodStock extends BaseModel {
-	private LocalDate lastUpdateData;
-	private float volume;
-	private BloodCenter bloodCenter;
-	private BloodType bloodType;
-	
-	public BloodStock(LocalDate lastUpdateData, float volume, BloodCenter bloodCenter, BloodType bloodType)
-	{
-		super("estoque");
-		this.lastUpdateData = lastUpdateData;
-		this.volume = volume;
-		this.bloodCenter = bloodCenter;
-		this.bloodType = bloodType;
-	}
-	
-	public BloodStock(int id)
-	{
-		super("estoque", id);
-		this.read();
-	}
+    private LocalDateTime lastUpdateDate;
+    private float volume;
+    private ObjectId bloodCenterId; 
+    private String bloodType;       
 
-	public LocalDate getLastUpdateData() {
-		return lastUpdateData;
-	}
-
-	public void setLastUpdateData(LocalDate lastUpdateData) {
-		this.lastUpdateData = lastUpdateData;
-	}
-
-	public float getVolume() {
-		return volume;
-	}
-
-	public void setVolume(float volume) {
-		this.volume = volume;
-	}
-
-	public BloodCenter getBloodCenter() {
-		return bloodCenter;
-	}
-
-	public void setBloodCenter(BloodCenter bloodCenter) {
-		this.bloodCenter = bloodCenter;
-	}
-
-	public BloodType getBloodType() {
-		return bloodType;
-	}
-
-	public void setBloodType(BloodType bloodType) {
-		this.bloodType = bloodType;
-	}
-	
-	@Override
-	public void populate(Map<String, String> data) {
-        this.lastUpdateData = LocalDate.parse(data.getOrDefault("data_Atualizacao", null));
-        this.volume = data.get("volume") != null ? Float.parseFloat(data.get("volume")) : 0f;
-        this.bloodCenter = new BloodCenter(Integer.parseInt(data.getOrDefault("id_Hemocentro", null)));
-        this.bloodType = new BloodType(Integer.parseInt(data.getOrDefault("id_TipoSanguineo", null)));
+    public BloodStock(LocalDateTime lastUpdateDate, float volume, ObjectId bloodCenterId, String bloodType) {
+        super("estoque");
+        this.lastUpdateDate = lastUpdateDate;
+        this.volume = volume;
+        this.bloodCenterId = bloodCenterId;
+        this.bloodType = bloodType;
     }
     
-	@Override
-	public Map<String, String> toMap() {
-        Map<String, String> data = new HashMap<>();
-        data.put("data_Atualizacao", String.valueOf(this.lastUpdateData));
-        data.put("volume", String.valueOf(this.volume));
-        data.put("id_Hemocentro", String.valueOf(this.bloodCenter.getId()));
-        data.put("id_TipoSanguineo", String.valueOf(this.bloodType.getId()));
-        return data;
+    public BloodStock(ObjectId id) {
+        super("estoque", id);
+    }
+    
+    public BloodStock() {
+        super("estoque");
+    }
+
+    public LocalDateTime getLastUpdateDate() { return lastUpdateDate; }
+    public void setLastUpdateDate(LocalDateTime d) { this.lastUpdateDate = d; }
+    public float getVolume() { return volume; }
+    public void setVolume(float v) { this.volume = v; }
+    public ObjectId getBloodCenterId() { return bloodCenterId; }
+    public void setBloodCenterId(ObjectId id) { this.bloodCenterId = id; }
+    public String getBloodType() { return bloodType; }
+    public void setBloodType(String type) { this.bloodType = type; }
+
+    @Override
+    public Document toDoc() {
+        return new Document("data_atualizacao", this.lastUpdateDate)
+                .append("volume", this.volume)
+                .append("id_hemocentro", this.bloodCenterId)
+                .append("tipo_sanguineo", this.bloodType);
+    }
+
+    @Override
+    public void populateFromDoc(Document doc) {
+        if (doc == null) return;
+        this.id = doc.getObjectId("_id");
+        Date lastUpdateDateFromDb = doc.get("data_atualizacao", Date.class);
+        if (lastUpdateDateFromDb != null) {
+            this.lastUpdateDate = lastUpdateDateFromDb.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        }
+        this.volume = doc.getDouble("volume").floatValue();
+        this.bloodCenterId = doc.getObjectId("id_hemocentro");
+        this.bloodType = doc.getString("tipo_sanguineo");
     }
 }
-

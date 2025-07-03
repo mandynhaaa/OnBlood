@@ -1,102 +1,64 @@
 package Main;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
 import Standard.BaseModel;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class Donation extends BaseModel {
-	private String status;
-	private float volume;
-	private LocalDateTime datetime;
-	private Donor donor;
-	private BloodCenter bloodCenter;
-	
-	public Donation(String status, float volume, LocalDateTime datetime, Donor donor, BloodCenter bloodCenter)
-	{
-		super("doacao");
-		this.status = status;
-		this.volume = volume;
-		this.datetime = datetime;
-		this.donor = donor;
-		this.bloodCenter = bloodCenter;
-	}
-	
-	public Donation(int id)
-	{
-		super("doacao", id);
-		this.read();
-	}
-	
-	public String getStatus() {
-		return status;
-	}
+    private String status;
+    private float volume;
+    private LocalDateTime datetime;
+    private ObjectId donorId;       
+    private ObjectId bloodCenterId; 
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public Donation(String status, float volume, LocalDateTime datetime, ObjectId donorId, ObjectId bloodCenterId) {
+        super("doacoes");
+        this.status = status;
+        this.volume = volume;
+        this.datetime = datetime;
+        this.donorId = donorId;
+        this.bloodCenterId = bloodCenterId;
+    }
 
-	public float getVolume() {
-		return volume;
-	}
-
-	public void setVolume(float volume) {
-		this.volume = volume;
-	}
-
-	public LocalDateTime getDatetime() {
-		return datetime;
-	}
-
-	public void setDatetime(LocalDateTime datetime) {
-		this.datetime = datetime;
-	}
-
-	public Donor getDonor() {
-		return donor;
-	}
-
-	public void setDonor(Donor donor) {
-		this.donor = donor;
-	}
-
-	public BloodCenter getBloodCenter() {
-		return bloodCenter;
-	}
-
-	public void setBloodCenter(BloodCenter bloodCenter) {
-		this.bloodCenter = bloodCenter;
-	}
-
-	@Override
-	public void populate(Map<String, String> data) {
-		this.status = data.getOrDefault("status", null);
-		this.volume = data.get("volume") != null ? Float.parseFloat(data.get("volume")) : 0f;
-		
-		String rawDate = data.getOrDefault("data_Hora", null);
-		if (rawDate != null) {
-		    try {
-		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		        this.datetime = LocalDateTime.parse(rawDate, formatter);
-		    } catch (Exception e) {
-		        this.datetime = LocalDateTime.parse(rawDate);
-		    }
-		}
-		
-        this.donor = new Donor(data.get("id_Doador") != null ? Integer.parseInt(data.get("id_Doador")) : 0);
-        this.bloodCenter = new BloodCenter(data.get("id_Hemocentro") != null ? Integer.parseInt(data.get("id_Hemocentro")) : 0);
+    public Donation(ObjectId id) {
+        super("doacoes", id);
     }
     
-	@Override
-	public Map<String, String> toMap() {
-        Map<String, String> data = new HashMap<>();
-        data.put("status", this.status);
-        data.put("volume", String.valueOf(this.volume));
-        data.put("data_Hora", this.datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        data.put("id_Doador", String.valueOf(this.donor.getId()));
-        data.put("id_Hemocentro", String.valueOf(this.bloodCenter.getId()));
-        return data;
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public float getVolume() { return volume; }
+    public void setVolume(float volume) { this.volume = volume; }
+    public LocalDateTime getDatetime() { return datetime; }
+    public void setDatetime(LocalDateTime datetime) { this.datetime = datetime; }
+    public ObjectId getDonorId() { return donorId; }
+    public void setDonorId(ObjectId donorId) { this.donorId = donorId; }
+    public ObjectId getBloodCenterId() { return bloodCenterId; }
+    public void setBloodCenterId(ObjectId bloodCenterId) { this.bloodCenterId = bloodCenterId; }
+
+    @Override
+    public Document toDoc() {
+        return new Document("status", this.status)
+                .append("volume", this.volume)
+                .append("data_hora", this.datetime)
+                .append("id_doador", this.donorId)
+                .append("id_hemocentro", this.bloodCenterId);
+    }
+
+    @Override
+    public void populateFromDoc(Document doc) {
+        if (doc == null) return;
+        this.id = doc.getObjectId("_id");
+        this.status = doc.getString("status");
+        this.volume = doc.getDouble("volume").floatValue();
+        Date datetimeFromDb = doc.get("data_hora", Date.class);
+        if (datetimeFromDb != null) {
+            this.datetime = datetimeFromDb.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        }
+        this.donorId = doc.getObjectId("id_doador");
+        this.bloodCenterId = doc.getObjectId("id_hemocentro");
     }
 }

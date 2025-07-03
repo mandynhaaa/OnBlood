@@ -1,34 +1,24 @@
 package View.Access;
 
-import java.awt.EventQueue;
-import javax.swing.*;
-import java.awt.Font;
-import java.util.List;
-
 import Controller.UserController;
+import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+import java.awt.Font;
+import java.awt.Component;
+import java.text.ParseException;
+import java.util.List;
 
 public class RegisterUser extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
-    private JTextField tf_nome, tf_email, tf_senha;
-    private JTextField tf_cpf, tf_endereco, tf_razao_Social;
+    private JTextField tf_nome, tf_email;
+    private JPasswordField tf_senha;
+    private JFormattedTextField tf_cpf, tf_dataNascimento; 
+    private JTextField tf_razao_Social, tf_cnpj;
     private JComboBox<String> comboTipoUsuario;
-    private JTextField tf_dataNascimento;
     private JComboBox<String> comboTipoSangue;
-    private JTextField tf_cnpj;
     private UserController controller;
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                RegisterUser frame = new RegisterUser();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     public RegisterUser() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,128 +32,120 @@ public class RegisterUser extends JFrame {
         lblTitulo.setBounds(220, 20, 180, 40);
         contentPane.add(lblTitulo);
 
-        JLabel lblNome = new JLabel("Nome:");
-        lblNome.setBounds(100, 80, 100, 25);
-        contentPane.add(lblNome);
+        addLabelAndField("Nome:", 80, tf_nome = new JTextField());
+        addLabelAndField("E-mail:", 120, tf_email = new JTextField());
+        addLabelAndField("Senha:", 160, tf_senha = new JPasswordField());
+        addLabelAndField("Tipo:", 200, comboTipoUsuario = new JComboBox<>(new String[]{"Doador", "Hemocentro"}));
+        
+        JLabel lblCPF = addLabel("CPF:", 240);
+        JLabel lblTipoSanguineo = addLabel("Tipo Sanguíneo:", 280);
+        JLabel lblDataNascimento = addLabel("Nascimento:", 320);
+        lblDataNascimento.setToolTipText("Formato: dd/MM/yyyy");
 
-        tf_nome = new JTextField();
-        tf_nome.setBounds(200, 80, 250, 25);
-        contentPane.add(tf_nome);
+        try {
+            MaskFormatter cpfFormatter = new MaskFormatter("###.###.###-##");
+            tf_cpf = new JFormattedTextField(cpfFormatter);
+            tf_cpf.setBounds(200, 240, 250, 25);
+            contentPane.add(tf_cpf);
 
-        JLabel lblEmail = new JLabel("E-mail:");
-        lblEmail.setBounds(100, 120, 100, 25);
-        contentPane.add(lblEmail);
+            MaskFormatter dateFormatter = new MaskFormatter("##/##/####");
+            tf_dataNascimento = new JFormattedTextField(dateFormatter);
+            tf_dataNascimento.setBounds(200, 320, 250, 25);
+            contentPane.add(tf_dataNascimento);
 
-        tf_email = new JTextField();
-        tf_email.setBounds(200, 120, 250, 25);
-        contentPane.add(tf_email);
-
-        JLabel lblSenha = new JLabel("Senha:");
-        lblSenha.setBounds(100, 160, 100, 25);
-        contentPane.add(lblSenha);
-
-        tf_senha = new JTextField();
-        tf_senha.setBounds(200, 160, 250, 25);
-        contentPane.add(tf_senha);
-
-        JLabel lblTipo = new JLabel("Tipo:");
-        lblTipo.setBounds(100, 200, 100, 25);
-        contentPane.add(lblTipo);
-
-        comboTipoUsuario = new JComboBox<>(new String[] { "Doador", "Hemocentro" });
-        comboTipoUsuario.setBounds(200, 200, 250, 25);
-        contentPane.add(comboTipoUsuario);
-
-        tf_cpf = new JTextField();
-        tf_cpf.setBounds(200, 240, 250, 25);
-        contentPane.add(tf_cpf);
-
-        JLabel lblCPF = new JLabel("CPF:");
-        lblCPF.setBounds(100, 240, 100, 25);
-        contentPane.add(lblCPF);
-
-        JLabel lblTipoSanguineo = new JLabel("Tipo Sanguíneo:");
-        lblTipoSanguineo.setBounds(100, 280, 100, 25);
-        contentPane.add(lblTipoSanguineo);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tf_cpf = new JFormattedTextField();
+            tf_dataNascimento = new JFormattedTextField();
+        }
 
         comboTipoSangue = new JComboBox<>();
         comboTipoSangue.setBounds(200, 280, 250, 25);
         contentPane.add(comboTipoSangue);
 
-        JLabel lblDataNascimento = new JLabel("Nascimento:");
-        lblDataNascimento.setToolTipText("Formato: dd/MM/aaa");
-        lblDataNascimento.setBounds(100, 320, 200, 25);
-        contentPane.add(lblDataNascimento);
-
-        JTextField tf_dataNascimento = new JTextField();
-        tf_dataNascimento.setBounds(300, 320, 150, 25);
-        contentPane.add(tf_dataNascimento);
-
+        JLabel lblRazaoSocial = addLabel("Razão Social:", 240);
         tf_razao_Social = new JTextField();
         tf_razao_Social.setBounds(200, 240, 250, 25);
         contentPane.add(tf_razao_Social);
-        tf_razao_Social.setVisible(false);
 
-        JLabel lblrazao_Social = new JLabel("Razão Social:");
-        lblrazao_Social.setBounds(100, 240, 100, 25);
-        contentPane.add(lblrazao_Social);
-        lblrazao_Social.setVisible(false);
-
-        JTextField tf_cnpj = new JTextField();
+        JLabel lblCNPJ = addLabel("CNPJ:", 280);
+        tf_cnpj = new JTextField();
         tf_cnpj.setBounds(200, 280, 250, 25);
         contentPane.add(tf_cnpj);
-        tf_cnpj.setVisible(false);
 
-        JLabel lblCNPJ = new JLabel("CNPJ:");
-        lblCNPJ.setBounds(100, 280, 100, 25);
-        contentPane.add(lblCNPJ);
+        setupVisibilityAndActions(lblCPF, lblTipoSanguineo, lblDataNascimento, lblRazaoSocial, lblCNPJ);
+
+        controller = new UserController(tf_nome, tf_email, tf_senha, comboTipoUsuario, tf_cpf, tf_dataNascimento, comboTipoSangue, tf_cnpj, tf_razao_Social);
+        loadBloodTypes();
+    }
+    
+    private void addLabelAndField(String labelText, int y, JComponent field) {
+        JLabel label = new JLabel(labelText);
+        label.setBounds(100, y, 100, 25);
+        contentPane.add(label);
+        field.setBounds(200, y, 250, 25);
+        contentPane.add(field);
+    }
+
+    private JLabel addLabel(String text, int y) {
+        JLabel label = new JLabel(text);
+        label.setBounds(100, y, 100, 25);
+        contentPane.add(label);
+        return label;
+    }
+
+    private void setupVisibilityAndActions(JLabel lblCPF, JLabel lblTipoSanguineo, JLabel lblDataNascimento, JLabel lblRazaoSocial, JLabel lblCNPJ) {
+
+        lblRazaoSocial.setVisible(false);
+        tf_razao_Social.setVisible(false);
         lblCNPJ.setVisible(false);
-
+        tf_cnpj.setVisible(false);
+        
         comboTipoUsuario.addItemListener(e -> {
-            boolean isDoador = comboTipoUsuario.getSelectedItem().equals("Doador");
-
-            tf_cpf.setVisible(isDoador);
+            boolean isDoador = "Doador".equals(comboTipoUsuario.getSelectedItem());
+            
             lblCPF.setVisible(isDoador);
-            comboTipoSangue.setVisible(isDoador);
+            tf_cpf.setVisible(isDoador);
             lblTipoSanguineo.setVisible(isDoador);
-            tf_dataNascimento.setVisible(isDoador);
+            comboTipoSangue.setVisible(isDoador);
             lblDataNascimento.setVisible(isDoador);
+            tf_dataNascimento.setVisible(isDoador);
 
+            lblRazaoSocial.setVisible(!isDoador);
             tf_razao_Social.setVisible(!isDoador);
-            lblrazao_Social.setVisible(!isDoador);
-            tf_cnpj.setVisible(!isDoador);
             lblCNPJ.setVisible(!isDoador);
+            tf_cnpj.setVisible(!isDoador);
         });
-
+        
         JButton btnCadastrar = new JButton("Criar Conta");
-        btnCadastrar.setBounds(230, 360, 120, 30);
+        btnCadastrar.setBounds(230, 380, 120, 30);
         contentPane.add(btnCadastrar);
 
-        JButton btnLogar = new JButton("Logar");
-        btnLogar.setBounds(230, 400, 120, 25);
+        JButton btnLogar = new JButton("Já tenho conta");
+        btnLogar.setBounds(230, 420, 120, 25);
         contentPane.add(btnLogar);
-
-        controller = new UserController(0, 0,
-        	    tf_nome, tf_email, tf_senha, comboTipoUsuario,
-        	    tf_cpf, tf_razao_Social, tf_dataNascimento, comboTipoSangue, tf_cnpj
-        	);
+        
         btnCadastrar.addActionListener(e -> {
-            controller.executeRegister();
-            dispose();
+            if (controller != null) {
+                controller.executeRegister();
+            }
         });
 
         btnLogar.addActionListener(e -> {
             new Login().setVisible(true);
             dispose();
         });
+    }
+
+    private void loadBloodTypes() {
+        List<String> tiposSangue = new UserController().listarTiposSanguineos();
         
-        List<String> tiposSangue = controller.listarTiposSanguineos();
         if (tiposSangue.isEmpty()) {
-        	comboTipoSangue.addItem("Nenhum cadastrado");
-        	comboTipoSangue.setEnabled(false);
+            comboTipoSangue.addItem("Nenhum cadastrado");
+            comboTipoSangue.setEnabled(false);
         } else {
             for (String tipo : tiposSangue) {
-            	comboTipoSangue.addItem(tipo);
+                comboTipoSangue.addItem(tipo);
             }
         }
     }

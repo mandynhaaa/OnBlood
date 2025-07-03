@@ -1,78 +1,40 @@
 package Main;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 
-import Standard.BaseModel;
-
-public class Telephone extends BaseModel {
-	private String description;
-	private String ddd;
-	private String number;
-	private User user;
-	
-	public Telephone (String description, String ddd, String number, User user)
-	{
-		super("telefone");
-		this.description = description;
-		this.ddd = ddd;
-		this.number = number;
-		this.user = user;
-	}
-	
-	public Telephone (int id)
-	{
-		super("telefone", id);
-		this.read();
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getDdd() {
-		return ddd;
-	}
-
-	public void setDdd(String ddd) {
-		this.ddd = ddd;
-	}
-
-	public String getNumber() {
-		return number;
-	}
-
-	public void setNumber(String number) {
-		this.number = number;
-	}
-	
-    public User getUser() {
-    	return user;
-    }
+public class Telephone {
+    private ObjectId id;
+    private String description;
+    private String ddd;
+    private String number;
     
-    public void setUser(User user) {
-    	this.user = user;
+    public Telephone() {
+        this.id = new ObjectId();
     }
-	
-	@Override
-	public Map<String, String> toMap() {
-		Map<String, String> data = new HashMap<>();
-		data.put("descricao", this.description);
-		data.put("ddd", String.valueOf(this.ddd));
-		data.put("numero", String.valueOf(this.number));
-		data.put("id_Usuario", String.valueOf(this.user.getId()));
-		return data;
-	}
+
+    public ObjectId getId() { return id; }
+    public String getDescription() { return description; }
+    public void setDescription(String d) { this.description = d; }
+    public String getDdd() { return ddd; }
+    public void setDdd(String ddd) { this.ddd = ddd; }
+    public String getNumber() { return number; }
+    public void setNumber(String n) { this.number = n; }
     
-	@Override
-	public void populate(Map<String, String> data) {
-		this.description = data.getOrDefault("descricao", null);
-		this.ddd = data.getOrDefault("ddd", null);
-		this.number = data.getOrDefault("numero", null);
-		this.user = new User(data.get("id_Usuario") != null ? Integer.parseInt(data.get("id_Usuario")) : 0);
-	}
+    public Document toDoc() {
+        return new Document("id_telefone", this.id)
+                .append("descricao", this.description)
+                .append("ddd", this.ddd)
+                .append("numero", this.number);
+    }
+
+    public static Telephone fromDoc(Document doc) {
+        if (doc == null) return null;
+        Telephone phone = new Telephone();
+        phone.id = doc.getObjectId("id_telefone");
+        phone.description = doc.getString("descricao");
+        phone.ddd = doc.getString("ddd");
+        phone.number = doc.getString("numero");
+        return phone;
+    }
 }

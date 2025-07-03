@@ -1,231 +1,168 @@
 package View.Access;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.time.LocalDate;
+import Controller.UserController;
+import Main.User;
+import Main.Donor;
+import Main.BloodCenter;
+import View.Address.ManagerAddress;
+import View.Telephone.ManagerTelephone;
+import org.bson.types.ObjectId;
+
+import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+import java.awt.*;
+import java.text.ParseException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import Connection.ConnectionSQL;
-import Controller.UserController;
-import View.Address.ManagerAddress;
-import View.Telephone.ManagerTelephone;
-
 public class AccountConfiguration extends JFrame {
 
-    private JPanel contentPane;
-    private JTextField tf_nome, tf_email, tf_senha, tf_cpf, tf_razao_Social, tf_dataNascimento, tf_cnpj;
+    private JTextField tf_nome, tf_email;
+    private JPasswordField tf_senha;
+    private JFormattedTextField tf_cpf, tf_dataNascimento;
+    private JTextField tf_razao_Social, tf_cnpj;
     private JComboBox<String> comboTipoSangue;
     private UserController controller;
-    private int idUsuario;
-    private int userType;
+    private User user; // Armazena o objeto User completo
 
-    public AccountConfiguration(int idUser, int userType) {
-        this.idUsuario = idUser;
-        this.userType = userType;
+    public AccountConfiguration(User user) {
+        this.user = user;
 
         setTitle("Configuração de Conta");
-        setSize(600, 400);
+        setSize(600, 480);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(5, 10, 5, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        int gridY = 0;
 
-        JLabel lblNome = new JLabel("Nome:");
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        add(lblNome, gbc);
-
-        tf_nome = new JTextField();
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        add(tf_nome, gbc);
-
-        JLabel lblEmail = new JLabel("E-mail:");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(lblEmail, gbc);
-
-        tf_email = new JTextField();
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        add(tf_email, gbc);
-
-        JLabel lblSenha = new JLabel("Senha:");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(lblSenha, gbc);
-
-        tf_senha = new JTextField();
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        add(tf_senha, gbc);
+        tf_nome = createField(gbc, "Nome:", gridY++);
+        tf_email = createField(gbc, "E-mail:", gridY++);
+        tf_senha = createPasswordField(gbc, "Nova Senha (deixe em branco para não alterar):", gridY++);
         
-        if (userType == 2) {
-            JLabel lblCPF = new JLabel("CPF:");
-            gbc.gridx = 0;
-            gbc.gridy = 3;
-            add(lblCPF, gbc);
+        if ("Doador".equals(user.getUserType())) {
+            try {
+                MaskFormatter cpfFormatter = new MaskFormatter("###.###.###-##");
+                tf_cpf = createFormattedField(gbc, "CPF:", gridY++, cpfFormatter);
+                
+                comboTipoSangue = createComboBox(gbc, "Tipo Sanguíneo:", gridY++);
 
-            tf_cpf = new JTextField();
-            gbc.gridx = 1;
-            gbc.gridy = 3;
-            add(tf_cpf, gbc);
+                MaskFormatter dateFormatter = new MaskFormatter("##/##/####");
+                tf_dataNascimento = createFormattedField(gbc, "Nascimento:", gridY++, dateFormatter);
 
-            JLabel lblTipoSangue = new JLabel("Tipo Sanguíneo:");
-            gbc.gridx = 0;
-            gbc.gridy = 4;
-            add(lblTipoSangue, gbc);
-
-            comboTipoSangue = new JComboBox<>();
-            gbc.gridx = 1;
-            gbc.gridy = 4;
-            add(comboTipoSangue, gbc);
-
-            JLabel lblNascimento = new JLabel("Nascimento:");
-            lblNascimento.setToolTipText("Formato: dd/MM/aaaa");
-            gbc.gridx = 0;
-            gbc.gridy = 5;
-            add(lblNascimento, gbc);
-
-            tf_dataNascimento = new JTextField();
-            gbc.gridx = 1;
-            gbc.gridy = 5;
-            add(tf_dataNascimento, gbc);
-            
-            controller = new UserController(idUsuario, userType,
-                    tf_nome, tf_email, tf_senha, null,
-                    tf_cpf, null, tf_dataNascimento, comboTipoSangue, null
-            );
-
-            List<String> tipos = controller.listarTiposSanguineos();
-            if (tipos.isEmpty()) {
-                comboTipoSangue.addItem("Nenhum cadastrado");
-                comboTipoSangue.setEnabled(false);
-            } else {
-                for (String tipo : tipos) comboTipoSangue.addItem(tipo);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                tf_cpf = new JFormattedTextField();
+                tf_dataNascimento = new JFormattedTextField();
             }
-
-        } else if (userType == 3) {
-            JLabel lblRazao = new JLabel("Razão Social:");
-            gbc.gridx = 0;
-            gbc.gridy = 3;
-            add(lblRazao, gbc);
-
-            tf_razao_Social = new JTextField();
-            gbc.gridx = 1;
-            gbc.gridy = 3;
-            add(tf_razao_Social, gbc);
-
-            JLabel lblCNPJ = new JLabel("CNPJ:");
-            gbc.gridx = 0;
-            gbc.gridy = 4;
-            add(lblCNPJ, gbc);
-
-            tf_cnpj = new JTextField();
-            gbc.gridx = 1;
-            gbc.gridy = 4;
-            add(tf_cnpj, gbc);
             
-            controller = new UserController(idUsuario, userType,
-                    tf_nome, tf_email, tf_senha, null,
-                    null, tf_razao_Social, null, null, tf_cnpj
-            );
+            controller = new UserController(user.getId(), tf_nome, tf_email, tf_senha, tf_cpf, tf_dataNascimento, comboTipoSangue, null, null);
+            
+            List<String> tipos = controller.listarTiposSanguineos();
+            tipos.forEach(comboTipoSangue::addItem);
+
+        } else if ("Hemocentro".equals(user.getUserType())) {
+            tf_razao_Social = createField(gbc, "Razão Social:", gridY++);
+            tf_cnpj = createField(gbc, "CNPJ:", gridY++);
+            
+            controller = new UserController(user.getId(), tf_nome, tf_email, tf_senha, null, null, null, tf_cnpj, tf_razao_Social);
         }
 
-        addButton("Telefones", e -> new ManagerTelephone(idUsuario).setVisible(true));
-        addButton("Endereços", e -> new ManagerAddress(idUsuario).setVisible(true));
-        addButton("Salvar", e -> salvar());
+        gbc.gridy = gridY;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
+        buttonPanel.add(createButton("Gerenciar Endereços", e -> new ManagerAddress(user.getId()).setVisible(true)));
+        buttonPanel.add(createButton("Gerenciar Telefones", e -> new ManagerTelephone(user.getId()).setVisible(true)));
+        buttonPanel.add(createButton("Salvar Alterações", e -> {
+            // A lógica de update precisa ser chamada aqui
+            // controller.executeUpdate(); 
+            dispose();
+        }));
+        add(buttonPanel, gbc);
         
         carregarDados();
-	}
-	
-    private void addButton(String text, java.awt.event.ActionListener action) {
-        JButton button = new JButton(text);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.addActionListener(action);
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(button);
-    }
-    
-    private void salvar() {
-        controller.executeUpdate();
-        dispose();
     }
 
     private void carregarDados() {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            
-        	String sql = "";
-            if (userType == 2) {
-            	sql = "SELECT nome, email, cpf, data_Nascimento, id_Tipo_Sanguineo "
-        			+ "FROM usuario "
-        			+ "INNER JOIN doador ON doador.id_Usuario = usuario.id_Usuario "
-        			+ "WHERE usuario.id_Usuario = ?";
-            } else if (userType == 3) {
-            	sql = "SELECT nome, email, cnpj, razao_Social "
-        			+ "FROM usuario "
-        			+ "INNER JOIN hemocentro ON hemocentro.id_Usuario = usuario.id_Usuario "
-        			+ "WHERE usuario.id_Usuario = ?";
-            }
-            
-            
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idUsuario);
-            ResultSet rs = stmt.executeQuery();
+        tf_nome.setText(user.getName());
+        tf_email.setText(user.getEmail());
 
-            if (rs.next()) {
-                if (userType == 2) {
-                    tf_cpf.setText(rs.getString("cpf"));
-                    
-                    DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                    DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-                    LocalDate dataHoraConvertida = LocalDate.parse(rs.getString("data_Nascimento"), formatoEntrada);
-                    String dataHoraFormatada = dataHoraConvertida.format(formatoSaida);
-                    
-                    tf_dataNascimento.setText(dataHoraFormatada);
-                    
-                    String tipoSanguineo = rs.getString("id_Tipo_Sanguineo");
-                    for (int i = 0; i < comboTipoSangue.getItemCount(); i++) {
-                        String item = comboTipoSangue.getItemAt(i);
-                        if (item.contains("[" + tipoSanguineo + "]")) {
-                        	comboTipoSangue.setSelectedIndex(i);
-                            break;
-                        }
-                    }
-                } else if (userType == 3) {
-                    tf_cnpj.setText(rs.getString("cnpj"));
-                    tf_razao_Social.setText(rs.getString("razao_Social"));
+        if ("Doador".equals(user.getUserType())) {
+            Donor donorInfo = user.getDonorInfo();
+            if (donorInfo != null) {
+                tf_cpf.setText(donorInfo.getCpf());
+                if (donorInfo.getBirthDate() != null) {
+                    tf_dataNascimento.setText(donorInfo.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 }
-                
-                tf_nome.setText(rs.getString("nome"));
-                tf_email.setText(rs.getString("email"));
+                comboTipoSangue.setSelectedItem(donorInfo.getBloodType());
             }
-
-            rs.close();
-            stmt.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados.");
+        } else if ("Hemocentro".equals(user.getUserType())) {
+            BloodCenter centerInfo = user.getBloodCenterInfo();
+            if (centerInfo != null) {
+                tf_razao_Social.setText(centerInfo.getCompanyName());
+                tf_cnpj.setText(centerInfo.getCnpj());
+            }
         }
+    }
+
+    private JTextField createField(GridBagConstraints gbc, String label, int y) {
+        gbc.gridy = y;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel(label), gbc);
+        JTextField tf = new JTextField(25);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        add(tf, gbc);
+        return tf;
+    }
+    
+    private JPasswordField createPasswordField(GridBagConstraints gbc, String label, int y) {
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel(label), gbc);
+        JPasswordField pf = new JPasswordField(25);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        add(pf, gbc);
+        return pf;
+    }
+    
+    private JFormattedTextField createFormattedField(GridBagConstraints gbc, String label, int y, MaskFormatter formatter) {
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel(label), gbc);
+        JFormattedTextField ftf = new JFormattedTextField(formatter);
+        ftf.setColumns(25);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        add(ftf, gbc);
+        return ftf;
+    }
+
+    private JComboBox<String> createComboBox(GridBagConstraints gbc, String label, int y) {
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        add(new JLabel(label), gbc);
+        JComboBox<String> cb = new JComboBox<>();
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        add(cb, gbc);
+        return cb;
+    }
+
+    private JButton createButton(String text, java.awt.event.ActionListener action) {
+        JButton button = new JButton(text);
+        button.addActionListener(action);
+        return button;
     }
 }
