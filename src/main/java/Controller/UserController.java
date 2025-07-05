@@ -108,6 +108,58 @@ public class UserController {
         }
     }
     
+    public boolean  executeUpdate() {
+        if (this.idUsuario == null) {
+            JOptionPane.showMessageDialog(null, "Erro: ID do utilizador não encontrado para atualização.");
+            return false;
+        }
+        
+        User user = new User(this.idUsuario);
+        if(user.getId() == null) {
+            JOptionPane.showMessageDialog(null, "Utilizador não encontrado na base de dados.");
+            return false;
+        }
+
+        user.setName(tf_name.getText());
+        user.setEmail(tf_email.getText());
+        
+        String newPassword = new String(tf_senha.getPassword());
+        if (newPassword != null && !newPassword.isEmpty()) {
+            user.setPassword(newPassword); 
+        }
+
+        if ("Doador".equals(user.getUserType())) {
+            Donor donorInfo = user.getDonorInfo() != null ? user.getDonorInfo() : new Donor();
+            try {
+                donorInfo.setCpf(tf_cpf.getText().replaceAll("[^0-9]", ""));
+                donorInfo.setBloodType((String) comboTipoSanguineo.getSelectedItem());
+                String data = tf_dataNascimento.getText();
+                if (!data.trim().replace("/", "").isEmpty()) {
+                    donorInfo.setBirthDate(LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                }
+                user.setDonorInfo(donorInfo);
+            } catch (DateTimeParseException e) {
+                JOptionPane.showMessageDialog(null, "Formato de data inválido. Use dd/MM/yyyy.");
+                return false;
+            }
+        } else if ("Hemocentro".equals(user.getUserType())) {
+            BloodCenter centerInfo = user.getBloodCenterInfo() != null ? user.getBloodCenterInfo() : new BloodCenter();
+            centerInfo.setCnpj(tf_cnpj.getText());
+            centerInfo.setCompanyName(tf_razao_Social.getText());
+            user.setBloodCenterInfo(centerInfo);
+        }
+
+        try {
+            user.update(); 
+            JOptionPane.showMessageDialog(null, "Dados alterados com sucesso!");
+            return true; 
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Ocorreu um erro ao salvar as alterações.");
+            e.printStackTrace();
+            return false; 
+        }
+    }
+    
     public List<String> listarTiposSanguineos() {
         List<String> tipos = new ArrayList<>();
         MongoCollection<Document> collection = new BloodType("").getCollection();

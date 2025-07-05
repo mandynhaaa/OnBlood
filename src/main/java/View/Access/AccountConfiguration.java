@@ -23,7 +23,7 @@ public class AccountConfiguration extends JFrame {
     private JTextField tf_razao_Social, tf_cnpj;
     private JComboBox<String> comboTipoSangue;
     private UserController controller;
-    private User user; // Armazena o objeto User completo
+    private User user; 
 
     public AccountConfiguration(User user) {
         this.user = user;
@@ -80,10 +80,13 @@ public class AccountConfiguration extends JFrame {
         buttonPanel.add(createButton("Gerenciar Endereços", e -> new ManagerAddress(user.getId()).setVisible(true)));
         buttonPanel.add(createButton("Gerenciar Telefones", e -> new ManagerTelephone(user.getId()).setVisible(true)));
         buttonPanel.add(createButton("Salvar Alterações", e -> {
-            // A lógica de update precisa ser chamada aqui
-            // controller.executeUpdate(); 
+            controller.executeUpdate(); 
             dispose();
         }));
+        
+        JButton btnVoltar = createButton("Voltar ao Menu", e -> dispose()); 
+        buttonPanel.add(btnVoltar);
+        
         add(buttonPanel, gbc);
         
         carregarDados();

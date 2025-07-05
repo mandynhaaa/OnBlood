@@ -9,7 +9,7 @@ public class MongoConnection {
 
     public static MongoDatabase getDatabase() {
         if (mongoClient == null) {          
-            mongoClient = MongoClients.create("mongodb://localhost:27017");
+            mongoClient = MongoClients.create("mongodb+srv://ruan:nDVI4EUPmC3DDmVr@onblood.uuiqcsu.mongodb.net/?retryWrites=true&w=majority&appName=OnBlood");
         }
         return mongoClient.getDatabase("dbOnBlood");
     }
