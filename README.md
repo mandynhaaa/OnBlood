@@ -19,12 +19,28 @@
 - Utilizado para gerenciamento de dependências e build do projeto;
 - Instalação: https://maven.apache.org/install.html
 
-**3. MySQL Server**
+**3. Banco de Dados**
+
+**_MongoDB - NoSQL_**
+
+Deixamos o projeto configurado para acessar a base de dados no servidor. Com isso, além de clonar o repositório, não é necessário realizar mais configurações.
+
+Caso deseje, pode instalar o [MongoDB Compass](https://www.mongodb.com/try/download/compass) para visualizar e gerir a base de dados MongoDB.
+
+O arquivo [DataSeeder.java](https://github.com/mandynhaaa/OnBlood/blob/main/src/main/java/Main/DataSeeder.java) é o script de criação e população.
+
+**_MySQL - Banco Relacional_**
+
+```diff
+- O projeto foi ajustado para utilizar banco de dados NoSQL. Apesar disso, ainda é possível visualizar os arquivos de conexão, 
+- geração de SQL e _dumps_ que foram utilizados na versão com banco de dados relacional.
+```
+
 - Necessário para persistir os dados.
 - Versão recomendada: MySQL 8.0+
 - Download: https://dev.mysql.com/downloads/
 
-Criar uma conexão local e importar o script [dbOnBlood-MySQLWorkbench.sql](./OnBlood/src/Connection/dbOnBlood-MySQLWorkbench.sql).
+Criar uma conexão local e importar o script [dbOnBlood-MySQLWorkbench.sql](https://github.com/mandynhaaa/OnBlood/blob/main/src/main/resources/dbOnBlood-MySQLWorkbench.sql).
 
 Garantir que a conexão tenha os seguintes dados de acesso:
 
@@ -36,7 +52,7 @@ username = "root";
 password = "admin";
 ```
 
-OU altere os dados no arquivo [ConnectionSQL.java](./OnBlood/src/Connection/ConnectionSQL.java).
+OU altere os dados no arquivo [ConnectionSQL.java](https://github.com/mandynhaaa/OnBlood/blob/main/src/main/java/Connection/ConnectionSQL.java).
 
 ## Clonagem do Projeto
 A seguir serão listados os passos para rodar o projeto OnBlood na sua máquina utilizando a IDE recomendada.
