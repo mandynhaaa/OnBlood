@@ -40,7 +40,6 @@ public class LoginController implements ActionListener {
         if (!tempUser.login()) {
             JOptionPane.showMessageDialog(null, "Usuário ou senha incorreta", "Erro de Login", JOptionPane.ERROR_MESSAGE);
         } else {
-            
             User loggedUser = tempUser.searchByName();
             if (loggedUser != null) {
                 new MainMenu(loggedUser).setVisible(true);

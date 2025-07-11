@@ -138,7 +138,7 @@ public class RegisterUser extends JFrame {
     }
 
     private void loadBloodTypes() {
-        List<String> tiposSangue = new UserController().listarTiposSanguineos();
+        List<String> tiposSangue = new UserController().listBloodTypes();
         
         if (tiposSangue.isEmpty()) {
             comboTipoSangue.addItem("Nenhum cadastrado");

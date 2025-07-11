@@ -22,15 +22,22 @@ public class RequestController {
     private ObjectId id_UserBloodCenter;
     private JTextField tf_volume;
     private JTextField tf_datetime;
-    private JComboBox<String> cb_tipoSanguineo;
+    private JComboBox<String> cb_bloodTypesanguineo;
     private JComboBox<String> cb_status;
     
-    public RequestController(ObjectId id_Request, ObjectId id_UserBloodCenter, JTextField tf_volume, JTextField tf_datetime, JComboBox<String> cb_tipoSanguineo, JComboBox<String> cb_status) {
+    public RequestController(
+    	ObjectId id_Request, 
+    	ObjectId id_UserBloodCenter, 
+    	JTextField tf_volume, 
+    	JTextField tf_datetime, 
+    	JComboBox<String> cb_bloodTypesanguineo, 
+    	JComboBox<String> cb_status
+    ) {
         this.id_Request = id_Request;
         this.id_UserBloodCenter = id_UserBloodCenter;
         this.tf_volume = tf_volume;
         this.tf_datetime = tf_datetime;
-        this.cb_tipoSanguineo = cb_tipoSanguineo;
+        this.cb_bloodTypesanguineo = cb_bloodTypesanguineo;
         this.cb_status = cb_status;
     }
     
@@ -39,7 +46,7 @@ public class RequestController {
             float volume = Float.parseFloat(tf_volume.getText().replace(",", "."));
             LocalDateTime datetime = LocalDateTime.parse(tf_datetime.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
             String status = (String) cb_status.getSelectedItem();
-            String bloodType = (String) cb_tipoSanguineo.getSelectedItem();
+            String bloodType = (String) cb_bloodTypesanguineo.getSelectedItem();
 
             Request request = new Request(status, volume, datetime, this.id_UserBloodCenter, bloodType);
             request.create();
@@ -63,7 +70,7 @@ public class RequestController {
             request.setVolume(Float.parseFloat(tf_volume.getText().replace(",", ".")));
             request.setDatetime(LocalDateTime.parse(tf_datetime.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
             request.setStatus((String) cb_status.getSelectedItem());
-            request.setBloodType((String) cb_tipoSanguineo.getSelectedItem());
+            request.setBloodType((String) cb_bloodTypesanguineo.getSelectedItem());
             
             request.update();
             JOptionPane.showMessageDialog(null, "Solicitação alterada com sucesso!");
@@ -85,31 +92,31 @@ public class RequestController {
         }
     }
     
-    public List<String> listarTiposSanguineos() {
-        List<String> tipos = new ArrayList<>();
+    public List<String> listBloodTypes() {
+        List<String> bloodTypes = new ArrayList<>();
         try (MongoCursor<Document> cursor = new BloodType("").getCollection().find().iterator()) {
             while (cursor.hasNext()) {
-                tipos.add(cursor.next().getString("descricao"));
+                bloodTypes.add(cursor.next().getString("descricao"));
             }
         }
-        return tipos;
+        return bloodTypes;
     }
 
-    public List<String> listarSolicitacoesPorHemocentro(ObjectId idHemocentro) {
-        List<String> solicitacoesFormatadas = new ArrayList<>();
+    public List<String> listBloodCenterRequests(ObjectId idHemocentro) {
+        List<String> formatedResquests = new ArrayList<>();
         MongoCollection<Document> collection = new Request(null).getCollection();
         
-        try (MongoCursor<Document> cursor = collection.find(Filters.eq("id_hemocentro", idHemocentro)).iterator()) {
+        try (MongoCursor<Document> cursor = collection.find(Filters.eq("id_Hemocentro", idHemocentro)).iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
-                solicitacoesFormatadas.add(String.format("[%s] Tipo: %s | Status: %s | Volume: %.1fmL",
+                formatedResquests.add(String.format("[%s] Tipo: %s | Status: %s | Volume: %.1fmL",
                         doc.getObjectId("_id").toHexString(),
-                        doc.getString("tipo_sanguineo"),
+                        doc.getString("tipo_Sanguineo"),
                         doc.getString("status"),
                         doc.getDouble("volume")
                 ));
             }
         }
-        return solicitacoesFormatadas;
+        return formatedResquests;
     }
 }

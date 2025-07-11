@@ -48,10 +48,10 @@ public class EditTelephone extends JFrame {
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
         
-        carregarDados();
+        loadData();
     }
 
-    private void carregarDados() {
+    private void loadData() {
         User user = new User(idUsuario);
         user.getTelephones().stream()
             .filter(p -> p.getId().equals(idTelefone))

@@ -39,8 +39,7 @@ public class EditAddress extends JFrame {
         tfRua = createField("Rua:", y++, gbc);
         tfNumero = createField("Número:", y++, gbc);
         tfComplemento = createField("Complemento:", y++, gbc);
-        
-        // --- Botões ---
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSalvar = new JButton("Salvar");
         JButton btnCancelar = new JButton("Cancelar");
@@ -51,17 +50,15 @@ public class EditAddress extends JFrame {
         gbc.gridwidth = 2;
         add(buttonPanel, gbc);
 
-        // --- Controller ---
         controller = new AddressController(idUsuario, idEndereco, tfDescricao, tfCep, tfPais, tfEstado, tfCidade, tfBairro, tfRua, tfNumero, tfComplemento);
 
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
-        carregarDados();
+        loadData();
     }
 
-    private void carregarDados() {
-        // Busca o usuário e, em seguida, o endereço específico para popular os campos
+	private void loadData() {
         User user = new User(idUsuario);
         user.getAddresses().stream()
             .filter(a -> a.getId().equals(idEndereco))
@@ -85,7 +82,6 @@ public class EditAddress extends JFrame {
         dispose();
     }
     
-    // Método auxiliar
     private JTextField createField(String label, int y, GridBagConstraints gbc) {
         gbc.gridy = y;
         gbc.gridx = 0;

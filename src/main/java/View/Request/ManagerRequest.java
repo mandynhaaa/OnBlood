@@ -51,7 +51,7 @@ public class ManagerRequest extends JFrame {
 
     public void carregarSolicitacoes() {
         listModel.clear();
-        List<String> solicitacoes = controller.listarSolicitacoesPorHemocentro(idUsuarioHemocentro);
+        List<String> solicitacoes = controller.listBloodCenterRequests(idUsuarioHemocentro);
         solicitacoes.forEach(listModel::addElement);
     }
 

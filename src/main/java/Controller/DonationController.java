@@ -18,11 +18,20 @@ import java.util.List;
 
 public class DonationController {
     
-    private ObjectId id_Donation, id_UserBloodCenter;
-    private JTextField tf_volume, tf_datetime;
-    private JComboBox<String> cb_status, cb_donors;
+    private ObjectId id_Donation;
+    private ObjectId id_UserBloodCenter;
+    private JTextField tf_volume;
+    private JTextField tf_datetime;
+    private JComboBox<String> cb_status;
+    private JComboBox<String> cb_donors;
 
-    public DonationController(ObjectId id_UserBloodCenter, JTextField tf_volume, JTextField tf_datetime, JComboBox<String> cb_status, JComboBox<String> cb_donors) {
+    public DonationController(
+		ObjectId id_UserBloodCenter, 
+		JTextField tf_volume, 
+		JTextField tf_datetime, 
+		JComboBox<String> cb_status, 
+		JComboBox<String> cb_donors
+    ) {
         this.id_UserBloodCenter = id_UserBloodCenter;
         this.tf_volume = tf_volume;
         this.tf_datetime = tf_datetime;
@@ -30,7 +39,12 @@ public class DonationController {
         this.cb_donors = cb_donors;
     }
 
-    public DonationController(ObjectId id_Donation, JTextField tf_volume, JTextField tf_datetime, JComboBox<String> cb_status) {
+    public DonationController(
+    	ObjectId id_Donation, 
+    	JTextField tf_volume, 
+    	JTextField tf_datetime, 
+    	JComboBox<String> cb_status
+    ) {
         this.id_Donation = id_Donation;
         this.tf_volume = tf_volume;
         this.tf_datetime = tf_datetime;
@@ -83,19 +97,18 @@ public class DonationController {
              if (donorUser.getDonorInfo() != null) {
                 BloodStockController.atualizarEstoque(donation.getBloodCenterId(), donorUser.getDonorInfo().getBloodType());
             }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erro ao atualizar doação: " + e.getMessage());
         }
     }
 
-    public void executeDelete(ObjectId donationId) {
-        Donation donation = new Donation(donationId);
+    public void executeDelete(ObjectId id_Donation) {
+        Donation donation = new Donation(id_Donation);
         donation.delete();
         JOptionPane.showMessageDialog(null, "Doação removida com sucesso!");
     }
 
-    public List<String> listarDoadores() {
+    public List<String> listDonors() {
         List<String> doadores = new ArrayList<>();
         MongoCollection<Document> collection = new User().getCollection();
         try (MongoCursor<Document> cursor = collection.find(Filters.eq("tipo_usuario", "Doador")).iterator()) {
@@ -103,7 +116,7 @@ public class DonationController {
                 Document doc = cursor.next();
                 ObjectId id = doc.getObjectId("_id");
                 String nome = doc.getString("nome");
-                Document donorInfo = doc.get("doador_info", Document.class);
+                Document donorInfo = doc.get("doador_Info", Document.class);
                 String cpf = (donorInfo != null) ? donorInfo.getString("cpf") : "N/A";
                 doadores.add(String.format("[%s] %s - %s", id.toHexString(), nome, cpf));
             }
@@ -111,11 +124,11 @@ public class DonationController {
         return doadores;
     }
     
-    public List<String> listarDoacoesPorHemocentro(ObjectId idHemocentro, String statusFiltro) {
+    public List<String> listBloodCenterDonations(ObjectId idHemocentro, String statusFiltro) {
         List<String> doacoesFormatadas = new ArrayList<>();
         MongoCollection<Document> collection = new Donation(null).getCollection();
         
-        Bson filter = Filters.eq("id_hemocentro", idHemocentro);
+        Bson filter = Filters.eq("id_Hemocentro", idHemocentro);
         if (!"Todos".equals(statusFiltro)) {
             filter = Filters.and(filter, Filters.eq("status", statusFiltro));
         }
@@ -123,7 +136,7 @@ public class DonationController {
         try (MongoCursor<Document> cursor = collection.find(filter).iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
-                ObjectId idDoador = doc.getObjectId("id_doador");
+                ObjectId idDoador = doc.getObjectId("id_Doador");
                 User doador = new User(idDoador); 
 
                 doacoesFormatadas.add(String.format("[%s] Doador: %s | Status: %s | Volume: %.1fmL",
@@ -141,7 +154,7 @@ public class DonationController {
         List<String> doacoesFormatadas = new ArrayList<>();
         MongoCollection<Document> collection = new Donation(null).getCollection();
         
-        Bson filter = Filters.eq("id_doador", idDoador);
+        Bson filter = Filters.eq("id_Doador", idDoador);
         if (!"Todos".equals(statusFiltro)) {
             filter = Filters.and(filter, Filters.eq("status", statusFiltro));
         }
@@ -149,7 +162,7 @@ public class DonationController {
         try (MongoCursor<Document> cursor = collection.find(filter).iterator()) {
             while (cursor.hasNext()) {
                  Document doc = cursor.next();
-                 ObjectId idHemocentro = doc.getObjectId("id_hemocentro");
+                 ObjectId idHemocentro = doc.getObjectId("id_Hemocentro");
                  User hemocentro = new User(idHemocentro);
 
                  doacoesFormatadas.add(String.format("[%s] Hemocentro: %s | Status: %s | Volume: %.1fmL",

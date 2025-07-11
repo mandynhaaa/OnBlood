@@ -59,7 +59,7 @@ public class ManagerDonation extends JFrame {
     public void carregarDoacoes() {
         listModel.clear();
         String statusSelecionado = (String) comboFiltroStatus.getSelectedItem();
-        controller.listarDoacoesPorHemocentro(this.idUsuarioHemocentro, statusSelecionado)
+        controller.listBloodCenterDonations(this.idUsuarioHemocentro, statusSelecionado)
                   .forEach(listModel::addElement);
     }
 
