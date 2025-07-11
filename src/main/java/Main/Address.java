@@ -3,7 +3,11 @@ package Main;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-public class Address {
+import com.mongodb.client.result.InsertOneResult;
+
+import Standard.BaseModel;
+
+public class Address extends BaseModel {
     private ObjectId id; 
     private String description;
     private String cep;
@@ -15,8 +19,13 @@ public class Address {
     private int number;
     private String complement;
 
+    public Address(ObjectId id) {
+    	super("enderecos", id);
+        this.id = id;
+    }
+    
     public Address() {
-        this.id = new ObjectId();
+        super("enderecos");
     }
     
     public ObjectId getId() { return id; }
@@ -38,6 +47,13 @@ public class Address {
     public void setNumber(int num) { this.number = num; }
     public String getComplement() { return complement; }
     public void setComplement(String c) { this.complement = c; }
+    
+    public ObjectId create() {
+        Document doc = toDoc();
+        InsertOneResult result = getCollection().insertOne(doc);
+        this.id = result.getInsertedId().asObjectId().getValue();
+        return this.id;
+    }
 
     public Document toDoc() {
         return new Document("id_endereco", this.id)
@@ -67,4 +83,19 @@ public class Address {
         address.complement = doc.getString("complemento");
         return address;
     }
+
+	@Override
+	public void populateFromDoc(Document doc) {
+        if (doc == null) return;
+        this.id = doc.getObjectId("_id");
+        this.description = doc.getString("descricao");
+        this.cep = doc.getString("cep");
+        this.country = doc.getString("pais");
+        this.state = doc.getString("estado");
+        this.city = doc.getString("cidade");
+        this.neighborhood = doc.getString("bairro");
+        this.street = doc.getString("rua");
+        this.number = doc.getInteger("numero", 0);
+        this.complement = doc.getString("complemento");
+	}
 }

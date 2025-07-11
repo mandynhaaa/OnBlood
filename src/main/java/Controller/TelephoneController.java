@@ -1,8 +1,16 @@
 package Controller;
 
+import Main.Address;
 import Main.Telephone;
 import Main.User;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -42,9 +50,9 @@ public class TelephoneController {
 
         Telephone phone = new Telephone();
         phone.setDescription(tf_description.getText());
-        // Remove caracteres de máscara antes de salvar
         phone.setDdd(tf_ddd.getText().replaceAll("[^0-9]", ""));
         phone.setNumber(tf_number.getText().replaceAll("[^0-9]", ""));
+        phone.create();
 
         user.getTelephones().add(phone);
         user.update();
@@ -77,15 +85,23 @@ public class TelephoneController {
         }
     }
 
-    public List<String> listTelephones(ObjectId id_User) {
-        User user = new User(id_User);
-        if (user.getTelephones() == null) {
-            return new ArrayList<>();
+    public List<String> listTelephones(ObjectId id_User) {        
+        List<String> telefonesFormatados = new ArrayList<>();
+        MongoCollection<Document> collection = new Telephone().getCollection();
+        
+        Bson filter = Filters.eq("id_Usuario", id_User);
+        
+        try (MongoCursor<Document> cursor = collection.find(filter).iterator()) {
+            while (cursor.hasNext()) {
+                 Document doc = cursor.next();
+                 telefonesFormatados.add(String.format("%s: (%s) %s [%s]",
+                     doc.getString("descricao"), 
+                     doc.getString("ddd"), 
+                     doc.getDouble("numero"),
+                     doc.getObjectId("_id").toHexString()
+                ));
+            }
         }
-
-        return user.getTelephones().stream()
-                .map(p -> String.format("[%s] %s: (%s) %s",
-                        p.getId().toHexString(), p.getDescription(), p.getDdd(), p.getNumber()))
-                .collect(Collectors.toList());
+        return telefonesFormatados;
     }
 }

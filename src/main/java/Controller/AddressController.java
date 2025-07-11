@@ -1,8 +1,16 @@
 package Controller;
 
 import Main.Address;
+import Main.Donation;
 import Main.User;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -20,7 +28,7 @@ public class AddressController {
     private JTextField tf_state;
     private JTextField tf_neighborhood;
     private JTextField tf_complement;
-    private JFormattedTextField tf_cep; // Alterado para JFormattedTextField
+    private JFormattedTextField tf_cep;
     private JTextField tf_country;
     private JTextField tf_description;
 
@@ -31,7 +39,7 @@ public class AddressController {
     public AddressController(
 		ObjectId id_User, 
 		JTextField tf_description, 
-		JFormattedTextField tf_cep, // Alterado para JFormattedTextField
+		JFormattedTextField tf_cep,
 		JTextField tf_country, 
 		JTextField tf_state, 
 		JTextField tf_city, 
@@ -95,11 +103,10 @@ public class AddressController {
             JOptionPane.showMessageDialog(null, "O campo 'número' deve ser um valor numérico válido.");
             return;
         }
+        address.create();
         
         user.getAddresses().add(address);
-        
         user.update(); 
-        
         JOptionPane.showMessageDialog(null, "Endereço adicionado com sucesso!");
     }
 
@@ -144,19 +151,24 @@ public class AddressController {
     }
     
     public List<String> listAddresses(ObjectId id_User) {
-        User user = new User(id_User);
-        if (user.getId() == null || user.getAddresses() == null) {
-            return new ArrayList<>();
-        }
+        List<String> enderecosFormatados = new ArrayList<>();
+        MongoCollection<Document> collection = new Address().getCollection();
         
-        return user.getAddresses().stream()
-                .map(a -> String.format("[%s] %s: %s, %d - %s / %s", 
-                        a.getId().toHexString(), 
-                        a.getDescription(), 
-                        a.getStreet(), 
-                        a.getNumber(), 
-                        a.getCity(),
-                        a.getState()))
-                .collect(Collectors.toList());
+        Bson filter = Filters.eq("id_Usuario", id_User);
+        
+        try (MongoCursor<Document> cursor = collection.find(filter).iterator()) {
+            while (cursor.hasNext()) {
+                 Document doc = cursor.next();
+                 enderecosFormatados.add(String.format("%s: %s, %d - %s / %s [%s]", 
+                     doc.getString("descricao"), 
+                     doc.getString("rua"), 
+                     doc.getDouble("numero"), 
+                     doc.getString("cidade"),
+                     doc.getString("estado"),
+                     doc.getObjectId("_id").toHexString()
+                ));
+            }
+        }
+        return enderecosFormatados;
     }
 }
