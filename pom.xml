@@ -4,8 +4,8 @@
     
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.onblood</groupId>   <!-- Corrigi para um domínio reverso padrão -->
-    <artifactId>onblood</artifactId> <!-- Corrigi para minúsculo, padrão Maven -->
+    <groupId>com.onblood</groupId>
+    <artifactId>onblood</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
@@ -14,14 +14,11 @@
     </properties>
 
     <dependencies>
-        <!-- MySQL Connector -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>9.1.0</version>
-        </dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.11.1</version> </dependency>
 
-        <!-- JUnit 5 para testes -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -29,18 +26,27 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- Criptografia para as senhas -->
-        <dependency>
-		    <groupId>commons-logging</groupId>
-		    <artifactId>commons-logging</artifactId>
-		    <version>1.2</version>
-		</dependency>
-
         <dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-crypto</artifactId>
 		    <version>6.2.1</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.13</version> </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
 
     <build>

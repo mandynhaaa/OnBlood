@@ -1,116 +1,103 @@
 package View.Donation;
 
 import Controller.DonationController;
-import java.awt.*;
-import java.util.List;
+import org.bson.types.ObjectId;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
+import java.awt.*;
 
 public class ManagerDonation extends JFrame {
-    private static final String NULL = null;
-	private JList<String> listDoacoes;
+    private JList<String> listDoacoes;
     private DefaultListModel<String> listModel;
     private JButton btnEditar, btnExcluir, btnNova, btnAtualizar;
     private JComboBox<String> comboFiltroStatus;
     private DonationController controller;
-    private int idUsuario;
-    private int userTypeId;
+    private ObjectId idUsuarioHemocentro;
 
-    public ManagerDonation(int idUser, int userTypeId) {
-    	this.idUsuario = idUser;
-        this.userTypeId = userTypeId;
-        this.controller = new DonationController(0, idUsuario, 0, null, null, null, null);
+    public ManagerDonation(ObjectId idUsuarioHemocentro) {
+        this.idUsuarioHemocentro = idUsuarioHemocentro;
+        this.controller = new DonationController(); 
 
-        setTitle("Gerenciar Doações");
+        setTitle("Gerenciar Doações Recebidas");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(750, 500);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel panelTopo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelTopo.add(new JLabel("Filtrar por status:"));
+        comboFiltroStatus = new JComboBox<>(new String[]{"Todos", "Pendente", "Realizada", "Cancelada"});
+        panelTopo.add(comboFiltroStatus);
+        add(panelTopo, BorderLayout.NORTH);
 
         listModel = new DefaultListModel<>();
         listDoacoes = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(listDoacoes);
-        add(scrollPane, BorderLayout.CENTER);
-        
-        if (userTypeId == 3) {
-	        JPanel panelTopo = new JPanel(new FlowLayout(FlowLayout.LEFT));
-	        panelTopo.add(new JLabel("Filtrar por status:"));
-	        comboFiltroStatus = new JComboBox<>(new String[] {"Todos", "Pendente", "Realizada", "Cancelada"});
-	        panelTopo.add(comboFiltroStatus);
-	        add(panelTopo, BorderLayout.NORTH);
-        } 
+        listDoacoes.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        add(new JScrollPane(listDoacoes), BorderLayout.CENTER);
 
-        JPanel panelBotoes = new JPanel();
+        JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         btnAtualizar = new JButton("Atualizar");
         btnNova = new JButton("Nova Doação");
         btnEditar = new JButton("Editar");
         btnExcluir = new JButton("Excluir");
-
         panelBotoes.add(btnAtualizar);
         panelBotoes.add(btnNova);
         panelBotoes.add(btnEditar);
         panelBotoes.add(btnExcluir);
         add(panelBotoes, BorderLayout.SOUTH);
 
-        carregarDoacoes();
-
-        btnEditar.addActionListener(e -> {
-            String selecionado = listDoacoes.getSelectedValue();
-            if (selecionado != null) {
-                int id = extrairId(selecionado);
-                EditDonation editor = new EditDonation(id);
-                editor.setVisible(true);
-            }
-        });
-
+        btnNova.addActionListener(e -> new RegisterDonation(idUsuarioHemocentro, this).setVisible(true));
+        btnAtualizar.addActionListener(e -> carregarDoacoes());
+        comboFiltroStatus.addActionListener(e -> carregarDoacoes());
+        btnEditar.addActionListener(e -> editarDoacao());
         btnExcluir.addActionListener(e -> excluirDoacao());
 
-        btnNova.addActionListener(e -> {
-            RegisterDonation telaCadastro = new RegisterDonation(idUsuario);
-            telaCadastro.setVisible(true);
-        });
-
-        btnAtualizar.addActionListener(e -> carregarDoacoes());
-
-        if (userTypeId == 3) {
-        	comboFiltroStatus.addActionListener(e -> carregarDoacoes());
-    	}
-        
+        carregarDoacoes();
     }
 
-    void carregarDoacoes() {
+    public void carregarDoacoes() {
         listModel.clear();
-
         String statusSelecionado = (String) comboFiltroStatus.getSelectedItem();
-        List<String> doacoes = controller.listarDoacoesHemocentro(idUsuario, statusSelecionado);
-
-        for (String d : doacoes) {
-            listModel.addElement(d);
-        }
+        controller.listarDoacoesPorHemocentro(this.idUsuarioHemocentro, statusSelecionado)
+                  .forEach(listModel::addElement);
     }
 
-    private int extrairId(String texto) {
-        return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
+    private void editarDoacao() {
+        String selecionado = listDoacoes.getSelectedValue();
+        if (selecionado != null) {
+            ObjectId idDoacao = extrairId(selecionado);
+            if (idDoacao != null) {
+                new EditDonation(idDoacao, this).setVisible(true);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione uma doação para editar.");
+        }
     }
 
     private void excluirDoacao() {
         String selecionado = listDoacoes.getSelectedValue();
         if (selecionado != null) {
-            int id = extrairId(selecionado);
-            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?");
+            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                controller = new DonationController(id, 0, 0, null, null, null, null);
-                controller.executeDelete();
-                carregarDoacoes();
+                ObjectId idDoacao = extrairId(selecionado);
+                if (idDoacao != null) {
+                    controller.executeDelete(idDoacao);
+                    carregarDoacoes();
+                }
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione uma doação para excluir.");
+        }
+    }
+    
+    private ObjectId extrairId(String texto) {
+        try {
+            String hexId = texto.substring(texto.indexOf('[') + 1, texto.indexOf(']'));
+            return new ObjectId(hexId);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Formato de ID inválido na lista.");
+            return null;
         }
     }
 }

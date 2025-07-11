@@ -1,85 +1,60 @@
 package View.Donation;
 
-import javax.swing.*;
 import Controller.DonationController;
-
-import java.util.List;
+import org.bson.types.ObjectId;
+import javax.swing.*;
+import java.awt.*;
 
 public class RegisterDonation extends JFrame {
 
     private JTextField tfVolume, tfDataHora;
     private JComboBox<String> cbDoador, cbStatus;
     private DonationController controller;
-    private int idUsuario;
+    private ManagerDonation parentView;
 
-    public RegisterDonation(int idUser) {
-    	this.idUsuario = idUser;
+    public RegisterDonation(ObjectId idHemocentro, ManagerDonation parentView) {
+        this.parentView = parentView;
 
-        setTitle("Cadastro de Doações");
+        setTitle("Cadastro de Doação");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 450, 350);
-        setLayout(null);
-        
-        JLabel lblDoador = new JLabel("Doador:");
-        lblDoador.setBounds(30, 30, 80, 20);
-        add(lblDoador);
+        setLocationRelativeTo(parentView);
+        setLayout(new GridLayout(5, 2, 10, 10));
+        ((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
+        add(new JLabel("Doador:"));
         cbDoador = new JComboBox<>();
-        cbDoador.setBounds(120, 30, 200, 22);
         add(cbDoador);
 
-        JLabel lblStatus = new JLabel("Status:");
-        lblStatus.setBounds(30, 110, 80, 20);
-        add(lblStatus);
-
-        cbStatus = new JComboBox<>();
-        cbStatus.setModel(new DefaultComboBoxModel<>(new String[] {"Pendente", "Realizada", "Cancelada"}));
-        cbStatus.setBounds(120, 110, 200, 22);
+        add(new JLabel("Status:"));
+        cbStatus = new JComboBox<>(new String[]{"Pendente", "Realizada", "Cancelada"});
         add(cbStatus);
 
-        JLabel lblVolume = new JLabel("Volume (mL):");
-        lblVolume.setBounds(30, 150, 80, 20);
-        add(lblVolume);
-
+        add(new JLabel("Volume (mL):"));
         tfVolume = new JTextField();
-        tfVolume.setBounds(120, 150, 200, 22);
         add(tfVolume);
 
-        JLabel lblDataHora = new JLabel("Data e Hora:");
-        lblDataHora.setBounds(30, 190, 80, 20);
-        add(lblDataHora);
-
+        add(new JLabel("Data e Hora (dd/MM/yyyy HH:mm:ss):"));
         tfDataHora = new JTextField();
-        tfDataHora.setBounds(120, 190, 200, 22);
-        tfDataHora.setToolTipText("Formato: dd/MM/aaaa HH:mm:ss");
         add(tfDataHora);
 
         JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setBounds(120, 240, 90, 25);
         add(btnSalvar);
-
+        
         JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(230, 240, 90, 25);
         add(btnCancelar);
+        
+        controller = new DonationController(idHemocentro, tfVolume, tfDataHora, cbStatus, cbDoador);
+        
+        controller.listarDoadores().forEach(cbDoador::addItem);
         
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
-        
-        controller = new DonationController(0, this.idUsuario, 0, tfVolume, tfDataHora, cbStatus, cbDoador);
-        
-        List<String> doadores = controller.listarDoadores();
-        if (doadores.isEmpty()) {
-            cbDoador.addItem("Nenhum cadastrado");
-            cbDoador.setEnabled(false);
-        } else {
-            for (String doador : doadores) {
-                cbDoador.addItem(doador);
-            }
-        }
     }
     
     private void salvar() {
         controller.executeRegister();
+        parentView.carregarDoacoes();
         dispose();
     }
 }

@@ -1,72 +1,55 @@
 package View.Donation;
 
 import Controller.DonationController;
+import org.bson.types.ObjectId;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class MyDonations extends JFrame {
     private JList<String> listDoacoes;
     private DefaultListModel<String> listModel;
     private DonationController controller;
-    private int idUsuario;
+    private ObjectId idUsuarioDoador;
 
     private JComboBox<String> cbStatus;
-    private JComboBox<String> cbHemocentro;
-    private JButton btnAtualizar;
+    private JButton btnFiltrar;
 
-    public MyDonations(int idUsuario) {
-        this.idUsuario = idUsuario;
-        this.controller = new DonationController(0, 0, idUsuario, null, null, null, null);
+    public MyDonations(ObjectId idUsuarioDoador) {
+        this.idUsuarioDoador = idUsuarioDoador;
+        this.controller = new DonationController();
 
         setTitle("Minhas Doações");
         setSize(700, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel panelFiltros = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelFiltros.add(new JLabel("Status:"));
+        cbStatus = new JComboBox<>(new String[]{"Todos", "Pendente", "Realizada", "Cancelada"});
+        panelFiltros.add(cbStatus);
+        btnFiltrar = new JButton("Filtrar");
+        panelFiltros.add(btnFiltrar);
+        add(panelFiltros, BorderLayout.NORTH);
 
         listModel = new DefaultListModel<>();
         listDoacoes = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(listDoacoes);
-        add(scrollPane, BorderLayout.CENTER);
+        listDoacoes.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        add(new JScrollPane(listDoacoes), BorderLayout.CENTER);
 
-        JPanel panelFiltros = new JPanel(new FlowLayout());
-
-        cbStatus = new JComboBox<>(new String[]{"Todos", "Pendente", "Realizada", "Cancelada"});
-        panelFiltros.add(new JLabel("Status:"));
-        panelFiltros.add(cbStatus);
-
-        cbHemocentro = new JComboBox<>();
-        panelFiltros.add(new JLabel("Hemocentro:"));
-        panelFiltros.add(cbHemocentro);
-
-        btnAtualizar = new JButton("Filtrar");
-        panelFiltros.add(btnAtualizar);
-
-        add(panelFiltros, BorderLayout.NORTH);
-
-        carregarHemocentros();
         carregarDoacoes();
 
-        btnAtualizar.addActionListener(e -> carregarDoacoes());
+        btnFiltrar.addActionListener(e -> carregarDoacoes());
+        cbStatus.addActionListener(e -> carregarDoacoes()); 
     }
 
     private void carregarDoacoes() {
         listModel.clear();
         String statusSelecionado = (String) cbStatus.getSelectedItem();
-        String hemocentroSelecionado = (String) cbHemocentro.getSelectedItem();
-        List<String> doacoes = controller.listarDoacoesPorUsuario(idUsuario, statusSelecionado, hemocentroSelecionado);
-        for (String d : doacoes) {
-            listModel.addElement(d);
-        }
-    }
-
-    private void carregarHemocentros() {
-        cbHemocentro.removeAllItems();
-        List<String> hemocentros = controller.listarHemocentros();
-        for (String h : hemocentros) {
-            cbHemocentro.addItem(h);
-        }
+        
+        controller.listarDoacoesPorDoador(idUsuarioDoador, statusSelecionado)
+                  .forEach(listModel::addElement);
     }
 }

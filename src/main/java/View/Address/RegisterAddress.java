@@ -1,113 +1,72 @@
 package View.Address;
 
-import javax.swing.*;
-import javax.swing.text.AbstractDocument;
-
 import Controller.AddressController;
-import Standard.OnlyNumbersDocumentFilter;
-
+import org.bson.types.ObjectId;
+import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class RegisterAddress extends JFrame {
     private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
     private AddressController controller;
-    private int idUsuario;
+    private ObjectId idUsuario;
+    private ManagerAddress parentView; 
 
-    public RegisterAddress(int idUsuario) {
-    	this.idUsuario = idUsuario;
-    	
+    public RegisterAddress(ObjectId idUsuario, ManagerAddress parentView) {
+        this.idUsuario = idUsuario;
+        this.parentView = parentView;
+
         setTitle("Cadastro de Endereço");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 400, 530);
-        setLayout(null);
-
-        JLabel lblDescricao = new JLabel("Descrição:");
-        lblDescricao.setBounds(30, 60, 100, 20);
-        add(lblDescricao);
-        tfDescricao = new JTextField();
-        tfDescricao.setBounds(130, 60, 220, 22);
-        add(tfDescricao);
-
-        JLabel lblCep = new JLabel("CEP:");
-        lblCep.setBounds(30, 90, 100, 20);
-        add(lblCep);
-        tfCep = new JTextField();
-        tfCep.setBounds(130, 90, 220, 22);
-        add(tfCep);
-
-        JLabel lblPais = new JLabel("País:");
-        lblPais.setBounds(30, 120, 100, 20);
-        add(lblPais);
-        tfPais = new JTextField();
-        tfPais.setBounds(130, 120, 220, 22);
-        add(tfPais);
-
-        JLabel lblEstado = new JLabel("Estado:");
-        lblEstado.setBounds(30, 150, 100, 20);
-        add(lblEstado);
-        tfEstado = new JTextField();
-        tfEstado.setBounds(130, 150, 220, 22);
-        add(tfEstado);
-
-        JLabel lblCidade = new JLabel("Cidade:");
-        lblCidade.setBounds(30, 180, 100, 20);
-        add(lblCidade);
-        tfCidade = new JTextField();
-        tfCidade.setBounds(130, 180, 220, 22);
-        add(tfCidade);
-
-        JLabel lblBairro = new JLabel("Bairro:");
-        lblBairro.setBounds(30, 210, 100, 20);
-        add(lblBairro);
-        tfBairro = new JTextField();
-        tfBairro.setBounds(130, 210, 220, 22);
-        add(tfBairro);
-
-        JLabel lblRua = new JLabel("Rua:");
-        lblRua.setBounds(30, 240, 100, 20);
-        add(lblRua);
-        tfRua = new JTextField();
-        tfRua.setBounds(130, 240, 220, 22);
-        add(tfRua);
-
-        JLabel lblNumero = new JLabel("Número:");
-        lblNumero.setBounds(30, 270, 100, 20);
-        add(lblNumero);
-
-        tfNumero = new JTextField();
-        tfNumero.setBounds(130, 270, 220, 22);
-        add(tfNumero);
+        setBounds(100, 100, 450, 450);
+        setLocationRelativeTo(parentView); 
+        setLayout(new GridBagLayout());
         
-        ((AbstractDocument) tfNumero.getDocument()).setDocumentFilter(new OnlyNumbersDocumentFilter());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        int y = 0;
 
-        JLabel lblComplemento = new JLabel("Complemento:");
-        lblComplemento.setBounds(30, 300, 100, 20);
-        add(lblComplemento);
-        tfComplemento = new JTextField();
-        tfComplemento.setBounds(130, 300, 220, 22);
-        add(tfComplemento);
+        tfDescricao = createField("Descrição:", y++, gbc);
+        tfCep = createField("CEP:", y++, gbc);
+        tfPais = createField("País:", y++, gbc);
+        tfEstado = createField("Estado:", y++, gbc);
+        tfCidade = createField("Cidade:", y++, gbc);
+        tfBairro = createField("Bairro:", y++, gbc);
+        tfRua = createField("Rua:", y++, gbc);
+        tfNumero = createField("Número:", y++, gbc);
+        tfComplemento = createField("Complemento:", y++, gbc);
 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setBounds(130, 350, 90, 25);
-        add(btnSalvar);
-
         JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(230, 350, 90, 25);
-        add(btnCancelar);
+        buttonPanel.add(btnSalvar);
+        buttonPanel.add(btnCancelar);
+
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        add(buttonPanel, gbc);
+
+        controller = new AddressController(this.idUsuario, tfDescricao, tfCep, tfPais, tfEstado, tfCidade, tfBairro, tfRua, tfNumero, tfComplemento);
 
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
-
-        controller = new AddressController(0, idUsuario,
-            tfRua, tfNumero, tfCidade, tfEstado,
-            tfBairro, tfComplemento, tfCep,
-            tfPais, tfDescricao
-        );
     }
 
     private void salvar() {
         controller.executeRegister();
-        dispose();
+        parentView.carregarEnderecos(); 
+        dispose(); 
+    }
+
+    private JTextField createField(String label, int y, GridBagConstraints gbc) {
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        add(new JLabel(label), gbc);
+        JTextField tf = new JTextField(20);
+        gbc.gridx = 1;
+        add(tf, gbc);
+        return tf;
     }
 }

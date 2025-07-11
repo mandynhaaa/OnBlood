@@ -1,33 +1,35 @@
 package View.Telephone;
 
-import javax.swing.*;
 import Controller.TelephoneController;
+import org.bson.types.ObjectId;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class ManagerTelephone extends JFrame {
     private JList<String> listTelefones;
     private DefaultListModel<String> listModel;
     private JButton btnExcluir, btnNovo, btnAtualizar, btnEditar;
     private TelephoneController controller;
-    private int idUsuario;
+    private ObjectId idUsuario;
 
-    public ManagerTelephone(int idUsuario) {
-    	this.idUsuario = idUsuario;
-    	
+    public ManagerTelephone(ObjectId idUsuario) {
+        this.idUsuario = idUsuario;
+        this.controller = new TelephoneController(idUsuario);
+
         setTitle("Gerenciar Telefones");
         setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         listModel = new DefaultListModel<>();
         listTelefones = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(listTelefones);
-        add(scrollPane, BorderLayout.CENTER);
+        listTelefones.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        add(new JScrollPane(listTelefones), BorderLayout.CENTER);
 
-        JPanel panelBotoes = new JPanel();
+        JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         btnAtualizar = new JButton("Atualizar");
         btnNovo = new JButton("Novo Telefone");
         btnEditar = new JButton("Editar");
@@ -40,44 +42,53 @@ public class ManagerTelephone extends JFrame {
         add(panelBotoes, BorderLayout.SOUTH);
 
         btnAtualizar.addActionListener(e -> carregarTelefones());
-        btnNovo.addActionListener(e -> new RegisterTelephone(idUsuario).setVisible(true));
-        btnExcluir.addActionListener(e -> excluirEndereco());
-        btnEditar.addActionListener(e -> {
-            String selecionado = listTelefones.getSelectedValue();
-            if (selecionado != null) {
-                int id = extrairId(selecionado);
-                EditTelephone editor = new EditTelephone(id);
-                editor.setVisible(true);
-            }
-        });
+        btnNovo.addActionListener(e -> new RegisterTelephone(idUsuario, this).setVisible(true));
+        btnEditar.addActionListener(e -> editarTelefone());
+        btnExcluir.addActionListener(e -> excluirTelefone());
 
         carregarTelefones();
     }
 
     public void carregarTelefones() {
         listModel.clear();
-        controller = new TelephoneController(0, idUsuario, null, null, null);
-        List<String> telefones = controller.listTelephones();
-        for (String e : telefones) {
-            listModel.addElement(e);
-        }
+        controller.listTelephones(this.idUsuario).forEach(listModel::addElement);
     }
 
-    private void excluirEndereco() {
+    private void editarTelefone() {
         String selecionado = listTelefones.getSelectedValue();
         if (selecionado != null) {
-            int id = Integer.parseInt(selecionado.substring(1, selecionado.indexOf("]")));
-            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_NO_OPTION) {
-                controller = new TelephoneController(id, idUsuario, null, null, null);
-                controller.executeDelete();
+            ObjectId idTelefone = extrairId(selecionado);
+            if (idTelefone != null) {
+                new EditTelephone(idUsuario, idTelefone, this).setVisible(true);
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione um telefone para editar.");
         }
-        carregarTelefones();
-    }
-    
-    private int extrairId(String texto) {
-        return Integer.parseInt(texto.substring(1, texto.indexOf("]")));
     }
 
+    private void excluirTelefone() {
+        String selecionado = listTelefones.getSelectedValue();
+        if (selecionado != null) {
+            int confirm = JOptionPane.showConfirmDialog(this, "Confirmar exclusão?", "Confirmação", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                ObjectId idTelefone = extrairId(selecionado);
+                if (idTelefone != null) {
+                    controller.executeDelete(idTelefone);
+                    carregarTelefones();
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione um telefone para excluir.");
+        }
+    }
+
+    private ObjectId extrairId(String texto) {
+        try {
+            String hexId = texto.substring(texto.indexOf('[') + 1, texto.indexOf(']'));
+            return new ObjectId(hexId);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Formato de ID inválido na lista.");
+            return null;
+        }
+    }
 }

@@ -1,100 +1,99 @@
 package View.Address;
 
-import javax.swing.*;
-import javax.swing.text.AbstractDocument;
-
 import Controller.AddressController;
-import Standard.OnlyNumbersDocumentFilter;
-
+import Main.User;
+import Main.Address;
+import org.bson.types.ObjectId;
+import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
-
-import Connection.ConnectionSQL;
 
 public class EditAddress extends JFrame {
     private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
-    private JButton btnSalvar, btnCancelar;
-    private int idEndereco;
     private AddressController controller;
+    private ObjectId idUsuario;
+    private ObjectId idEndereco;
+    private ManagerAddress parentView;
 
-    public EditAddress(int idEndereco) {
+    public EditAddress(ObjectId idUsuario, ObjectId idEndereco, ManagerAddress parentView) {
+        this.idUsuario = idUsuario;
         this.idEndereco = idEndereco;
+        this.parentView = parentView;
 
         setTitle("Editar Endereço");
-        setSize(450, 520);
-        setLocationRelativeTo(null);
+        setSize(450, 450);
+        setLocationRelativeTo(parentView);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(null);
+        setLayout(new GridBagLayout());
 
-        int y = 30;
-        tfDescricao = createField("Descrição:", y);
-        tfCep = createField("CEP:", y += 40);
-        tfPais = createField("País:", y += 40);
-        tfEstado = createField("Estado:", y += 40);
-        tfCidade = createField("Cidade:", y += 40);
-        tfBairro = createField("Bairro:", y += 40);
-        tfRua = createField("Rua:", y += 40);
-        tfNumero = createField("Número:", y += 40);
-        tfComplemento = createField("Complemento:", y += 40);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        int y = 0;
+
+        tfDescricao = createField("Descrição:", y++, gbc);
+        tfCep = createField("CEP:", y++, gbc);
+        tfPais = createField("País:", y++, gbc);
+        tfEstado = createField("Estado:", y++, gbc);
+        tfCidade = createField("Cidade:", y++, gbc);
+        tfBairro = createField("Bairro:", y++, gbc);
+        tfRua = createField("Rua:", y++, gbc);
+        tfNumero = createField("Número:", y++, gbc);
+        tfComplemento = createField("Complemento:", y++, gbc);
         
-        ((AbstractDocument) tfNumero.getDocument()).setDocumentFilter(new OnlyNumbersDocumentFilter());
+        // --- Botões ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnSalvar = new JButton("Salvar");
+        JButton btnCancelar = new JButton("Cancelar");
+        buttonPanel.add(btnSalvar);
+        buttonPanel.add(btnCancelar);
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        add(buttonPanel, gbc);
 
-        btnSalvar = new JButton("Salvar");
-        btnSalvar.setBounds(100, y + 50, 100, 25);
-        add(btnSalvar);
-
-        btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(220, y + 50, 100, 25);
-        add(btnCancelar);
+        // --- Controller ---
+        controller = new AddressController(idUsuario, idEndereco, tfDescricao, tfCep, tfPais, tfEstado, tfCidade, tfBairro, tfRua, tfNumero, tfComplemento);
 
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());
 
-        controller = new AddressController(this.idEndereco, 0, tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao);
-
         carregarDados();
     }
 
-    private JTextField createField(String label, int y) {
-        JLabel lbl = new JLabel(label);
-        lbl.setBounds(30, y, 100, 20);
-        add(lbl);
-        JTextField tf = new JTextField();
-        tf.setBounds(130, y, 250, 22);
-        add(tf);
-        return tf;
-    }
-
     private void carregarDados() {
-        try (Connection conn = new ConnectionSQL().getConnection()) {
-            String sql = "SELECT descricao, cep, pais, estado, cidade, bairro, rua, numero, complemento FROM endereco WHERE id_Endereco = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, idEndereco);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                tfDescricao.setText(rs.getString("descricao"));
-                tfCep.setText(rs.getString("cep"));
-                tfPais.setText(rs.getString("pais"));
-                tfEstado.setText(rs.getString("estado"));
-                tfCidade.setText(rs.getString("cidade"));
-                tfBairro.setText(rs.getString("bairro"));
-                tfRua.setText(rs.getString("rua"));
-                tfNumero.setText(rs.getString("numero"));
-                tfComplemento.setText(rs.getString("complemento"));
-            }
-
-            rs.close();
-            stmt.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados do endereço.");
-        }
+        // Busca o usuário e, em seguida, o endereço específico para popular os campos
+        User user = new User(idUsuario);
+        user.getAddresses().stream()
+            .filter(a -> a.getId().equals(idEndereco))
+            .findFirst()
+            .ifPresent(address -> {
+                tfDescricao.setText(address.getDescription());
+                tfCep.setText(address.getCep());
+                tfPais.setText(address.getCountry());
+                tfEstado.setText(address.getState());
+                tfCidade.setText(address.getCity());
+                tfBairro.setText(address.getNeighborhood());
+                tfRua.setText(address.getStreet());
+                tfNumero.setText(String.valueOf(address.getNumber()));
+                tfComplemento.setText(address.getComplement());
+            });
     }
     
     private void salvar() {
         controller.executeUpdate();
+        parentView.carregarEnderecos();
         dispose();
     }
-
+    
+    // Método auxiliar
+    private JTextField createField(String label, int y, GridBagConstraints gbc) {
+        gbc.gridy = y;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        add(new JLabel(label), gbc);
+        JTextField tf = new JTextField(20);
+        gbc.gridx = 1;
+        add(tf, gbc);
+        return tf;
+    }
 }
