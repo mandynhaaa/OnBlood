@@ -3,6 +3,7 @@ package Controller;
 import Main.BloodStock;
 import Main.Donation;
 import Main.Request;
+import Main.BloodType;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators; 
 import com.mongodb.client.model.Aggregates;
@@ -14,6 +15,7 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoCursor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,46 +29,63 @@ public class BloodStockController {
 
 	public MongoCursor<Document> listBloodCenterStocks() {
         MongoCollection<Document> bloodStockCollection = new BloodStock().getCollection();
-        return bloodStockCollection.find(Filters.eq("id_Hemocentro", this.id_BloodCenterUser)).iterator();
+        return bloodStockCollection.find(Filters.eq("id_hemocentro", this.id_BloodCenterUser)).iterator();
     }
     
+    public void updateAllBloodStocksForCenter() {
+        List<String> bloodTypes = new ArrayList<>();
+        MongoCollection<Document> bloodTypeCollection = new BloodType("").getCollection();
+        try (MongoCursor<Document> cursor = bloodTypeCollection.find().iterator()) {
+            while (cursor.hasNext()) {
+                bloodTypes.add(cursor.next().getString("descricao"));
+            }
+        }
+
+        for (String type : bloodTypes) {
+            atualizarEstoque(this.id_BloodCenterUser, type);
+        }
+    }
+
     public static void atualizarEstoque(ObjectId id_BloodCenter, String bloodType) {
         MongoCollection<Document> bloodStockCollection = new BloodStock().getCollection();
 
+
         List<Bson> donationAggregation = Arrays.asList(
-            Aggregates.lookup("usuarios", "id_doador", "_id", "doador_Info"),
-            Aggregates.unwind("$doador_Info"),
             Aggregates.match(Filters.and(
-                Filters.eq("id_Hemocentro", id_BloodCenter),
-                Filters.eq("status", "Realizada"),
-                Filters.eq("doador_Info.doador_Info.tipo_Sanguineo", bloodType)
+                Filters.eq("id_hemocentro", id_BloodCenter),
+                Filters.eq("status", "Realizada")
             )),
+            Aggregates.lookup("usuarios", "id_doador", "_id", "doadorInfo"),
+            Aggregates.unwind("$doadorInfo"),
+            Aggregates.match(Filters.eq("doadorInfo.doador_info.tipo_sanguineo", bloodType)),
             Aggregates.group(null, Accumulators.sum("total", "$volume"))
         );
+        
         Document totalDonatedDoc = new Donation(null).getCollection().aggregate(donationAggregation).first();
-        float totalDonated = (totalDonatedDoc != null) ? totalDonatedDoc.get("total", Number.class).floatValue() : 0.0f;
+        double totalDonated = (totalDonatedDoc != null) ? totalDonatedDoc.get("total", Number.class).doubleValue() : 0.0;
 
         List<Bson> requestAggregation = Arrays.asList(
              Aggregates.match(Filters.and(
-                Filters.eq("id_Hemocentro", id_BloodCenter),
-                Filters.eq("tipo_Sanguineo", bloodType),
+                Filters.eq("id_hemocentro", id_BloodCenter),
+                Filters.eq("tipo_sanguineo", bloodType),
                 Filters.eq("status", "Realizada")
             )),
             Aggregates.group(null, Accumulators.sum("total", "$volume"))
         );
+
         Document totalRequestedDoc = new Request(null).getCollection().aggregate(requestAggregation).first();
-        float totalRequested = (totalRequestedDoc != null) ? totalRequestedDoc.get("total", Number.class).floatValue() : 0.0f;
+        double totalRequested = (totalRequestedDoc != null) ? totalRequestedDoc.get("total", Number.class).doubleValue() : 0.0;
         
-        float volumeFinal = totalDonated - totalRequested;
+        double volumeFinal = totalDonated - totalRequested;
         if (volumeFinal < 0) volumeFinal = 0;
 
-        Bson estoqueFilter = Filters.and(Filters.eq("id_Hemocentro", id_BloodCenter), Filters.eq("tipo_Sanguineo", bloodType));
+        Bson estoqueFilter = Filters.and(Filters.eq("id_hemocentro", id_BloodCenter), Filters.eq("tipo_sanguineo", bloodType));
         
         Document updateDoc = new Document("$set", 
-                new Document("volume", (double) volumeFinal)
-                .append("data_Atualizacao", LocalDateTime.now())
-                .append("id_Hemocentro", id_BloodCenter)
-                .append("tipo_Sanguineo", bloodType)
+                new Document("volume", volumeFinal)
+                .append("data_atualizacao", LocalDateTime.now())
+                .append("id_hemocentro", id_BloodCenter)
+                .append("tipo_sanguineo", bloodType)
             );
 
         UpdateOptions options = new UpdateOptions().upsert(true);

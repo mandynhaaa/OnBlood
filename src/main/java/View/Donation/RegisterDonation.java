@@ -3,11 +3,14 @@ package View.Donation;
 import Controller.DonationController;
 import org.bson.types.ObjectId;
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 
 public class RegisterDonation extends JFrame {
 
-    private JTextField tfVolume, tfDataHora;
+    private JTextField tfVolume;
+    private JFormattedTextField tfDataHora; 
     private JComboBox<String> cbDoador, cbStatus;
     private DonationController controller;
     private ManagerDonation parentView;
@@ -35,7 +38,13 @@ public class RegisterDonation extends JFrame {
         add(tfVolume);
 
         add(new JLabel("Data e Hora (dd/MM/yyyy HH:mm:ss):"));
-        tfDataHora = new JTextField();
+        try {
+            MaskFormatter dateTimeFormatter = new MaskFormatter("##/##/#### ##:##:##");
+            tfDataHora = new JFormattedTextField(dateTimeFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tfDataHora = new JFormattedTextField();
+        }
         add(tfDataHora);
 
         JButton btnSalvar = new JButton("Salvar");

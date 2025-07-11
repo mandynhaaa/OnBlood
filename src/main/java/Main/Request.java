@@ -4,9 +4,9 @@ import Standard.BaseModel;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date; 
 
 public class Request extends BaseModel {
     private String status;
@@ -54,11 +54,21 @@ public class Request extends BaseModel {
         if (doc == null) return;
         this.id = doc.getObjectId("_id");
         this.status = doc.getString("status");
-        this.volume = doc.getDouble("volume").floatValue();
-        Date datetimeFromDb = doc.get("data_hora", Date.class);
-        if (datetimeFromDb != null) {
-            this.datetime = datetimeFromDb.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        Object volumeObj = doc.get("volume");
+        if (volumeObj instanceof Number) {
+            this.volume = ((Number) volumeObj).floatValue();
+        } else {
+            this.volume = 0.0f;
         }
+
+        Object dateObj = doc.get("data_hora");
+        if (dateObj instanceof Date) {
+            this.datetime = ((Date) dateObj).toInstant()
+              .atZone(ZoneId.systemDefault())
+              .toLocalDateTime();
+        }
+
         this.bloodCenterId = doc.getObjectId("id_hemocentro");
         this.bloodType = doc.getString("tipo_sanguineo");
     }

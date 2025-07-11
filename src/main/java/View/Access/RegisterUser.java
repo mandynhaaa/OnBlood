@@ -15,7 +15,8 @@ public class RegisterUser extends JFrame {
     private JTextField tf_nome, tf_email;
     private JPasswordField tf_senha;
     private JFormattedTextField tf_cpf, tf_dataNascimento; 
-    private JTextField tf_razao_Social, tf_cnpj;
+    private JTextField tf_razao_Social;
+    private JFormattedTextField tf_cnpj; 
     private JComboBox<String> comboTipoUsuario;
     private JComboBox<String> comboTipoSangue;
     private UserController controller;
@@ -69,9 +70,16 @@ public class RegisterUser extends JFrame {
         contentPane.add(tf_razao_Social);
 
         JLabel lblCNPJ = addLabel("CNPJ:", 280);
-        tf_cnpj = new JTextField();
+        try {
+            MaskFormatter cnpjFormatter = new MaskFormatter("##.###.###/####-##");
+            tf_cnpj = new JFormattedTextField(cnpjFormatter);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+            tf_cnpj = new JFormattedTextField();
+        }
         tf_cnpj.setBounds(200, 280, 250, 25);
         contentPane.add(tf_cnpj);
+
 
         setupVisibilityAndActions(lblCPF, lblTipoSanguineo, lblDataNascimento, lblRazaoSocial, lblCNPJ);
 

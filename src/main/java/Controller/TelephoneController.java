@@ -13,20 +13,22 @@ public class TelephoneController {
 
     private ObjectId id_User;
     private ObjectId id_Telephone;
-    private JTextField tf_description, tf_ddd, tf_number;
+    private JTextField tf_description;
+    private JFormattedTextField tf_ddd; 
+    private JFormattedTextField tf_number; 
 
     public TelephoneController(ObjectId id_User) {
         this.id_User = id_User;
     }
 
-    public TelephoneController(ObjectId id_User, JTextField tf_description, JTextField tf_ddd, JTextField tf_number) {
+    public TelephoneController(ObjectId id_User, JTextField tf_description, JFormattedTextField tf_ddd, JFormattedTextField tf_number) {
         this(id_User);
         this.tf_description = tf_description;
         this.tf_ddd = tf_ddd;
         this.tf_number = tf_number;
     }
 
-    public TelephoneController(ObjectId id_User, ObjectId id_Telephone, JTextField tf_description, JTextField tf_ddd, JTextField tf_number) {
+    public TelephoneController(ObjectId id_User, ObjectId id_Telephone, JTextField tf_description, JFormattedTextField tf_ddd, JFormattedTextField tf_number) {
         this(id_User, tf_description, tf_ddd, tf_number);
         this.id_Telephone = id_Telephone;
     }
@@ -40,8 +42,9 @@ public class TelephoneController {
 
         Telephone phone = new Telephone();
         phone.setDescription(tf_description.getText());
-        phone.setDdd(tf_ddd.getText());
-        phone.setNumber(tf_number.getText());
+        // Remove caracteres de máscara antes de salvar
+        phone.setDdd(tf_ddd.getText().replaceAll("[^0-9]", ""));
+        phone.setNumber(tf_number.getText().replaceAll("[^0-9]", ""));
 
         user.getTelephones().add(phone);
         user.update();
@@ -55,8 +58,8 @@ public class TelephoneController {
             .findFirst()
             .ifPresent(phone -> {
                 phone.setDescription(tf_description.getText());
-                phone.setDdd(tf_ddd.getText());
-                phone.setNumber(tf_number.getText());
+                phone.setDdd(tf_ddd.getText().replaceAll("[^0-9]", ""));
+                phone.setNumber(tf_number.getText().replaceAll("[^0-9]", ""));
                 user.update();
                 JOptionPane.showMessageDialog(null, "Telefone alterado com sucesso!");
             });

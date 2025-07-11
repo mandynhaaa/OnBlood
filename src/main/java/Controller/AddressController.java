@@ -20,7 +20,7 @@ public class AddressController {
     private JTextField tf_state;
     private JTextField tf_neighborhood;
     private JTextField tf_complement;
-    private JTextField tf_cep;
+    private JFormattedTextField tf_cep; // Alterado para JFormattedTextField
     private JTextField tf_country;
     private JTextField tf_description;
 
@@ -31,7 +31,7 @@ public class AddressController {
     public AddressController(
 		ObjectId id_User, 
 		JTextField tf_description, 
-		JTextField tf_cep, 
+		JFormattedTextField tf_cep, // Alterado para JFormattedTextField
 		JTextField tf_country, 
 		JTextField tf_state, 
 		JTextField tf_city, 
@@ -56,7 +56,7 @@ public class AddressController {
 		ObjectId id_User, 
 		ObjectId id_Address, 
 		JTextField tf_description, 
-		JTextField tf_cep, 
+		JFormattedTextField tf_cep,
 		JTextField tf_country, 
 		JTextField tf_state, 
 		JTextField tf_city, 
@@ -71,7 +71,7 @@ public class AddressController {
     
     private void fillAddressFromFields(Address address) throws NumberFormatException {
         address.setDescription(tf_description.getText());
-        address.setCep(tf_cep.getText());
+        address.setCep(tf_cep.getText().replaceAll("[^0-9]", "")); 
         address.setCountry(tf_country.getText());
         address.setState(tf_state.getText());
         address.setCity(tf_city.getText());
@@ -97,7 +97,9 @@ public class AddressController {
         }
         
         user.getAddresses().add(address);
-        user.update();
+        
+        user.update(); 
+        
         JOptionPane.showMessageDialog(null, "Endereço adicionado com sucesso!");
     }
 
@@ -128,6 +130,10 @@ public class AddressController {
 
     public void executeDelete(ObjectId idAddresToDelete) {
         User user = new User(this.id_User);
+        if (user.getAddresses() == null) {
+            JOptionPane.showMessageDialog(null, "Usuário não possui endereços para excluir.");
+            return;
+        }
         boolean removed = user.getAddresses().removeIf(a -> a.getId().equals(idAddresToDelete));
         if (removed) {
             user.update();

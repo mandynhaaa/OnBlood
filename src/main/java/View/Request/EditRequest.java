@@ -5,12 +5,15 @@ import Main.Request;
 import org.bson.types.ObjectId;
 
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 import java.time.format.DateTimeFormatter;
 
 public class EditRequest extends JFrame {
     private JComboBox<String> comboStatus, comboBloodType;
-    private JTextField txtVolume, txtDataHora;
+    private JTextField txtVolume;
+    private JFormattedTextField txtDataHora;
     private JButton btnSalvar, btnCancelar;
     private RequestController controller;
     private ManagerRequest parentView;
@@ -40,7 +43,13 @@ public class EditRequest extends JFrame {
         add(txtVolume);
 
         add(new JLabel("Data e Hora (dd/MM/yyyy HH:mm:ss):"));
-        txtDataHora = new JTextField();
+        try {
+            MaskFormatter dateTimeFormatter = new MaskFormatter("##/##/#### ##:##:##");
+            txtDataHora = new JFormattedTextField(dateTimeFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            txtDataHora = new JFormattedTextField();
+        }
         add(txtDataHora);
 
         btnSalvar = new JButton("Salvar");

@@ -3,12 +3,15 @@ package View.Request;
 import Controller.RequestController;
 import org.bson.types.ObjectId;
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 
 public class RegisterRequest extends JFrame {
 
     private JComboBox<String> cbTipoSanguineo, cbStatus;
-    private JTextField tfVolume, tfDataHora;
+    private JTextField tfVolume;
+    private JFormattedTextField tfDataHora;
     private RequestController controller;
     private ManagerRequest parentView;
 
@@ -31,7 +34,13 @@ public class RegisterRequest extends JFrame {
         add(tfVolume);
 
         add(new JLabel("Data e Hora (dd/MM/yyyy HH:mm:ss):"));
-        tfDataHora = new JTextField();
+        try {
+            MaskFormatter dateTimeFormatter = new MaskFormatter("##/##/#### ##:##:##");
+            tfDataHora = new JFormattedTextField(dateTimeFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tfDataHora = new JFormattedTextField();
+        }
         add(tfDataHora);
 
         add(new JLabel("Status:"));
