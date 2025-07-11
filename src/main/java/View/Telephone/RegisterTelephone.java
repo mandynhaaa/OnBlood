@@ -4,10 +4,13 @@ import Controller.TelephoneController;
 import org.bson.types.ObjectId;
 
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 
 public class RegisterTelephone extends JFrame {
-    private JTextField tf_description, tf_ddd, tf_number;
+    private JTextField tf_description;
+    private JFormattedTextField tf_ddd, tf_number;
     private TelephoneController controller;
     private ManagerTelephone parentView;
 
@@ -26,11 +29,23 @@ public class RegisterTelephone extends JFrame {
         add(tf_description);
 
         add(new JLabel("DDD:"));
-        tf_ddd = new JTextField();
+        try {
+            MaskFormatter dddFormatter = new MaskFormatter("(##)");
+            tf_ddd = new JFormattedTextField(dddFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tf_ddd = new JFormattedTextField();
+        }
         add(tf_ddd);
 
         add(new JLabel("Número:"));
-        tf_number = new JTextField();
+        try {
+            MaskFormatter numberFormatter = new MaskFormatter("#####-####");
+            tf_number = new JFormattedTextField(numberFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tf_number = new JFormattedTextField();
+        }
         add(tf_number);
 
         JButton btnSalvar = new JButton("Salvar");

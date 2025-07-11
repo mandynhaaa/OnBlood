@@ -74,7 +74,7 @@ public class ManagerRequest extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
                 ObjectId idRequest = extrairId(selecionado);
                 if (idRequest != null) {
-                    new RequestController(idRequest, null, null, null, null, null).executeDelete();
+                    new RequestController(null, null, null, null, null, null).executeDelete(idRequest);
                     carregarSolicitacoes();
                 }
             }

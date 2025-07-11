@@ -21,7 +21,8 @@ public class AccountConfiguration extends JFrame {
     private JTextField tf_nome, tf_email;
     private JPasswordField tf_senha;
     private JFormattedTextField tf_cpf, tf_dataNascimento;
-    private JTextField tf_razao_Social, tf_cnpj;
+    private JTextField tf_razao_Social;
+    private JFormattedTextField tf_cnpj;
     private JComboBox<String> comboTipoSangue;
     private UserController controller;
     private User user;
@@ -72,6 +73,7 @@ public class AccountConfiguration extends JFrame {
             try {
                 MaskFormatter cpfFormatter = new MaskFormatter("###.###.###-##");
                 tf_cpf = createFormattedField(mainPanel, gbc, "CPF:", gridY++, cpfFormatter);
+                tf_cpf.setEditable(false);
                 
                 comboTipoSangue = createComboBox(mainPanel, gbc, "Tipo Sanguíneo:", gridY++);
 
@@ -91,7 +93,13 @@ public class AccountConfiguration extends JFrame {
 
         } else if ("Hemocentro".equals(user.getUserType())) {
              tf_razao_Social = createField(mainPanel, gbc, "Razão Social:", gridY++);
-             tf_cnpj = createField(mainPanel, gbc, "CNPJ:", gridY++);
+             try {
+                MaskFormatter cnpjFormatter = new MaskFormatter("##.###.###/####-##");
+                tf_cnpj = createFormattedField(mainPanel, gbc, "CNPJ:", gridY++, cnpjFormatter);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                tf_cnpj = new JFormattedTextField();
+            }
             
             controller = new UserController(user.getId(), tf_nome, tf_email, tf_senha, null, null, null, tf_cnpj, tf_razao_Social);
         }

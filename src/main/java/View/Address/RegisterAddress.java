@@ -3,13 +3,16 @@ package View.Address;
 import Controller.AddressController;
 import org.bson.types.ObjectId;
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 
 public class RegisterAddress extends JFrame {
-    private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
+    private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfPais, tfDescricao;
+    private JFormattedTextField tfCep;
     private AddressController controller;
     private ObjectId idUsuario;
-    private ManagerAddress parentView; 
+    private ManagerAddress parentView;
 
     public RegisterAddress(ObjectId idUsuario, ManagerAddress parentView) {
         this.idUsuario = idUsuario;
@@ -18,16 +21,30 @@ public class RegisterAddress extends JFrame {
         setTitle("Cadastro de Endereço");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 450, 450);
-        setLocationRelativeTo(parentView); 
+        setLocationRelativeTo(parentView);
         setLayout(new GridBagLayout());
-        
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         int y = 0;
 
         tfDescricao = createField("Descrição:", y++, gbc);
-        tfCep = createField("CEP:", y++, gbc);
+
+        // Campo CEP com Máscara
+        gbc.gridy = y++;
+        gbc.gridx = 0;
+        add(new JLabel("CEP:"), gbc);
+        try {
+            MaskFormatter cepFormatter = new MaskFormatter("#####-###");
+            tfCep = new JFormattedTextField(cepFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tfCep = new JFormattedTextField();
+        }
+        gbc.gridx = 1;
+        add(tfCep, gbc);
+
         tfPais = createField("País:", y++, gbc);
         tfEstado = createField("Estado:", y++, gbc);
         tfCidade = createField("Cidade:", y++, gbc);
@@ -55,8 +72,8 @@ public class RegisterAddress extends JFrame {
 
     private void salvar() {
         controller.executeRegister();
-        parentView.carregarEnderecos(); 
-        dispose(); 
+        parentView.carregarEnderecos();
+        dispose();
     }
 
     private JTextField createField(String label, int y, GridBagConstraints gbc) {

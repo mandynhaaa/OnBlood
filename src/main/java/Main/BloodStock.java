@@ -4,9 +4,9 @@ import Standard.BaseModel;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 
 public class BloodStock extends BaseModel {
     private LocalDateTime lastUpdateDate;
@@ -51,11 +51,21 @@ public class BloodStock extends BaseModel {
     public void populateFromDoc(Document doc) {
         if (doc == null) return;
         this.id = doc.getObjectId("_id");
-        Date lastUpdateDateFromDb = doc.get("data_atualizacao", Date.class);
-        if (lastUpdateDateFromDb != null) {
-            this.lastUpdateDate = lastUpdateDateFromDb.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        
+        Object dateObj = doc.get("data_atualizacao");
+        if (dateObj instanceof Date) {
+            this.lastUpdateDate = ((Date) dateObj).toInstant()
+              .atZone(ZoneId.systemDefault())
+              .toLocalDateTime();
         }
-        this.volume = doc.getDouble("volume").floatValue();
+
+        Object volumeObj = doc.get("volume");
+        if (volumeObj instanceof Number) {
+            this.volume = ((Number) volumeObj).floatValue();
+        } else {
+            this.volume = 0.0f; 
+        }
+
         this.bloodCenterId = doc.getObjectId("id_hemocentro");
         this.bloodType = doc.getString("tipo_sanguineo");
     }

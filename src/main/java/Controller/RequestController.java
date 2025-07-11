@@ -21,7 +21,7 @@ public class RequestController {
     private ObjectId id_Request;
     private ObjectId id_UserBloodCenter;
     private JTextField tf_volume;
-    private JTextField tf_datetime;
+    private JFormattedTextField tf_datetime;
     private JComboBox<String> cb_bloodTypesanguineo;
     private JComboBox<String> cb_status;
     
@@ -29,7 +29,7 @@ public class RequestController {
     	ObjectId id_Request, 
     	ObjectId id_UserBloodCenter, 
     	JTextField tf_volume, 
-    	JTextField tf_datetime, 
+    	JFormattedTextField tf_datetime, 
     	JComboBox<String> cb_bloodTypesanguineo, 
     	JComboBox<String> cb_status
     ) {
@@ -82,12 +82,13 @@ public class RequestController {
         }
     }
 
-    public void executeDelete() {
+    public void executeDelete(ObjectId idRequestToDelete) {
         try {
-            Request request = new Request(id_Request);
+            Request request = new Request(idRequestToDelete);
             request.delete();
             JOptionPane.showMessageDialog(null, "Solicitação removida com sucesso!");
         } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao excluir solicitação: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -106,12 +107,12 @@ public class RequestController {
         List<String> formatedResquests = new ArrayList<>();
         MongoCollection<Document> collection = new Request(null).getCollection();
         
-        try (MongoCursor<Document> cursor = collection.find(Filters.eq("id_Hemocentro", idHemocentro)).iterator()) {
+        try (MongoCursor<Document> cursor = collection.find(Filters.eq("id_hemocentro", idHemocentro)).iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 formatedResquests.add(String.format("[%s] Tipo: %s | Status: %s | Volume: %.1fmL",
                         doc.getObjectId("_id").toHexString(),
-                        doc.getString("tipo_Sanguineo"),
+                        doc.getString("tipo_sanguineo"),
                         doc.getString("status"),
                         doc.getDouble("volume")
                 ));

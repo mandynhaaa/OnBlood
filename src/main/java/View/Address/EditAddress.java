@@ -5,10 +5,13 @@ import Main.User;
 import Main.Address;
 import org.bson.types.ObjectId;
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.text.ParseException;
 
 public class EditAddress extends JFrame {
-    private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfCep, tfPais, tfDescricao;
+    private JTextField tfRua, tfNumero, tfCidade, tfEstado, tfBairro, tfComplemento, tfPais, tfDescricao;
+    private JFormattedTextField tfCep;
     private AddressController controller;
     private ObjectId idUsuario;
     private ObjectId idEndereco;
@@ -31,7 +34,21 @@ public class EditAddress extends JFrame {
         int y = 0;
 
         tfDescricao = createField("Descrição:", y++, gbc);
-        tfCep = createField("CEP:", y++, gbc);
+
+        // Campo CEP com Máscara
+        gbc.gridy = y++;
+        gbc.gridx = 0;
+        add(new JLabel("CEP:"), gbc);
+        try {
+            MaskFormatter cepFormatter = new MaskFormatter("#####-###");
+            tfCep = new JFormattedTextField(cepFormatter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tfCep = new JFormattedTextField();
+        }
+        gbc.gridx = 1;
+        add(tfCep, gbc);
+
         tfPais = createField("País:", y++, gbc);
         tfEstado = createField("Estado:", y++, gbc);
         tfCidade = createField("Cidade:", y++, gbc);
@@ -75,13 +92,13 @@ public class EditAddress extends JFrame {
                 tfComplemento.setText(address.getComplement());
             });
     }
-    
+
     private void salvar() {
         controller.executeUpdate();
         parentView.carregarEnderecos();
         dispose();
     }
-    
+
     private JTextField createField(String label, int y, GridBagConstraints gbc) {
         gbc.gridy = y;
         gbc.gridx = 0;
