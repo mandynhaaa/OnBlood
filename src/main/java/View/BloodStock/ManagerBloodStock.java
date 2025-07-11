@@ -48,7 +48,7 @@ public class ManagerBloodStock extends JFrame {
     private void carregarEstoque() {
         modelo.setRowCount(0);
         
-        try (MongoCursor<Document> cursor = controller.listarEstoqueHemocentro()) {
+        try (MongoCursor<Document> cursor = controller.listBloodCenterStocks()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 LocalDateTime data = doc.get("data_atualizacao", LocalDateTime.class);

@@ -44,13 +44,13 @@ public class EditDonation extends JFrame {
 
         controller = new DonationController(idDonation, txtVolume, txtDataHora, comboStatus);
 
-        btnSalvar.addActionListener(e -> salvarAlteracoes());
+        btnSalvar.addActionListener(e -> saveUpdates());
         btnCancelar.addActionListener(e -> dispose());
 
-        carregarDados(idDonation);
+        loadData(idDonation);
     }
 
-    private void carregarDados(ObjectId idDonation) {
+    private void loadData(ObjectId idDonation) {
         Donation donation = new Donation(idDonation);
         if(donation.getId() != null) {
             comboStatus.setSelectedItem(donation.getStatus());
@@ -64,7 +64,7 @@ public class EditDonation extends JFrame {
         }
     }
 
-    private void salvarAlteracoes() {
+    private void saveUpdates() {
         controller.executeUpdate();
         parentView.carregarDoacoes();
         dispose();

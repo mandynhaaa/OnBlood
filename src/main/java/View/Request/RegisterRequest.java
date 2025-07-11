@@ -45,7 +45,7 @@ public class RegisterRequest extends JFrame {
         add(btnCancelar);
 
         controller = new RequestController(null, idHemocentro, tfVolume, tfDataHora, cbTipoSanguineo, cbStatus);
-        controller.listarTiposSanguineos().forEach(cbTipoSanguineo::addItem);
+        controller.listBloodTypes().forEach(cbTipoSanguineo::addItem);
 
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());

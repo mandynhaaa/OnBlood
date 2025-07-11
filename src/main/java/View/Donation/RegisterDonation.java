@@ -46,7 +46,7 @@ public class RegisterDonation extends JFrame {
         
         controller = new DonationController(idHemocentro, tfVolume, tfDataHora, cbStatus, cbDoador);
         
-        controller.listarDoadores().forEach(cbDoador::addItem);
+        controller.listDonors().forEach(cbDoador::addItem);
         
         btnSalvar.addActionListener(e -> salvar());
         btnCancelar.addActionListener(e -> dispose());

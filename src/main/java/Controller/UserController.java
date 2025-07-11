@@ -20,37 +20,52 @@ import java.util.List;
 
 public class UserController {
 
-    private ObjectId idUsuario;
+    private ObjectId id_User;
     private JTextField tf_name, tf_email;
     private JPasswordField tf_senha;
     private JComboBox<String> combo_Type;
     private JFormattedTextField tf_cpf, tf_dataNascimento;
     private JTextField tf_razao_Social, tf_cnpj;
-    private JComboBox<String> comboTipoSanguineo;
+    private JComboBox<String> combo_Blood_Type;
 
     public UserController() {}
 
-    public UserController(JTextField name, JTextField email, JPasswordField password, JComboBox<String> type,
-                        JFormattedTextField cpf, JFormattedTextField dataNascimento, JComboBox<String> tipoSanguineo,
-                        JTextField cnpj, JTextField razao_Social) {
+    public UserController(
+    	JTextField name, 
+    	JTextField email, 
+    	JPasswordField password, 
+    	JComboBox<String> type,
+    	JFormattedTextField cpf, 
+    	JFormattedTextField dataNascimento, 
+    	JComboBox<String> tipoSanguineo,
+    	JTextField cnpj, 
+    	JTextField razao_Social
+    ) {
         this.tf_name = name;
         this.tf_email = email;
         this.tf_senha = password;
         this.combo_Type = type;
         this.tf_cpf = cpf;
         this.tf_dataNascimento = dataNascimento;
-        this.comboTipoSanguineo = tipoSanguineo;
+        this.combo_Blood_Type = tipoSanguineo;
         this.tf_cnpj = cnpj;
         this.tf_razao_Social = razao_Social;
     }
     
-    public UserController(ObjectId idUsuario, JTextField name, JTextField email, JPasswordField password,
-                        JFormattedTextField cpf, JFormattedTextField dataNascimento, JComboBox<String> tipoSanguineo,
-                        JTextField cnpj, JTextField razao_Social) {
+    public UserController(
+    	ObjectId id_User, 
+    	JTextField name, 
+    	JTextField email, 
+    	JPasswordField password,
+    	JFormattedTextField cpf, 
+    	JFormattedTextField dataNascimento, 
+    	JComboBox<String> tipoSanguineo,
+    	JTextField cnpj, 
+    	JTextField razao_Social
+    ) {
         this(name, email, password, null, cpf, dataNascimento, tipoSanguineo, cnpj, razao_Social);
-        this.idUsuario = idUsuario;
+        this.id_User = id_User;
     }
-
 
     public void executeRegister() {
         String name = tf_name.getText();
@@ -87,7 +102,7 @@ public class UserController {
                 }
                 
                 LocalDate birthDate = LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                String bloodType = (String) comboTipoSanguineo.getSelectedItem();
+                String bloodType = (String) combo_Blood_Type.getSelectedItem();
                 user.setDonorInfo(new Donor(cpf, birthDate, bloodType));
 
             } catch (DateTimeParseException e) {
@@ -108,15 +123,15 @@ public class UserController {
         }
     }
     
-    public boolean  executeUpdate() {
-        if (this.idUsuario == null) {
-            JOptionPane.showMessageDialog(null, "Erro: ID do utilizador não encontrado para atualização.");
+    public boolean executeUpdate() {
+        if (this.id_User == null) {
+            JOptionPane.showMessageDialog(null, "Erro: ID do usuário não encontrado para atualização.");
             return false;
         }
         
-        User user = new User(this.idUsuario);
+        User user = new User(this.id_User);
         if(user.getId() == null) {
-            JOptionPane.showMessageDialog(null, "Utilizador não encontrado na base de dados.");
+            JOptionPane.showMessageDialog(null, "Usuário não encontrado na base de dados.");
             return false;
         }
 
@@ -132,7 +147,7 @@ public class UserController {
             Donor donorInfo = user.getDonorInfo() != null ? user.getDonorInfo() : new Donor();
             try {
                 donorInfo.setCpf(tf_cpf.getText().replaceAll("[^0-9]", ""));
-                donorInfo.setBloodType((String) comboTipoSanguineo.getSelectedItem());
+                donorInfo.setBloodType((String) combo_Blood_Type.getSelectedItem());
                 String data = tf_dataNascimento.getText();
                 if (!data.trim().replace("/", "").isEmpty()) {
                     donorInfo.setBirthDate(LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -160,7 +175,7 @@ public class UserController {
         }
     }
     
-    public List<String> listarTiposSanguineos() {
+    public List<String> listBloodTypes() {
         List<String> tipos = new ArrayList<>();
         MongoCollection<Document> collection = new BloodType("").getCollection();
         try (MongoCursor<Document> cursor = collection.find().iterator()) {

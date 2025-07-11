@@ -50,15 +50,15 @@ public class EditRequest extends JFrame {
         add(btnCancelar);
 
         controller = new RequestController(idRequest, null, txtVolume, txtDataHora, comboBloodType, comboStatus);
-        controller.listarTiposSanguineos().forEach(comboBloodType::addItem);
+        controller.listBloodTypes().forEach(comboBloodType::addItem);
 
-        btnSalvar.addActionListener(e -> salvarAlteracoes());
+        btnSalvar.addActionListener(e -> saveUpdates());
         btnCancelar.addActionListener(e -> dispose());
 
-        carregarDados();
+        loadData();
     }
 
-    private void carregarDados() {
+    private void loadData() {
         Request request = new Request(idRequest);
         if (request.getId() != null) {
             comboStatus.setSelectedItem(request.getStatus());
@@ -73,7 +73,7 @@ public class EditRequest extends JFrame {
         }
     }
 
-    private void salvarAlteracoes() {
+    private void saveUpdates() {
         controller.executeUpdate();
         parentView.carregarSolicitacoes();
         dispose();
